@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { Link, Route, Routes, useLocation } from "react-router-dom";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteFooter } from "./components/SiteFooter";
+import { RouteMeta } from "./components/RouteMeta";
 import { ModelListPage } from "./pages/ModelListPage";
 
 // 一覧は最初の画面なので同期読み込みし、詳細・履歴・解説は遅延させて初回を軽くする。
@@ -33,6 +34,7 @@ export default function App() {
         本文へ移動
       </a>
       <ScrollToTop />
+      <RouteMeta />
       <SiteHeader />
       <main id="main" className="main">
         <Suspense fallback={<p className="route-loading">読み込み中…</p>}>

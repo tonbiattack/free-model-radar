@@ -6,7 +6,7 @@
   "description": "OpenCode などのコーディングエージェントから使える無料枠つき LLM API を、出典と検証状態つきで比較する静的サイト",
   "scripts": {
     "dev": "npm run build:data && vite",
-    "build": "npm run build:data && tsc --noEmit && vite build && tsx scripts/postbuild.ts && tsx scripts/sitemap.ts",
+    "build": "npm run build:data && tsc --noEmit && vite build && tsx scripts/postbuild.ts && tsx scripts/prerender.ts && tsx scripts/sitemap.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
