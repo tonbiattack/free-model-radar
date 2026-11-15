@@ -1,0 +1,246 @@
+{
+  "provider": {
+    "id": "cloudflare-workers-ai",
+    "name": "Cloudflare Workers AI",
+    "website_url": "https://www.cloudflare.com/",
+    "docs_url": "https://developers.cloudflare.com/workers-ai/",
+    "signup_url": "https://dash.cloudflare.com/sign-up",
+    "api_format": "openai-compatible",
+    "base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
+    "native_opencode": "yes",
+    "opencode_provider_id": "cloudflare-workers-ai",
+    "authentication": "api-key",
+    "credit_card_required": "no",
+    "notes": [
+      "Workers Free プランでも 1 日 10,000 Neurons の無料割当が使える。",
+      "Neurons は GPU 計算量の単位で、モデルごとの消費レートが異なる。",
+      "一部のモデル（Kimi K2.6/K2.7、GLM 5.2/5.3、DeepSeek V4 系など）は有料プランか前払いクレジットが必要。"
+    ],
+    "sources": [
+      {
+        "field": "無料割当",
+        "value": "無料枠は 1 日あたり合計 10,000 Neurons。00:00 UTC にリセット",
+        "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+        "source_type": "official",
+        "observed_at": "2026-11-12",
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "有料モデル",
+        "value": "一部モデルは Workers Paid か AI Gateway の前払いクレジットが必要",
+        "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+        "source_type": "official",
+        "observed_at": "2026-11-12",
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "OpenAI 互換 API",
+        "value": "OpenAI 互換エンドポイントを提供",
+        "source_url": "https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "cf-llama-4-scout",
+      "provider_id": "cloudflare-workers-ai",
+      "display_name": "Llama 4 Scout 17B",
+      "model_id": "@cf/meta/llama-4-scout-17b-16e-instruct",
+      "context_tokens": 131000,
+      "max_output_tokens": 16384,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "no"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "neurons",
+          "amount": 10000,
+          "period": "day",
+          "scope": "account",
+          "note": "アカウント全体で 1 日 10,000 Neurons を共有。モデル単体の回数上限はない"
+        },
+        "caveats": [
+          "Neurons は全モデルで共有されるため、1 モデルの消費が他モデルの枠を減らす。",
+          "10,000 Neurons は $0.11 相当。このモデルの入力単価 $0.270 / M トークンで計算すると、入力だけで約 40 万トークン分に当たる。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "Neuron 消費は入力・出力のトークン数で変動する。1 日の残量はダッシュボードで確認する。"
+      ],
+      "sources": [
+        {
+          "field": "無料割当",
+          "value": "10,000 Neurons / day（全モデル共有、00:00 UTC リセット）",
+          "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "source_type": "official",
+          "observed_at": "2026-11-12",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "料金",
+          "value": "$0.270 / M input, $0.850 / M output",
+          "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "source_type": "official",
+          "observed_at": "2026-11-12",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "131,000 tokens, 最大出力 16,384",
+          "source_url": "https://developers.cloudflare.com/workers-ai/models/",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "id": "cf-gpt-oss-120b",
+      "provider_id": "cloudflare-workers-ai",
+      "display_name": "GPT OSS 120B",
+      "model_id": "@cf/openai/gpt-oss-120b",
+      "context_tokens": 128000,
+      "max_output_tokens": 16384,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "neurons",
+          "amount": 10000,
+          "period": "day",
+          "scope": "account",
+          "note": "アカウント全体で 1 日 10,000 Neurons を共有"
+        },
+        "caveats": ["Neurons は全モデルで共有される。"],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "入力 $0.350 / M, 出力 $0.750 / M。10,000 Neurons（$0.11 相当）では入力だけで約 31 万トークン分。"
+      ],
+      "sources": [
+        {
+          "field": "料金",
+          "value": "$0.350 / M input, $0.750 / M output",
+          "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "source_type": "official",
+          "observed_at": "2026-11-12",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "無料割当",
+          "value": "10,000 Neurons / day",
+          "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "source_type": "official",
+          "observed_at": "2026-11-12",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "cf-llama-3-3-70b",
+      "provider_id": "cloudflare-workers-ai",
+      "display_name": "Llama 3.3 70B fp8 fast",
+      "model_id": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "context_tokens": 24000,
+      "max_output_tokens": 24000,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "no"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "neurons",
+          "amount": 10000,
+          "period": "day",
+          "scope": "account",
+          "note": "アカウント全体で 1 日 10,000 Neurons を共有"
+        },
+        "caveats": [
+          "コンテキストが 24,000 トークンと小さく、エージェント用途では足りないことが多い。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["コンテキスト 24K のため、システムプロンプトとツール定義だけでかなり消費する。"],
+      "sources": [
+        {
+          "field": "コンテキスト長",
+          "value": "24,000 tokens",
+          "source_url": "https://developers.cloudflare.com/workers-ai/models/llama-3.3-70b-instruct-fp8-fast/",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "料金",
+          "value": "$0.293 / M input, $2.253 / M output",
+          "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+          "source_type": "official",
+          "observed_at": "2026-11-12",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

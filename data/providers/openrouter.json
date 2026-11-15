@@ -1,0 +1,261 @@
+{
+  "provider": {
+    "id": "openrouter",
+    "name": "OpenRouter",
+    "website_url": "https://openrouter.ai/",
+    "docs_url": "https://openrouter.ai/docs",
+    "signup_url": "https://openrouter.ai/keys",
+    "api_format": "openai-compatible",
+    "base_url": "https://openrouter.ai/api/v1",
+    "native_opencode": "yes",
+    "opencode_provider_id": "openrouter",
+    "authentication": "api-key",
+    "credit_card_required": "no",
+    "notes": [
+      ":free サフィックスの付いたモデルが無料で利用できる。",
+      "無料モデルには 1 分・1 日あたりのリクエスト上限があり、過去の購入クレジット額で日次上限が変わる。",
+      "無料モデルをフォールバックに使うと、レート制限時に有料モデルへ流れて課金されることがある。"
+    ],
+    "sources": [
+      {
+        "field": "無料モデルの上限",
+        "value": "購入クレジット 10 未満: 20 RPM / 50 RPD。10 以上: 20 RPM / 1000 RPD",
+        "source_url": "https://openrouter.ai/docs/api-reference/limits",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": ":free バリアント",
+        "value": "無料版はカタログ上で独立したエントリとして提供され、料金は 0",
+        "source_url": "https://openrouter.ai/docs/guides/routing/model-variants/free",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "有料モデルへのフォールバック",
+        "value": "models フォールバック配列に有料モデルを入れると課金される。無料を保つには :free のみを並べる",
+        "source_url": "https://openrouter.ai/docs/guides/routing/model-variants/free",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "openrouter-gemma-4-31b",
+      "provider_id": "openrouter",
+      "display_name": "Gemma 4 31B (free)",
+      "model_id": "google/gemma-4-31b-it:free",
+      "context_tokens": 262144,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [
+          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpd",
+            "value": 50,
+            "scope": "account",
+            "note": "クレジット購入実績が 10 未満のアカウントの上限。10 以上で 1000 に上がる"
+          }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "上限は無料モデル全体で共有される。複数の :free モデルを併用しても枠は増えない。",
+          "フォールバックに有料モデルを入れると、無料枠超過時に課金される。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        },
+        {
+          "method": "tool-calling",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "RPD 50 は 1 日 50 リクエスト。エージェントの 1 タスクで数十ステップ消費するため、試用向けと考える。",
+        "無料モデルは提供元の都合で停止・差し替えが起きやすい。"
+      ],
+      "sources": [
+        {
+          "field": "無料枠のレート制限",
+          "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+          "source_url": "https://openrouter.ai/docs/api-reference/limits",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "料金",
+          "value": "prompt / completion とも 0（models API の pricing）",
+          "source_url": "https://openrouter.ai/api/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長・対応パラメータ",
+          "value": "context_length 262144, supported_parameters に tools / response_format / reasoning を含む",
+          "source_url": "https://openrouter.ai/api/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "openrouter-ling-3-2-flash",
+      "provider_id": "openrouter",
+      "display_name": "Ling 3.2 Flash (free)",
+      "model_id": "inclusionai/ling-3.2-flash:free",
+      "context_tokens": 1048576,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [
+          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpd",
+            "value": 50,
+            "scope": "account",
+            "note": "クレジット購入実績が 10 未満のアカウントの上限"
+          }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "無料モデル全体で枠を共有する。",
+          "1M コンテキストでも RPD 50 が実用上の制約になる。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["長いコンテキストを持つが、無料枠ではリクエスト数が先に尽きる。"],
+      "sources": [
+        {
+          "field": "無料枠のレート制限",
+          "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+          "source_url": "https://openrouter.ai/docs/api-reference/limits",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "料金・コンテキスト長",
+          "value": "prompt / completion とも 0, context_length 1048576",
+          "source_url": "https://openrouter.ai/api/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "openrouter-north-mini-code",
+      "provider_id": "openrouter",
+      "display_name": "North Mini Code (free)",
+      "model_id": "cohere/north-mini-code:free",
+      "context_tokens": 256000,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "unknown",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [
+          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpd",
+            "value": 50,
+            "scope": "account",
+            "note": "クレジット購入実績が 10 未満のアカウントの上限"
+          }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": ["無料モデル全体で枠を共有する。"],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "supported_parameters に response_format が含まれないため、JSON モードは未確認（非対応とは断定しない）。"
+      ],
+      "sources": [
+        {
+          "field": "無料枠のレート制限",
+          "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+          "source_url": "https://openrouter.ai/docs/api-reference/limits",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "対応パラメータ",
+          "value": "tools / tool_choice / reasoning を含み、response_format を含まない",
+          "source_url": "https://openrouter.ai/api/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+:root {
+  /* 紙とインク。放射線レーダーの計器を思わせる寒色のグレーに、信号色を 1 色だけ置く。 */
+  --paper: #f2f3ef;
+  --paper-raised: #fbfbf8;
+  --paper-sunken: #e7e9e3;
+  --ink: #14201f;
+  --ink-soft: #46544f;
+  /* 小さめの文字にも使うため、AA（4.5:1）を満たす濃さにする */
+  --ink-faint: #5f6b64;
+  --rule: #c8cdc4;
+  --rule-strong: #9aa59b;
+
+  /* 信号色は「いま無料で呼べる」の意味だけに使う。 */
+  --signal: #b5440d;
+  --signal-soft: #f0ddd2;
+  --signal-ink: #7d2f08;
+
+  --ok: #2d6a4a;
+  --ok-soft: #d9e8dd;
+  --warn: #8a5a00;
+  --warn-soft: #f2e6c9;
+  --stop: #8c3a34;
+  --stop-soft: #f2ddda;
+  --unknown: #5c6870;
+  --unknown-soft: #e3e7e8;
+
+  --focus: #1d4ed8;
+
+  --font-sans:
+    "IBM Plex Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, system-ui,
+    sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "IBM Plex Serif", "Hiragino Mincho ProN", "Noto Serif JP", YuMincho, serif;
+
+  --measure: 72ch;
+  --radius: 2px;
+  --shell: 1180px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #10161a;
+    --paper-raised: #161e23;
+    --paper-sunken: #0b1013;
+    --ink: #e8ece6;
+    --ink-soft: #aebbb4;
+    --ink-faint: #808e88;
+    --rule: #2a3439;
+    --rule-strong: #3d4a50;
+
+    --signal: #f08a4b;
+    --signal-soft: #34211a;
+    --signal-ink: #ffab7b;
+
+    --ok: #7fc7a0;
+    --ok-soft: #16281f;
+    --warn: #e0b866;
+    --warn-soft: #2c2415;
+    --stop: #e79b93;
+    --stop-soft: #2e1c1a;
+    --unknown: #9aa8a2;
+    --unknown-soft: #1c2427;
+
+    --focus: #8ab4ff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.65;
+  font-feature-settings: "palt" 1;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+a {
+  color: var(--signal-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--paper-sunken);
+  padding: 0.1em 0.32em;
+  border-radius: var(--radius);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--signal-soft);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

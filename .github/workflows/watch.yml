@@ -1,0 +1,86 @@
+name: Watch changes
+
+# 無料枠・レート制限・モデル一覧の変更を検知する。
+# 自動検知は「候補」を作るところまで。確定は人が出典を見て行う。
+on:
+  schedule:
+    # 毎日 03:17 UTC（日本時間 12:17）
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "取得だけ行い、状態を保存しない"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: watch-changes
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    name: 監視対象を確認
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # 前回の状態を先に復元する。これがないと毎回「初回」になり、差分を検知できない。
+      - name: 監視状態を復元
+        if: inputs.dry_run != true
+        uses: actions/cache/restore@v4
+        with:
+          path: scripts/out/watch-state.json
+          key: watch-state-${{ github.run_id }}
+          restore-keys: |
+            watch-state-
+
+      - name: 変更を検知
+        id: watch
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm run watch:changes -- --dry-run
+          else
+            npm run watch:changes
+          fi
+
+      - name: レポートを残す
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: watch-report
+          path: scripts/out/watch-report.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: 要確認の変更を要約
+        if: always() && hashFiles('scripts/out/watch-report.json') != ''
+        run: |
+          node -e '
+            const report = require("./scripts/out/watch-report.json");
+            const review = report.findings.filter((f) => f.requires_human_review);
+            const lines = review.map(
+              (f) => `- [${f.kind}] ${f.provider_id}: ${f.label}\n  ${f.message}\n  ${f.url}`,
+            );
+            const body = lines.length
+              ? `## 要確認の変更 (${review.length} 件)\n\n${lines.join("\n")}\n`
+              : "要確認の変更はありません。";
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, body + "\n");
+          '
+
+      # 監視の失敗でデータを書き換えない。状態だけを次回へ持ち回る。
+      - name: 監視状態を保存
+        if: always() && inputs.dry_run != true
+        uses: actions/cache/save@v4
+        with:
+          path: scripts/out/watch-state.json
+          key: watch-state-${{ github.run_id }}

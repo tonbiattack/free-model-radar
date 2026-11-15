@@ -1,0 +1,255 @@
+{
+  "provider": {
+    "id": "google",
+    "name": "Google AI Studio (Gemini API)",
+    "website_url": "https://ai.google.dev/",
+    "docs_url": "https://ai.google.dev/gemini-api/docs",
+    "signup_url": "https://aistudio.google.com/api-keys",
+    "api_format": "google-generative",
+    "base_url": "https://generativelanguage.googleapis.com",
+    "native_opencode": "yes",
+    "opencode_provider_id": "google",
+    "authentication": "google-account",
+    "credit_card_required": "no",
+    "notes": [
+      "無料枠では入力・出力とも無料だが、送信内容が製品改善に使われると明記されている。業務コードを扱う場合は有料枠との差を確認すること。",
+      "OpenAI 互換エンドポイント https://generativelanguage.googleapis.com/v1beta/openai/ も提供されている。",
+      "レート制限はプロジェクト単位で、固定値は公表されず AI Studio の Rate Limit 画面で確認する方式。"
+    ],
+    "sources": [
+      {
+        "field": "無料枠の有無",
+        "value": "Free ティアで一部モデルの入力・出力が無料。データは製品改善に利用される",
+        "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "レート制限の適用単位",
+        "value": "プロジェクト単位。RPM/TPM/RPD で評価され、RPD は太平洋時間の深夜にリセット",
+        "source_url": "https://ai.google.dev/gemini-api/docs/rate-limits",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "OpenAI 互換 API",
+        "value": "base_url を https://generativelanguage.googleapis.com/v1beta/openai/ にすると OpenAI ライブラリから呼べる",
+        "source_url": "https://ai.google.dev/gemini-api/docs/openai",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "gemini-3-8-flash",
+      "provider_id": "google",
+      "display_name": "Gemini 3.8 Flash",
+      "model_id": "gemini-3.8-flash",
+      "context_tokens": 1048576,
+      "max_output_tokens": 65536,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "unknown",
+          "amount": null,
+          "period": "unknown",
+          "scope": "project",
+          "note": "無料ティアの具体的な RPM/TPM/RPD は公表されず、AI Studio の Rate Limit 画面でプロジェクトごとに表示される"
+        },
+        "caveats": [
+          "無料ティアの入力・出力は無料だが、送信内容が Google の製品改善に利用される。",
+          "レート制限は予告なく変動し、保証されないと明記されている。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        },
+        {
+          "method": "tool-calling",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "長いコンテキストを扱えるが、無料枠の TPM は低いため大きなリポジトリを一括投入すると 429 になりやすい。"
+      ],
+      "sources": [
+        {
+          "field": "無料枠",
+          "value": "Free Tier の Input / Output とも Free of charge",
+          "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "1M tokens, 最大出力 64K",
+          "source_url": "https://ai.google.dev/gemini-api/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "関数呼び出し・ストリーミング・構造化出力",
+          "value": "OpenAI 互換レイヤーで tools / stream / response_format に対応",
+          "source_url": "https://ai.google.dev/gemini-api/docs/openai",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "gemini-3-1-flash-lite",
+      "provider_id": "google",
+      "display_name": "Gemini 3.1 Flash-Lite",
+      "model_id": "gemini-3.1-flash-lite",
+      "context_tokens": 1048576,
+      "max_output_tokens": 65536,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "unknown",
+          "amount": null,
+          "period": "unknown",
+          "scope": "project",
+          "note": "固定値は非公表。AI Studio の Rate Limit 画面で確認する"
+        },
+        "caveats": [
+          "無料ティアのデータは製品改善に利用される。",
+          "低コスト枠のため無料ティアの上限も小さめに設定されやすい。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["大量のファイル編集を一度に投げる用途より、小さな修正の反復に向く。"],
+      "sources": [
+        {
+          "field": "無料枠",
+          "value": "Free Tier の Input / Output とも Free of charge",
+          "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "1M tokens, 最大出力 64K",
+          "source_url": "https://ai.google.dev/gemini-api/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "gemini-4-hydrogen",
+      "provider_id": "google",
+      "display_name": "Gemini 4 Hydrogen",
+      "model_id": "gemini-4-hydrogen",
+      "context_tokens": 1048576,
+      "max_output_tokens": 65536,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "unknown",
+          "amount": null,
+          "period": "unknown",
+          "scope": "project",
+          "note": "固定値は非公表。AI Studio の Rate Limit 画面で確認する"
+        },
+        "caveats": [
+          "無料ティアのデータは製品改善に利用される。",
+          "Priority ティアでも無料枠の範囲は Standard と同じ扱い。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["1M コンテキストの長文デコードが可能。ただし無料枠の TPM が実測上の制約になる。"],
+      "sources": [
+        {
+          "field": "無料枠",
+          "value": "Standard / Priority の Free Tier 列が Free of charge",
+          "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "1M tokens, 最大出力 64K / 1M",
+          "source_url": "https://ai.google.dev/gemini-api/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

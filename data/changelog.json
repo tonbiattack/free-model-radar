@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "entity_id": "model:github-models-gpt-4o",
+      "entity_type": "model",
+      "field": "free_tier.availability",
+      "previous": "available",
+      "current": "ended",
+      "detected_at": "2026-11-15T00:00:00Z",
+      "effective_at": "2026-07-30T00:00:00Z",
+      "evidence_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+      "review_status": "confirmed",
+      "summary": "GitHub Models が 2026-07-30 にサービスを完全終了。Playground・モデルカタログ・推論 API・BYOK がすべて利用不可になった。"
+    },
+    {
+      "entity_id": "provider:cerebras",
+      "entity_type": "provider",
+      "field": "free_tier.type",
+      "previous": null,
+      "current": "credit",
+      "detected_at": "2026-11-15T00:00:00Z",
+      "effective_at": null,
+      "evidence_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+      "review_status": "confirmed",
+      "summary": "Cerebras に恒久無料ティアはないことを公式 FAQ で確認。$5 クレジット（30 日失効）のみで、無料枠種別を「初回クレジット」に分類した。"
+    },
+    {
+      "entity_id": "provider:openrouter",
+      "entity_type": "provider",
+      "field": "free_tier.limits.rpd",
+      "previous": null,
+      "current": "50",
+      "detected_at": "2026-11-15T00:00:00Z",
+      "effective_at": null,
+      "evidence_url": "https://openrouter.ai/docs/api-reference/limits",
+      "review_status": "confirmed",
+      "summary": "OpenRouter の無料モデルは 20 RPM / 50 RPD（累計購入クレジット 10 未満）。10 以上で RPD が 1000 に上がる。"
+    }
+  ]
+}

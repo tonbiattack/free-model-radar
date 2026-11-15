@@ -1,0 +1,107 @@
+---
+name: データの追加・修正
+description: 無料枠、モデル、レート制限の情報を追加・修正する
+title: "data: "
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        情報を追加・修正する Issue です。**出典 URL と確認日が必須**です。
+        確認できていない項目は空欄のままにしてください。推測で埋めないでください。
+
+  - type: input
+    id: provider
+    attributes:
+      label: プロバイダー ID
+      description: 既存の ID か、新規なら小文字英数字とハイフンで
+      placeholder: groq
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: モデル ID
+      description: `data/providers/<provider-id>.json` の `id`。新規なら提案する ID
+      placeholder: groq-gpt-oss-120b
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 変更の種類
+      options:
+        - 新規追加
+        - 既存情報の修正
+        - 無料枠の終了を反映
+        - レート制限の変更
+        - モデルの廃止
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 何が変わりましたか
+      description: 変更前と変更後が分かるように書いてください
+      placeholder: 無料枠の RPD が 1,000 から 500 に下がった
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: 出典 URL
+      description: 公式ドキュメントまたは料金ページの URL
+      placeholder: https://console.groq.com/docs/rate-limits
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source-type
+    attributes:
+      label: 情報の種類
+      options:
+        - 公式
+        - コミュニティ
+        - 実機検証
+    validations:
+      required: true
+
+  - type: input
+    id: checked-at
+    attributes:
+      label: 確認日
+      description: 出典を開いて確認した日（YYYY-MM-DD）
+      placeholder: "2026-11-15"
+    validations:
+      required: true
+
+  - type: textarea
+    id: conditions
+    attributes:
+      label: 無料枠の条件
+      description: |
+        数値は単位と適用範囲まで書いてください。分からない項目は「不明」と書いてください。
+      placeholder: |
+        種別: 恒久無料
+        カード: 不要
+        RPM: 30（モデル単位）
+        RPD: 1000（モデル単位）
+        TPM: 8000（モデル単位）
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 確認
+      options:
+        - label: 出典 URL を開き、内容が今も書かれていることを確認した
+          required: true
+        - label: 不明な項目を 0 や「非対応」と書いていない
+          required: true
+        - label: API キーや個人情報を含めていない
+          required: true

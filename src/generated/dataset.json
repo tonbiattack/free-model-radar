@@ -1,0 +1,1503 @@
+{
+  "dataset": {
+    "meta": {
+      "last_updated": "2026-11-15",
+      "spec_version": "1.0.0"
+    },
+    "providers": [
+      {
+        "id": "cerebras",
+        "name": "Cerebras Inference",
+        "website_url": "https://www.cerebras.ai/",
+        "docs_url": "https://inference-docs.cerebras.ai/",
+        "signup_url": "https://cloud.cerebras.ai/",
+        "api_format": "openai-compatible",
+        "base_url": "https://api.cerebras.ai/v1",
+        "native_opencode": "yes",
+        "opencode_provider_id": "cerebras",
+        "authentication": "api-key",
+        "credit_card_required": "yes",
+        "notes": [
+          "恒久無料の枠はなく、Free Trial の $5 クレジットのみ。",
+          "Free Trial のクレジットは付与から 30 日で失効する。",
+          "クレジットを使い切るか失効すると、Pay as You Go を購入するまで API は停止する。"
+        ],
+        "sources": [
+          {
+            "field": "恒久無料枠の有無",
+            "value": "恒久無料ティアはない。Free Trial は $5 クレジットで 30 日間",
+            "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "Free Trial の条件",
+            "value": "確認済みの支払い方法の登録が必要。登録しないと Playground / API が有効にならない",
+            "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "cloudflare-workers-ai",
+        "name": "Cloudflare Workers AI",
+        "website_url": "https://www.cloudflare.com/",
+        "docs_url": "https://developers.cloudflare.com/workers-ai/",
+        "signup_url": "https://dash.cloudflare.com/sign-up",
+        "api_format": "openai-compatible",
+        "base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
+        "native_opencode": "yes",
+        "opencode_provider_id": "cloudflare-workers-ai",
+        "authentication": "api-key",
+        "credit_card_required": "no",
+        "notes": [
+          "Workers Free プランでも 1 日 10,000 Neurons の無料割当が使える。",
+          "Neurons は GPU 計算量の単位で、モデルごとの消費レートが異なる。",
+          "一部のモデル（Kimi K2.6/K2.7、GLM 5.2/5.3、DeepSeek V4 系など）は有料プランか前払いクレジットが必要。"
+        ],
+        "sources": [
+          {
+            "field": "無料割当",
+            "value": "無料枠は 1 日あたり合計 10,000 Neurons。00:00 UTC にリセット",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "有料モデル",
+            "value": "一部モデルは Workers Paid か AI Gateway の前払いクレジットが必要",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "OpenAI 互換 API",
+            "value": "OpenAI 互換エンドポイントを提供",
+            "source_url": "https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "github-models",
+        "name": "GitHub Models",
+        "website_url": "https://github.com/",
+        "docs_url": "https://docs.github.com/en/github-models",
+        "signup_url": "https://github.com/marketplace/models",
+        "api_format": "openai-compatible",
+        "base_url": null,
+        "native_opencode": "unknown",
+        "opencode_provider_id": null,
+        "authentication": "github-account",
+        "credit_card_required": "no",
+        "notes": [
+          "2026 年 7 月 30 日に完全終了した。Playground・モデルカタログ・推論 API・BYOK のいずれも利用できない。",
+          "終了済みの情報を「現在使える無料枠」として掲載しないために保持している。",
+          "GitHub Copilot とは別サービスであり、Copilot の提供状況とは関係しない。"
+        ],
+        "sources": [
+          {
+            "field": "サービス終了",
+            "value": "2026-07-30 に GitHub Models は完全に終了。playground / catalog / inference API / BYOK は全顧客で利用不可",
+            "source_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "google",
+        "name": "Google AI Studio (Gemini API)",
+        "website_url": "https://ai.google.dev/",
+        "docs_url": "https://ai.google.dev/gemini-api/docs",
+        "signup_url": "https://aistudio.google.com/api-keys",
+        "api_format": "google-generative",
+        "base_url": "https://generativelanguage.googleapis.com",
+        "native_opencode": "yes",
+        "opencode_provider_id": "google",
+        "authentication": "google-account",
+        "credit_card_required": "no",
+        "notes": [
+          "無料枠では入力・出力とも無料だが、送信内容が製品改善に使われると明記されている。業務コードを扱う場合は有料枠との差を確認すること。",
+          "OpenAI 互換エンドポイント https://generativelanguage.googleapis.com/v1beta/openai/ も提供されている。",
+          "レート制限はプロジェクト単位で、固定値は公表されず AI Studio の Rate Limit 画面で確認する方式。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠の有無",
+            "value": "Free ティアで一部モデルの入力・出力が無料。データは製品改善に利用される",
+            "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "レート制限の適用単位",
+            "value": "プロジェクト単位。RPM/TPM/RPD で評価され、RPD は太平洋時間の深夜にリセット",
+            "source_url": "https://ai.google.dev/gemini-api/docs/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "OpenAI 互換 API",
+            "value": "base_url を https://generativelanguage.googleapis.com/v1beta/openai/ にすると OpenAI ライブラリから呼べる",
+            "source_url": "https://ai.google.dev/gemini-api/docs/openai",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "groq",
+        "name": "Groq",
+        "website_url": "https://groq.com/",
+        "docs_url": "https://console.groq.com/docs/overview",
+        "signup_url": "https://console.groq.com/keys",
+        "api_format": "openai-compatible",
+        "base_url": "https://api.groq.com/openai/v1",
+        "native_opencode": "yes",
+        "opencode_provider_id": "groq",
+        "authentication": "api-key",
+        "credit_card_required": "no",
+        "notes": [
+          "無料枠（Free Plan）はカード登録なしで使える。Developer Plan に上げると上限が増える。",
+          "無料枠のレート制限はモデル単位で公表されている。",
+          "OpenCode のドキュメントに Groq 専用のセットアップ手順が用意されている。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "Free Plan の RPM/RPD/TPM/TPD がモデルごとに表で公開されている",
+            "source_url": "https://console.groq.com/docs/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "有料プランへの移行条件",
+            "value": "Developer ティアは支払い方法の登録で即時有効。登録だけでは即時課金されない",
+            "source_url": "https://console.groq.com/docs/billing-faqs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "OpenCode 連携",
+            "value": "Groq 公式ドキュメントに OpenCode の設定手順がある",
+            "source_url": "https://console.groq.com/docs/coding-with-groq/opencode",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "openrouter",
+        "name": "OpenRouter",
+        "website_url": "https://openrouter.ai/",
+        "docs_url": "https://openrouter.ai/docs",
+        "signup_url": "https://openrouter.ai/keys",
+        "api_format": "openai-compatible",
+        "base_url": "https://openrouter.ai/api/v1",
+        "native_opencode": "yes",
+        "opencode_provider_id": "openrouter",
+        "authentication": "api-key",
+        "credit_card_required": "no",
+        "notes": [
+          ":free サフィックスの付いたモデルが無料で利用できる。",
+          "無料モデルには 1 分・1 日あたりのリクエスト上限があり、過去の購入クレジット額で日次上限が変わる。",
+          "無料モデルをフォールバックに使うと、レート制限時に有料モデルへ流れて課金されることがある。"
+        ],
+        "sources": [
+          {
+            "field": "無料モデルの上限",
+            "value": "購入クレジット 10 未満: 20 RPM / 50 RPD。10 以上: 20 RPM / 1000 RPD",
+            "source_url": "https://openrouter.ai/docs/api-reference/limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": ":free バリアント",
+            "value": "無料版はカタログ上で独立したエントリとして提供され、料金は 0",
+            "source_url": "https://openrouter.ai/docs/guides/routing/model-variants/free",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "有料モデルへのフォールバック",
+            "value": "models フォールバック配列に有料モデルを入れると課金される。無料を保つには :free のみを並べる",
+            "source_url": "https://openrouter.ai/docs/guides/routing/model-variants/free",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      }
+    ],
+    "models": [
+      {
+        "id": "cerebras-gpt-oss-120b",
+        "provider_id": "cerebras",
+        "display_name": "GPT OSS 120B",
+        "model_id": "gpt-oss-120b",
+        "context_tokens": 65536,
+        "max_output_tokens": 40960,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "credit",
+          "availability": "restricted",
+          "requirements": [
+            "支払い方法の登録",
+            "アカウント作成"
+          ],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 5,
+              "scope": "model",
+              "note": "Free Trial ティアの上限"
+            },
+            {
+              "metric": "tpm",
+              "value": 30000,
+              "scope": "model",
+              "note": "キャッシュ未ヒット分（uncached）の上限"
+            },
+            {
+              "metric": "tph",
+              "value": 1000000,
+              "scope": "model",
+              "note": "Free Trial ティアの上限"
+            },
+            {
+              "metric": "tpd",
+              "value": 1000000,
+              "scope": "model",
+              "note": "Free Trial ティアの上限"
+            }
+          ],
+          "quota": {
+            "kind": "currency",
+            "amount": 5,
+            "currency": "USD",
+            "period": "one-time",
+            "scope": "account",
+            "note": "初回プロモーションクレジット。付与から 30 日で失効"
+          },
+          "caveats": [
+            "恒久無料ではない。クレジット失効後は API が停止する。",
+            "Free Trial のコンテキスト長は 65K（有料ティアは 131K）。",
+            "RPM 5 はエージェントの反復実行には少なすぎる。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "高速だが、Free Trial では RPM 5 とコンテキスト 65K が実用上の足枷になる。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠の種別",
+            "value": "無料枠は恒久ではなく $5 クレジット（30 日失効）",
+            "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "Free Trial のレート制限",
+            "value": "gpt-oss-120b: RPM 5 / Uncached TPM 30K / Total TPM 90K / TPH 1M / TPD 1M",
+            "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "Free Trial 65k / 有料 131k",
+            "source_url": "https://inference-docs.cerebras.ai/models/overview",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "cerebras-qwen-3-8-27b",
+        "provider_id": "cerebras",
+        "display_name": "Qwen 3.8 27B",
+        "model_id": "qwen-3.8-27b",
+        "context_tokens": 65536,
+        "max_output_tokens": 40960,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "credit",
+          "availability": "restricted",
+          "requirements": [
+            "支払い方法の登録",
+            "アカウント作成"
+          ],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 300,
+              "scope": "model",
+              "note": "Free Trial ティアの上限"
+            },
+            {
+              "metric": "tpm",
+              "value": 150000,
+              "scope": "model",
+              "note": "キャッシュ未ヒット分（uncached）の上限"
+            }
+          ],
+          "quota": {
+            "kind": "currency",
+            "amount": 5,
+            "currency": "USD",
+            "period": "one-time",
+            "scope": "account",
+            "note": "初回プロモーションクレジット。付与から 30 日で失効"
+          },
+          "caveats": [
+            "RPM 300 と TPM 150K は Free Trial としては比較的寛容だが、クレジットは 30 日で失効する。",
+            "1 リクエストあたり画像 2 枚、リクエスト全体で 10 MiB までの制限がある。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "クレジット制のため、使い続けられるかは残額次第。"
+        ],
+        "sources": [
+          {
+            "field": "Free Trial のレート制限",
+            "value": "qwen-3.8-27b: RPM 300 / Uncached TPM 150K / Total TPM 750K",
+            "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "Free Trial 64k / 有料 128k",
+            "source_url": "https://inference-docs.cerebras.ai/models/overview",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "cf-llama-4-scout",
+        "provider_id": "cloudflare-workers-ai",
+        "display_name": "Llama 4 Scout 17B",
+        "model_id": "@cf/meta/llama-4-scout-17b-16e-instruct",
+        "context_tokens": 131000,
+        "max_output_tokens": 16384,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "no"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "neurons",
+            "amount": 10000,
+            "period": "day",
+            "scope": "account",
+            "note": "アカウント全体で 1 日 10,000 Neurons を共有。モデル単体の回数上限はない"
+          },
+          "caveats": [
+            "Neurons は全モデルで共有されるため、1 モデルの消費が他モデルの枠を減らす。",
+            "10,000 Neurons は $0.11 相当。このモデルの入力単価 $0.270 / M トークンで計算すると、入力だけで約 40 万トークン分に当たる。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "Neuron 消費は入力・出力のトークン数で変動する。1 日の残量はダッシュボードで確認する。"
+        ],
+        "sources": [
+          {
+            "field": "無料割当",
+            "value": "10,000 Neurons / day（全モデル共有、00:00 UTC リセット）",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "料金",
+            "value": "$0.270 / M input, $0.850 / M output",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "131,000 tokens, 最大出力 16,384",
+            "source_url": "https://developers.cloudflare.com/workers-ai/models/",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "medium"
+          }
+        ]
+      },
+      {
+        "id": "cf-gpt-oss-120b",
+        "provider_id": "cloudflare-workers-ai",
+        "display_name": "GPT OSS 120B",
+        "model_id": "@cf/openai/gpt-oss-120b",
+        "context_tokens": 128000,
+        "max_output_tokens": 16384,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "neurons",
+            "amount": 10000,
+            "period": "day",
+            "scope": "account",
+            "note": "アカウント全体で 1 日 10,000 Neurons を共有"
+          },
+          "caveats": [
+            "Neurons は全モデルで共有される。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "入力 $0.350 / M, 出力 $0.750 / M。10,000 Neurons（$0.11 相当）では入力だけで約 31 万トークン分。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "$0.350 / M input, $0.750 / M output",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "無料割当",
+            "value": "10,000 Neurons / day",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "cf-llama-3-3-70b",
+        "provider_id": "cloudflare-workers-ai",
+        "display_name": "Llama 3.3 70B fp8 fast",
+        "model_id": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        "context_tokens": 24000,
+        "max_output_tokens": 24000,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "no"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "neurons",
+            "amount": 10000,
+            "period": "day",
+            "scope": "account",
+            "note": "アカウント全体で 1 日 10,000 Neurons を共有"
+          },
+          "caveats": [
+            "コンテキストが 24,000 トークンと小さく、エージェント用途では足りないことが多い。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "コンテキスト 24K のため、システムプロンプトとツール定義だけでかなり消費する。"
+        ],
+        "sources": [
+          {
+            "field": "コンテキスト長",
+            "value": "24,000 tokens",
+            "source_url": "https://developers.cloudflare.com/workers-ai/models/llama-3.3-70b-instruct-fp8-fast/",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "料金",
+            "value": "$0.293 / M input, $2.253 / M output",
+            "source_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+            "source_type": "official",
+            "observed_at": "2026-11-12",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "github-models-gpt-4o",
+        "provider_id": "github-models",
+        "display_name": "GPT-4o (GitHub Models)",
+        "model_id": "openai/gpt-4o",
+        "context_tokens": null,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "unknown",
+          "streaming": "unknown",
+          "json_mode": "unknown",
+          "reasoning": "unknown"
+        },
+        "free_tier": {
+          "type": "ended",
+          "availability": "ended",
+          "requirements": [
+            "GitHub アカウント（終了前）"
+          ],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "サービス自体が終了しているため、現在は無料枠を利用できない。",
+            "代替として Azure AI Foundry への移行が案内されている。"
+          ],
+          "expires_on": null
+        },
+        "verification": [],
+        "caveats": [
+          "終了済み。新規に設定しないこと。"
+        ],
+        "sources": [
+          {
+            "field": "サービス終了",
+            "value": "2026-07-30 に完全終了",
+            "source_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "gemini-3-8-flash",
+        "provider_id": "google",
+        "display_name": "Gemini 3.8 Flash",
+        "model_id": "gemini-3.8-flash",
+        "context_tokens": 1048576,
+        "max_output_tokens": 65536,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "unknown",
+            "amount": null,
+            "period": "unknown",
+            "scope": "project",
+            "note": "無料ティアの具体的な RPM/TPM/RPD は公表されず、AI Studio の Rate Limit 画面でプロジェクトごとに表示される"
+          },
+          "caveats": [
+            "無料ティアの入力・出力は無料だが、送信内容が Google の製品改善に利用される。",
+            "レート制限は予告なく変動し、保証されないと明記されている。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          },
+          {
+            "method": "tool-calling",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "長いコンテキストを扱えるが、無料枠の TPM は低いため大きなリポジトリを一括投入すると 429 になりやすい。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠",
+            "value": "Free Tier の Input / Output とも Free of charge",
+            "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "1M tokens, 最大出力 64K",
+            "source_url": "https://ai.google.dev/gemini-api/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "関数呼び出し・ストリーミング・構造化出力",
+            "value": "OpenAI 互換レイヤーで tools / stream / response_format に対応",
+            "source_url": "https://ai.google.dev/gemini-api/docs/openai",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "gemini-3-1-flash-lite",
+        "provider_id": "google",
+        "display_name": "Gemini 3.1 Flash-Lite",
+        "model_id": "gemini-3.1-flash-lite",
+        "context_tokens": 1048576,
+        "max_output_tokens": 65536,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "unknown",
+            "amount": null,
+            "period": "unknown",
+            "scope": "project",
+            "note": "固定値は非公表。AI Studio の Rate Limit 画面で確認する"
+          },
+          "caveats": [
+            "無料ティアのデータは製品改善に利用される。",
+            "低コスト枠のため無料ティアの上限も小さめに設定されやすい。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "大量のファイル編集を一度に投げる用途より、小さな修正の反復に向く。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠",
+            "value": "Free Tier の Input / Output とも Free of charge",
+            "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "1M tokens, 最大出力 64K",
+            "source_url": "https://ai.google.dev/gemini-api/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "gemini-4-hydrogen",
+        "provider_id": "google",
+        "display_name": "Gemini 4 Hydrogen",
+        "model_id": "gemini-4-hydrogen",
+        "context_tokens": 1048576,
+        "max_output_tokens": 65536,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "unknown",
+            "amount": null,
+            "period": "unknown",
+            "scope": "project",
+            "note": "固定値は非公表。AI Studio の Rate Limit 画面で確認する"
+          },
+          "caveats": [
+            "無料ティアのデータは製品改善に利用される。",
+            "Priority ティアでも無料枠の範囲は Standard と同じ扱い。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "1M コンテキストの長文デコードが可能。ただし無料枠の TPM が実測上の制約になる。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠",
+            "value": "Standard / Priority の Free Tier 列が Free of charge",
+            "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "1M tokens, 最大出力 64K / 1M",
+            "source_url": "https://ai.google.dev/gemini-api/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "groq-gpt-oss-120b",
+        "provider_id": "groq",
+        "display_name": "GPT OSS 120B",
+        "model_id": "openai/gpt-oss-120b",
+        "context_tokens": 131072,
+        "max_output_tokens": 65536,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 30,
+              "scope": "model"
+            },
+            {
+              "metric": "rpd",
+              "value": 1000,
+              "scope": "model"
+            },
+            {
+              "metric": "tpm",
+              "value": 8000,
+              "scope": "model"
+            },
+            {
+              "metric": "tpd",
+              "value": 200000,
+              "scope": "model"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "model"
+          },
+          "caveats": [
+            "無料枠は組織単位ではなくモデル単位の制限。",
+            "無料枠の上限は予告なく変更されうる。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          },
+          {
+            "method": "tool-calling",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "TPM 8,000 はエージェント用途では厳しめ。1 ターンで長いファイルを読み込むと即座に上限へ達する。",
+          "RPD 1,000 は 1 日の試行回数の上限として意識する。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "openai/gpt-oss-120b: RPM 30 / RPD 1K / TPM 8K / TPD 200K（Free Plan 表）",
+            "source_url": "https://console.groq.com/docs/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "131,072 tokens",
+            "source_url": "https://console.groq.com/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "ツール呼び出し",
+            "value": "Tool Use のドキュメントで tool calling に対応",
+            "source_url": "https://console.groq.com/docs/tool-use/overview",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "groq-qwen3-8-27b",
+        "provider_id": "groq",
+        "display_name": "Qwen3.8 27B",
+        "model_id": "qwen/qwen3.8-27b",
+        "context_tokens": 131072,
+        "max_output_tokens": 16384,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 30,
+              "scope": "model"
+            },
+            {
+              "metric": "rpd",
+              "value": 1000,
+              "scope": "model"
+            },
+            {
+              "metric": "tpm",
+              "value": 8000,
+              "scope": "model"
+            },
+            {
+              "metric": "tpd",
+              "value": 200000,
+              "scope": "model"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "model"
+          },
+          "caveats": [
+            "無料枠はモデル単位の制限。",
+            "上限値は予告なく変更されうる。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "最大出力 16K のため、大きなファイルの一括書き換えより差分編集に向く。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "qwen/qwen3.8-27b: RPM 30 / RPD 1K / TPM 8K / TPD 200K（Free Plan 表）",
+            "source_url": "https://console.groq.com/docs/rate-limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "131,072 tokens",
+            "source_url": "https://console.groq.com/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "groq-llama-3-3-70b",
+        "provider_id": "groq",
+        "display_name": "Llama 3.3 70B",
+        "model_id": "llama-3.3-70b-versatile",
+        "context_tokens": 131072,
+        "max_output_tokens": 32768,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "no"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "unknown",
+            "amount": null,
+            "period": "unknown",
+            "scope": "model",
+            "note": "無料枠のレート制限表（2026-11-15 確認）に本モデルの行がないため、数値は非掲載"
+          },
+          "caveats": [
+            "Free Plan のレート制限表に本モデルの記載がない。空欄を 0 や「不可」と解釈しないこと。",
+            "Groq はモデルの提供状況を頻繁に変えるため、利用前に必ず公式の制限画面を確認する。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "ツール呼び出しに対応するが、reasoning 機能は持たない。"
+        ],
+        "sources": [
+          {
+            "field": "ツール呼び出し",
+            "value": "Tool Use のドキュメントで tool calling に対応",
+            "source_url": "https://console.groq.com/docs/tool-use/overview",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長",
+            "value": "131,072 tokens, 最大出力 32,768",
+            "source_url": "https://console.groq.com/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "openrouter-gemma-4-31b",
+        "provider_id": "openrouter",
+        "display_name": "Gemma 4 31B (free)",
+        "model_id": "google/gemma-4-31b-it:free",
+        "context_tokens": 262144,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 20,
+              "scope": "account",
+              "note": "無料モデル共通の上限"
+            },
+            {
+              "metric": "rpd",
+              "value": 50,
+              "scope": "account",
+              "note": "クレジット購入実績が 10 未満のアカウントの上限。10 以上で 1000 に上がる"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "上限は無料モデル全体で共有される。複数の :free モデルを併用しても枠は増えない。",
+            "フォールバックに有料モデルを入れると、無料枠超過時に課金される。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          },
+          {
+            "method": "tool-calling",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "RPD 50 は 1 日 50 リクエスト。エージェントの 1 タスクで数十ステップ消費するため、試用向けと考える。",
+          "無料モデルは提供元の都合で停止・差し替えが起きやすい。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+            "source_url": "https://openrouter.ai/docs/api-reference/limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "料金",
+            "value": "prompt / completion とも 0（models API の pricing）",
+            "source_url": "https://openrouter.ai/api/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "コンテキスト長・対応パラメータ",
+            "value": "context_length 262144, supported_parameters に tools / response_format / reasoning を含む",
+            "source_url": "https://openrouter.ai/api/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "openrouter-ling-3-2-flash",
+        "provider_id": "openrouter",
+        "display_name": "Ling 3.2 Flash (free)",
+        "model_id": "inclusionai/ling-3.2-flash:free",
+        "context_tokens": 1048576,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 20,
+              "scope": "account",
+              "note": "無料モデル共通の上限"
+            },
+            {
+              "metric": "rpd",
+              "value": 50,
+              "scope": "account",
+              "note": "クレジット購入実績が 10 未満のアカウントの上限"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "無料モデル全体で枠を共有する。",
+            "1M コンテキストでも RPD 50 が実用上の制約になる。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "長いコンテキストを持つが、無料枠ではリクエスト数が先に尽きる。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+            "source_url": "https://openrouter.ai/docs/api-reference/limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "料金・コンテキスト長",
+            "value": "prompt / completion とも 0, context_length 1048576",
+            "source_url": "https://openrouter.ai/api/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "openrouter-north-mini-code",
+        "provider_id": "openrouter",
+        "display_name": "North Mini Code (free)",
+        "model_id": "cohere/north-mini-code:free",
+        "context_tokens": 256000,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 20,
+              "scope": "account",
+              "note": "無料モデル共通の上限"
+            },
+            {
+              "metric": "rpd",
+              "value": 50,
+              "scope": "account",
+              "note": "クレジット購入実績が 10 未満のアカウントの上限"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "無料モデル全体で枠を共有する。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "caveats": [
+          "supported_parameters に response_format が含まれないため、JSON モードは未確認（非対応とは断定しない）。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠のレート制限",
+            "value": "Free model variant: 20 RPM, 50 RPD（クレジット 10 未満）",
+            "source_url": "https://openrouter.ai/docs/api-reference/limits",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "対応パラメータ",
+            "value": "tools / tool_choice / reasoning を含み、response_format を含まない",
+            "source_url": "https://openrouter.ai/api/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      }
+    ],
+    "changelog": [
+      {
+        "entity_id": "model:github-models-gpt-4o",
+        "entity_type": "model",
+        "field": "free_tier.availability",
+        "previous": "available",
+        "current": "ended",
+        "detected_at": "2026-11-15T00:00:00Z",
+        "effective_at": "2026-07-30T00:00:00Z",
+        "evidence_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+        "review_status": "confirmed",
+        "summary": "GitHub Models が 2026-07-30 にサービスを完全終了。Playground・モデルカタログ・推論 API・BYOK がすべて利用不可になった。"
+      },
+      {
+        "entity_id": "provider:cerebras",
+        "entity_type": "provider",
+        "field": "free_tier.type",
+        "previous": null,
+        "current": "credit",
+        "detected_at": "2026-11-15T00:00:00Z",
+        "effective_at": null,
+        "evidence_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+        "review_status": "confirmed",
+        "summary": "Cerebras に恒久無料ティアはないことを公式 FAQ で確認。$5 クレジット（30 日失効）のみで、無料枠種別を「初回クレジット」に分類した。"
+      },
+      {
+        "entity_id": "provider:openrouter",
+        "entity_type": "provider",
+        "field": "free_tier.limits.rpd",
+        "previous": null,
+        "current": "50",
+        "detected_at": "2026-11-15T00:00:00Z",
+        "effective_at": null,
+        "evidence_url": "https://openrouter.ai/docs/api-reference/limits",
+        "review_status": "confirmed",
+        "summary": "OpenRouter の無料モデルは 20 RPM / 50 RPD（累計購入クレジット 10 未満）。10 以上で RPD が 1000 に上がる。"
+      }
+    ],
+    "watch_sources": [
+      {
+        "provider_id": "google",
+        "label": "Gemini API 料金（無料枠の有無）",
+        "url": "https://ai.google.dev/gemini-api/docs/pricing",
+        "target": "pricing",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "google",
+        "label": "Gemini API レート制限",
+        "url": "https://ai.google.dev/gemini-api/docs/rate-limits",
+        "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "groq",
+        "label": "Groq レート制限（Free Plan 表）",
+        "url": "https://console.groq.com/docs/rate-limits",
+        "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "groq",
+        "label": "Groq モデル一覧",
+        "url": "https://console.groq.com/docs/models",
+        "target": "models",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "openrouter",
+        "label": "OpenRouter 上限（無料モデル）",
+        "url": "https://openrouter.ai/docs/api-reference/limits",
+        "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "openrouter",
+        "label": "OpenRouter モデルカタログ API",
+        "url": "https://openrouter.ai/api/v1/models",
+        "target": "models",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "cloudflare-workers-ai",
+        "label": "Workers AI 料金（無料割当）",
+        "url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
+        "target": "pricing",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "cerebras",
+        "label": "Cerebras レート制限（Free Trial）",
+        "url": "https://inference-docs.cerebras.ai/support/rate-limits",
+        "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "github-models",
+        "label": "GitHub Models 提供状況",
+        "url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+        "target": "status",
+        "failure_threshold": 3
+      }
+    ]
+  },
+  "warnings": []
+}

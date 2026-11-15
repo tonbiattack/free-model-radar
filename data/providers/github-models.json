@@ -1,0 +1,72 @@
+{
+  "provider": {
+    "id": "github-models",
+    "name": "GitHub Models",
+    "website_url": "https://github.com/",
+    "docs_url": "https://docs.github.com/en/github-models",
+    "signup_url": "https://github.com/marketplace/models",
+    "api_format": "openai-compatible",
+    "base_url": null,
+    "native_opencode": "unknown",
+    "opencode_provider_id": null,
+    "authentication": "github-account",
+    "credit_card_required": "no",
+    "notes": [
+      "2026 年 7 月 30 日に完全終了した。Playground・モデルカタログ・推論 API・BYOK のいずれも利用できない。",
+      "終了済みの情報を「現在使える無料枠」として掲載しないために保持している。",
+      "GitHub Copilot とは別サービスであり、Copilot の提供状況とは関係しない。"
+    ],
+    "sources": [
+      {
+        "field": "サービス終了",
+        "value": "2026-07-30 に GitHub Models は完全に終了。playground / catalog / inference API / BYOK は全顧客で利用不可",
+        "source_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "github-models-gpt-4o",
+      "provider_id": "github-models",
+      "display_name": "GPT-4o (GitHub Models)",
+      "model_id": "openai/gpt-4o",
+      "context_tokens": null,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "unknown",
+        "streaming": "unknown",
+        "json_mode": "unknown",
+        "reasoning": "unknown"
+      },
+      "free_tier": {
+        "type": "ended",
+        "availability": "ended",
+        "requirements": ["GitHub アカウント（終了前）"],
+        "limits": [],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "サービス自体が終了しているため、現在は無料枠を利用できない。",
+          "代替として Azure AI Foundry への移行が案内されている。"
+        ],
+        "expires_on": null
+      },
+      "verification": [],
+      "caveats": ["終了済み。新規に設定しないこと。"],
+      "sources": [
+        {
+          "field": "サービス終了",
+          "value": "2026-07-30 に完全終了",
+          "source_url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,540 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { providersById, dataset } from "@/lib/dataset";
+import {
+  activeFilterCount,
+  applyFilters,
+  parseFilters,
+  serializeFilters,
+  type FilterState,
+  type Row,
+  type SortKey,
+} from "@/lib/filters";
+import {
+  freshnessAt,
+  formatDate,
+  formatLimitValue,
+  latestCheck,
+  sortedLimits,
+  verificationSummary,
+} from "@/lib/format";
+import { LOADED_AT_MS } from "@/lib/clock";
+import { freeTierTypeLabel, limitMetricLabel, limitScopeLabel } from "@/lib/labels";
+import type { FreeTierType } from "@/lib/schema";
+import {
+  AvailabilityMark,
+  FreeTierBadge,
+  FreshnessNote,
+  TristateBadge,
+  VerificationBadge,
+} from "@/components/Badges";
+
+const freeTypeOrder: FreeTierType[] = [
+  "permanent",
+  "trial",
+  "credit",
+  "conditional",
+  "unknown",
+  "ended",
+];
+
+const freshOptions = [
+  { value: null, label: "指定なし" },
+  { value: 7, label: "7日以内" },
+  { value: 30, label: "30日以内" },
+  { value: 90, label: "90日以内" },
+];
+
+const sortOptions: { value: SortKey; label: string }[] = [
+  { value: "checked", label: "最終確認日" },
+  { value: "name", label: "モデル名" },
+  { value: "limits", label: "制限の記載量" },
+];
+
+export function ModelListPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filters = useMemo(() => parseFilters(searchParams.toString()), [searchParams]);
+  const [queryDraft, setQueryDraft] = useState(filters.q);
+  const [committedQuery, setCommittedQuery] = useState(filters.q);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // URL が外から変わったとき（共有リンクを開いた、戻る/進む）は入力欄も追従させる。
+  // effect で setState せず、レンダー中に前回値と比べて同期する。
+  if (committedQuery !== filters.q) {
+    setCommittedQuery(filters.q);
+    setQueryDraft(filters.q);
+  }
+
+  const update = useCallback(
+    (patch: Partial<FilterState>) => {
+      const next = { ...filters, ...patch };
+      setSearchParams(serializeFilters(next), { replace: true });
+    },
+    [filters, setSearchParams],
+  );
+
+  // 検索文字列は入力のたびに URL を書き換えると重いので、少し待ってから反映する
+  useEffect(() => {
+    if (queryDraft === filters.q) return;
+    const timer = window.setTimeout(() => {
+      update({ q: queryDraft });
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [queryDraft, filters.q, update]);
+
+  const allRows: Row[] = useMemo(
+    () =>
+      dataset.models.map((model) => ({
+        model,
+        provider: providersById.get(model.provider_id),
+      })),
+    [],
+  );
+
+  const { rows, hiddenUnknown } = useMemo(() => applyFilters(allRows, filters), [allRows, filters]);
+
+  const providers = useMemo(
+    () => [...dataset.providers].sort((a, b) => a.name.localeCompare(b.name, "ja")),
+    [],
+  );
+
+  const filterCount = activeFilterCount(filters);
+  const totalVisible = allRows.filter((row) => row.model.free_tier.availability !== "ended").length;
+
+  const toggleFreeType = (type: FreeTierType) => {
+    const next = filters.freeTypes.includes(type)
+      ? filters.freeTypes.filter((value) => value !== type)
+      : [...filters.freeTypes, type];
+    update({ freeTypes: next });
+  };
+
+  const toggleProvider = (id: string) => {
+    const next = filters.providerIds.includes(id)
+      ? filters.providerIds.filter((value) => value !== id)
+      : [...filters.providerIds, id];
+    update({ providerIds: next });
+  };
+
+  return (
+    <>
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="hero__lede">
+          <h1 id="hero-title">
+            OpenCode で
+            <br />
+            課金なしに使えるモデルを探す
+          </h1>
+          <p className="hero__sub">
+            無料枠のある LLM API を、公式の出典・確認日・検証状態つきで並べています。
+            「無料で呼べる」と「エージェントとして動く」は別の情報として扱います。
+          </p>
+          <p className="hero__links">
+            <Link to="/method" className="text-link">
+              何をどう確認しているか
+            </Link>
+            <Link to="/changes" className="text-link">
+              最近の変更
+            </Link>
+          </p>
+        </div>
+
+        <dl className="hero__stats">
+          <div>
+            <dt>掲載モデル</dt>
+            <dd>{totalVisible}</dd>
+            <dd className="hero__stat-note">終了済みを除く</dd>
+          </div>
+          <div>
+            <dt>恒久無料</dt>
+            <dd>
+              {
+                allRows.filter(
+                  (row) =>
+                    row.model.free_tier.type === "permanent" &&
+                    row.model.free_tier.availability !== "ended",
+                ).length
+              }
+            </dd>
+            <dd className="hero__stat-note">継続利用できる枠</dd>
+          </div>
+          <div>
+            <dt>要カード登録</dt>
+            <dd>
+              {
+                dataset.providers.filter((provider) => provider.credit_card_required === "yes")
+                  .length
+              }
+            </dd>
+            <dd className="hero__stat-note">プロバイダー単位</dd>
+          </div>
+        </dl>
+      </section>
+
+      <div className="browse">
+        <aside className="filters" aria-labelledby="filters-title">
+          <div className="filters__head">
+            <h2 id="filters-title">絞り込み</h2>
+            {filterCount > 0 ? (
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => {
+                  setQueryDraft("");
+                  setSearchParams("", { replace: true });
+                  searchRef.current?.focus();
+                }}
+              >
+                条件をすべて解除
+              </button>
+            ) : null}
+          </div>
+
+          <div className="field">
+            <label htmlFor="search">モデル名・プロバイダー名</label>
+            <input
+              id="search"
+              ref={searchRef}
+              type="search"
+              value={queryDraft}
+              onChange={(event) => setQueryDraft(event.target.value)}
+              placeholder="例: gemini, groq, qwen"
+              autoComplete="off"
+            />
+          </div>
+
+          <fieldset className="field">
+            <legend>無料枠の種別</legend>
+            <ul className="check-list">
+              {freeTypeOrder.map((type) => (
+                <li key={type}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filters.freeTypes.includes(type)}
+                      onChange={() => toggleFreeType(type)}
+                    />
+                    <span>{freeTierTypeLabel[type]}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+
+          <fieldset className="field">
+            <legend>条件</legend>
+            <ul className="check-list">
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.toolsOnly}
+                    onChange={(event) => update({ toolsOnly: event.target.checked })}
+                  />
+                  <span>ツール呼び出しに対応</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.noCardOnly}
+                    onChange={(event) => update({ noCardOnly: event.target.checked })}
+                  />
+                  <span>クレジットカード不要</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.verifiedOnly}
+                    onChange={(event) => update({ verifiedOnly: event.target.checked })}
+                  />
+                  <span>OpenCode で検証済み</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.includeEnded}
+                    onChange={(event) => update({ includeEnded: event.target.checked })}
+                  />
+                  <span>終了・停止したものも表示</span>
+                </label>
+              </li>
+            </ul>
+          </fieldset>
+
+          <fieldset className="field">
+            <legend>プロバイダー</legend>
+            <ul className="check-list">
+              {providers.map((provider) => (
+                <li key={provider.id}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filters.providerIds.includes(provider.id)}
+                      onChange={() => toggleProvider(provider.id)}
+                    />
+                    <span>{provider.name}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+
+          <div className="field">
+            <label htmlFor="fresh">情報の鮮度</label>
+            <select
+              id="fresh"
+              value={filters.freshDays ?? ""}
+              onChange={(event) =>
+                update({ freshDays: event.target.value === "" ? null : Number(event.target.value) })
+              }
+            >
+              {freshOptions.map((option) => (
+                <option key={option.label} value={option.value ?? ""}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="sort">並び順</label>
+            <select
+              id="sort"
+              value={filters.sort}
+              onChange={(event) => update({ sort: event.target.value as SortKey })}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </aside>
+
+        <section className="results" aria-labelledby="results-title">
+          <div className="results__head">
+            <h2 id="results-title">
+              {rows.length} 件
+              {rows.length !== totalVisible ? (
+                <span className="results__of"> / 全 {totalVisible} 件</span>
+              ) : null}
+            </h2>
+            <p className="results__hint">
+              {filters.sort === "limits"
+                ? "制限の記載量は、単位の異なる数値をまとめた目安です。厳密な比較には使えません。"
+                : "\u00a0"}
+            </p>
+          </div>
+
+          {hiddenUnknown > 0 ? (
+            <p className="results__notice" role="status">
+              条件が「不明」のため表示していない項目が {hiddenUnknown}{" "}
+              件あります。不明は非対応ではありません。
+            </p>
+          ) : null}
+
+          {rows.length === 0 ? (
+            <EmptyState filterCount={filterCount} />
+          ) : (
+            <>
+              <div className="model-table-wrap">
+                <table className="model-table">
+                  <caption className="sr-only">
+                    無料枠のあるモデルの一覧。各行からモデル詳細を開けます。
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">モデル</th>
+                      <th scope="col">無料枠</th>
+                      <th scope="col">主な制限</th>
+                      <th scope="col">ツール</th>
+                      <th scope="col">検証</th>
+                      <th scope="col">最終確認</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row) => (
+                      <ModelRow key={row.model.id} row={row} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <ul className="model-cards">
+                {rows.map((row) => (
+                  <ModelCard key={row.model.id} row={row} />
+                ))}
+              </ul>
+            </>
+          )}
+
+          <p className="results__foot">
+            数値は公式ドキュメントの記載値です。未記載の項目は空欄や「不明」と表示し、0
+            や「非対応」としては扱いません。 空欄の理由は各モデルの詳細で確認できます。
+          </p>
+        </section>
+      </div>
+    </>
+  );
+}
+
+function ModelRow({ row }: { row: Row }) {
+  const { model, provider } = row;
+  const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
+  const checked = latestCheck(model);
+  const freshness = checked ? freshnessAt(checked, LOADED_AT_MS) : null;
+  const summary = verificationSummary(model);
+
+  return (
+    <tr className={model.free_tier.availability === "ended" ? "is-ended" : undefined}>
+      <th scope="row">
+        <Link to={`/models/${model.id}`} className="model-link">
+          {model.display_name}
+        </Link>
+        <span className="model-row__meta">
+          {provider?.name ?? model.provider_id}
+          <span aria-hidden="true"> · </span>
+          <code>{model.model_id}</code>
+        </span>
+        <span className="model-row__ctx">
+          コンテキスト{" "}
+          {model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : "不明"}
+        </span>
+      </th>
+      <td>
+        <span className="free-cell">
+          <AvailabilityMark availability={model.free_tier.availability} />
+          <FreeTierBadge
+            type={model.free_tier.type}
+            muted={model.free_tier.availability === "ended"}
+          />
+        </span>
+        {model.free_tier.availability === "restricted" ? (
+          <span className="free-cell__note">条件あり</span>
+        ) : model.free_tier.availability === "ended" ? (
+          <span className="free-cell__note">利用不可</span>
+        ) : null}
+      </td>
+      <td>
+        {limits.length === 0 ? (
+          <span className="muted">数値の記載なし</span>
+        ) : (
+          <ul className="limit-list">
+            {limits.map((limit) => (
+              <li key={`${limit.metric}-${limit.scope}`}>
+                <span className="limit-list__metric">{limitMetricLabel[limit.metric]}</span>
+                <span className="limit-list__value">{formatLimitValue(limit)}</span>
+                {limit.scope !== "model" ? (
+                  <span className="limit-list__scope">{limitScopeLabel[limit.scope]}</span>
+                ) : null}
+              </li>
+            ))}
+            {model.free_tier.limits.length > 3 ? (
+              <li className="muted">他 {model.free_tier.limits.length - 3} 件</li>
+            ) : null}
+          </ul>
+        )}
+      </td>
+      <td>
+        <TristateBadge value={model.capabilities.tool_calling} />
+      </td>
+      <td>
+        <VerificationBadge status={summary.status} passed={summary.passed} total={summary.total} />
+      </td>
+      <td>
+        {checked ? (
+          <span className="checked-cell">
+            <time dateTime={checked}>{formatDate(checked)}</time>
+            {freshness && freshness !== "fresh" ? (
+              <FreshnessNote freshness={freshness} checkedAt={checked} />
+            ) : null}
+          </span>
+        ) : (
+          <span className="muted">不明</span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function ModelCard({ row }: { row: Row }) {
+  const { model, provider } = row;
+  const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
+  const checked = latestCheck(model);
+  const summary = verificationSummary(model);
+
+  return (
+    <li className={model.free_tier.availability === "ended" ? "model-card is-ended" : "model-card"}>
+      <div className="model-card__head">
+        <Link to={`/models/${model.id}`} className="model-link">
+          {model.display_name}
+        </Link>
+        <FreeTierBadge
+          type={model.free_tier.type}
+          muted={model.free_tier.availability === "ended"}
+        />
+      </div>
+      <p className="model-card__meta">
+        {provider?.name ?? model.provider_id} <code>{model.model_id}</code>
+      </p>
+      <dl className="model-card__facts">
+        <div>
+          <dt>コンテキスト</dt>
+          <dd>{model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : "不明"}</dd>
+        </div>
+        <div>
+          <dt>ツール</dt>
+          <dd>
+            <TristateBadge value={model.capabilities.tool_calling} />
+          </dd>
+        </div>
+        <div>
+          <dt>主な制限</dt>
+          <dd>
+            {limits.length === 0
+              ? "記載なし"
+              : limits
+                  .map((limit) => `${limitMetricLabel[limit.metric]} ${formatLimitValue(limit)}`)
+                  .join(" / ")}
+          </dd>
+        </div>
+        <div>
+          <dt>検証</dt>
+          <dd>
+            <VerificationBadge
+              status={summary.status}
+              passed={summary.passed}
+              total={summary.total}
+            />
+          </dd>
+        </div>
+        <div>
+          <dt>最終確認</dt>
+          <dd>{checked ? formatDate(checked) : "不明"}</dd>
+        </div>
+      </dl>
+    </li>
+  );
+}
+
+function EmptyState({ filterCount }: { filterCount: number }) {
+  return (
+    <div className="empty">
+      <h3>条件に合うモデルがない</h3>
+      {filterCount > 0 ? (
+        <p>
+          絞り込みが厳しすぎる可能性があります。「終了・停止したものも表示」を有効にするか、条件を減らして試してください。
+          掲載数がまだ少ないため、条件を 1 つ外すと見つかることがあります。
+        </p>
+      ) : (
+        <p>掲載データがありません。</p>
+      )}
+    </div>
+  );
+}

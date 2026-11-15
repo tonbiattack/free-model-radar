@@ -1,0 +1,251 @@
+{
+  "provider": {
+    "id": "groq",
+    "name": "Groq",
+    "website_url": "https://groq.com/",
+    "docs_url": "https://console.groq.com/docs/overview",
+    "signup_url": "https://console.groq.com/keys",
+    "api_format": "openai-compatible",
+    "base_url": "https://api.groq.com/openai/v1",
+    "native_opencode": "yes",
+    "opencode_provider_id": "groq",
+    "authentication": "api-key",
+    "credit_card_required": "no",
+    "notes": [
+      "無料枠（Free Plan）はカード登録なしで使える。Developer Plan に上げると上限が増える。",
+      "無料枠のレート制限はモデル単位で公表されている。",
+      "OpenCode のドキュメントに Groq 専用のセットアップ手順が用意されている。"
+    ],
+    "sources": [
+      {
+        "field": "無料枠のレート制限",
+        "value": "Free Plan の RPM/RPD/TPM/TPD がモデルごとに表で公開されている",
+        "source_url": "https://console.groq.com/docs/rate-limits",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "有料プランへの移行条件",
+        "value": "Developer ティアは支払い方法の登録で即時有効。登録だけでは即時課金されない",
+        "source_url": "https://console.groq.com/docs/billing-faqs",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "OpenCode 連携",
+        "value": "Groq 公式ドキュメントに OpenCode の設定手順がある",
+        "source_url": "https://console.groq.com/docs/coding-with-groq/opencode",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "groq-gpt-oss-120b",
+      "provider_id": "groq",
+      "display_name": "GPT OSS 120B",
+      "model_id": "openai/gpt-oss-120b",
+      "context_tokens": 131072,
+      "max_output_tokens": 65536,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [
+          { "metric": "rpm", "value": 30, "scope": "model" },
+          { "metric": "rpd", "value": 1000, "scope": "model" },
+          { "metric": "tpm", "value": 8000, "scope": "model" },
+          { "metric": "tpd", "value": 200000, "scope": "model" }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "model" },
+        "caveats": [
+          "無料枠は組織単位ではなくモデル単位の制限。",
+          "無料枠の上限は予告なく変更されうる。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        },
+        {
+          "method": "tool-calling",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": [
+        "TPM 8,000 はエージェント用途では厳しめ。1 ターンで長いファイルを読み込むと即座に上限へ達する。",
+        "RPD 1,000 は 1 日の試行回数の上限として意識する。"
+      ],
+      "sources": [
+        {
+          "field": "無料枠のレート制限",
+          "value": "openai/gpt-oss-120b: RPM 30 / RPD 1K / TPM 8K / TPD 200K（Free Plan 表）",
+          "source_url": "https://console.groq.com/docs/rate-limits",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "131,072 tokens",
+          "source_url": "https://console.groq.com/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "ツール呼び出し",
+          "value": "Tool Use のドキュメントで tool calling に対応",
+          "source_url": "https://console.groq.com/docs/tool-use/overview",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "groq-qwen3-8-27b",
+      "provider_id": "groq",
+      "display_name": "Qwen3.8 27B",
+      "model_id": "qwen/qwen3.8-27b",
+      "context_tokens": 131072,
+      "max_output_tokens": 16384,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "yes"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [
+          { "metric": "rpm", "value": 30, "scope": "model" },
+          { "metric": "rpd", "value": 1000, "scope": "model" },
+          { "metric": "tpm", "value": 8000, "scope": "model" },
+          { "metric": "tpd", "value": 200000, "scope": "model" }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "model" },
+        "caveats": ["無料枠はモデル単位の制限。", "上限値は予告なく変更されうる。"],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["最大出力 16K のため、大きなファイルの一括書き換えより差分編集に向く。"],
+      "sources": [
+        {
+          "field": "無料枠のレート制限",
+          "value": "qwen/qwen3.8-27b: RPM 30 / RPD 1K / TPM 8K / TPD 200K（Free Plan 表）",
+          "source_url": "https://console.groq.com/docs/rate-limits",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "131,072 tokens",
+          "source_url": "https://console.groq.com/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "groq-llama-3-3-70b",
+      "provider_id": "groq",
+      "display_name": "Llama 3.3 70B",
+      "model_id": "llama-3.3-70b-versatile",
+      "context_tokens": 131072,
+      "max_output_tokens": 32768,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "yes",
+        "reasoning": "no"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": [],
+        "limits": [],
+        "quota": {
+          "kind": "unknown",
+          "amount": null,
+          "period": "unknown",
+          "scope": "model",
+          "note": "無料枠のレート制限表（2026-11-15 確認）に本モデルの行がないため、数値は非掲載"
+        },
+        "caveats": [
+          "Free Plan のレート制限表に本モデルの記載がない。空欄を 0 や「不可」と解釈しないこと。",
+          "Groq はモデルの提供状況を頻繁に変えるため、利用前に必ず公式の制限画面を確認する。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "caveats": ["ツール呼び出しに対応するが、reasoning 機能は持たない。"],
+      "sources": [
+        {
+          "field": "ツール呼び出し",
+          "value": "Tool Use のドキュメントで tool calling に対応",
+          "source_url": "https://console.groq.com/docs/tool-use/overview",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "コンテキスト長",
+          "value": "131,072 tokens, 最大出力 32,768",
+          "source_url": "https://console.groq.com/docs/models",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

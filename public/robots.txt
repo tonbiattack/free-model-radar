@@ -1,0 +1,8 @@
+# Free Model Radar
+# サイト自体は自由にクロールして構いません。
+# 各プロバイダーのドキュメントは、それぞれの robots.txt に従ってください。
+
+User-agent: *
+Allow: /
+
+Sitemap: https://tonbiattack.github.io/free-model-radar/sitemap.xml
