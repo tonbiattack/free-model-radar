@@ -78,12 +78,36 @@ export function validateDataset(input: unknown, options: { today?: Date } = {}):
   }
 
   const modelIds = new Set<string>();
+  const canonicalIds = new Set<string>();
+  for (const [index, canonical] of dataset.canonical_models.entries()) {
+    if (canonicalIds.has(canonical.id)) {
+      errors.push({
+        path: `canonical_models.${index}.id`,
+        message: `モデル ID が重複しています: ${canonical.id}`,
+      });
+    }
+    canonicalIds.add(canonical.id);
+  }
+
+  // 同じモデルを複数の提供元が扱えることが、このデータ構造の要点。
+  // canonical_id でまとまることを前提に、参照の妥当性だけを検証する。
+  const canonicalUsage = new Map<string, number>();
+
   for (const [index, model] of dataset.models.entries()) {
     const at = `models.${index}`;
     if (modelIds.has(model.id)) {
       errors.push({ path: `${at}.id`, message: `モデル ID が重複しています: ${model.id}` });
     }
     modelIds.add(model.id);
+
+    if (!canonicalIds.has(model.canonical_id)) {
+      errors.push({
+        path: `${at}.canonical_id`,
+        message: `data/models.json に存在しないモデルを参照しています: ${model.canonical_id}`,
+      });
+    } else {
+      canonicalUsage.set(model.canonical_id, (canonicalUsage.get(model.canonical_id) ?? 0) + 1);
+    }
 
     if (!providerIds.has(model.provider_id)) {
       errors.push({
@@ -187,7 +211,8 @@ export function validateDataset(input: unknown, options: { today?: Date } = {}):
     }
     const exists =
       providerIds.has(entry.entity_id.replace(/^provider:/, "")) ||
-      modelIds.has(entry.entity_id.replace(/^model:/, ""));
+      modelIds.has(entry.entity_id.replace(/^model:/, "")) ||
+      canonicalIds.has(entry.entity_id.replace(/^model:/, ""));
     if (!exists) {
       warnings.push({
         path: `changelog.${index}.entity_id`,
@@ -211,6 +236,17 @@ export function validateDataset(input: unknown, options: { today?: Date } = {}):
       path: "meta.last_updated",
       message: "last_updated は YYYY-MM-DD で指定してください",
     });
+  }
+
+  // どの提供元も扱っていないモデルは、定義だけ残っている状態。
+  // 統合の取りこぼしを検出できるよう警告する。
+  for (const canonical of dataset.canonical_models) {
+    if (!canonicalUsage.has(canonical.id)) {
+      warnings.push({
+        path: `canonical_models.${canonical.id}`,
+        message: "このモデルを扱う提供元がありません。不要なら削除してください",
+      });
+    }
   }
 
   // 同じ metric かつ同じ scope の制限だけが「比較可能」なので、比較可能性を数えておく

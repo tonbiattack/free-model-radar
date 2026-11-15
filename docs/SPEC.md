@@ -25,18 +25,24 @@ OpenCodeなどのコーディングエージェントから利用できる、無
 
 ### 4.1 モデル一覧（MVP）
 
+- 同一モデルは 1 件にまとめて表示し、提供元の数を示す。同じモデルを複数の提供元が扱う場合は重複カードにしない。
 - プロバイダー・モデル名・無料枠種別・認証要件・RPM/RPD/TPM等・ツール呼び出し対応・確認日時・検証状態を表示。
-- 絞り込み: 恒久無料のみ、ツール呼び出し対応、クレカ不要、OpenCode動作確認済み、プロバイダー、情報鮮度。
-- 検索: プロバイダー名、モデルID、モデル表示名。
-- ソート: 最終確認日、制限の充実度（同一単位で比較できるときのみ）、モデル名。
+- 絞り込み: 恒久無料のみ、ツール呼び出し対応、クレカ不要、登録の手間、OpenCode動作確認済み、複数の提供元がある、プロバイダー、情報鮮度。
+- 検索: モデル名・別名・開発元・APIのモデルID・プロバイダー名。モデル名とサービス名の両方から見つかる。
+- ソート: 最終確認日、提供元の数、制限の充実度（同一単位で比較できるときのみ）、モデル名。
 - 各モデルから公式の料金表・ドキュメント・APIキー取得ページを開ける。
 - 未確認値を0や「非対応」と表示しない。UNKNOWN / YES / NO を区別。
 
 ### 4.2 詳細ページ（MVP）
 
+- 第一階層: モデル本体の情報と「このモデルを無料で使える提供元」の比較表。
+- 比較表の列: 提供元、無料枠種別、RPM/RPD/TPM と適用範囲、カード要否、登録の手間、ツール呼び出し、検証状態、確認日時。
+- 第二階層: 提供元を選ぶと、その提供元の条件・導入手順・OpenCode 設定生成へ遷移する。
+
 - モデルID、APIベースURL（公開可能なもの）、API形式（OpenAI互換等）、コンテキスト長（出典付き）、レート制限・総量制限、無料枠の継続条件、利用規約の注意事項。
 - 対応機能: tool calling、streaming、JSON mode、reasoning（それぞれ公式記載と実機検証の区別）。
 - 確認結果: 公式記載、接続検証成功/失敗/未実施、検証日、検証バージョン。
+- 性能は自前評価せず、出典のある比較ページへリンクする。
 - 出典および更新履歴へリンク。
 
 ### 4.3 OpenCode設定ジェネレーター（MVP）
@@ -75,14 +81,18 @@ OpenCodeなどのコーディングエージェントから利用できる、無
 
 ## 6. データモデル（概念）
 
-- Provider: id, name, website_url, docs_url, signup_url, api_format, base_url, native_opencode, authentication, credit_card_required（nullable）
-- Model: id, provider_id, display_name, model_id, context_tokens（nullable）, capabilities（各3値）, status
+- **CanonicalModel**: id, name, developer, family, aliases — モデル本体。提供元をまたぐ同一性の基準
+- Provider: id, name, website_url, docs_url, signup_url, api_format, base_url, native_opencode, authentication, credit_card_required（nullable）, signup_friction
+- Model: id, provider_id, **canonical_id**, display_name, model_id, context_tokens（nullable）, capabilities（各3値）, status
 - FreeTier: type, available, reqs, rpm/rpd/tpm/tpd（nullable）, monthly_quota（nullable）, concurrency（nullable）, expiration, caveats
 - Evidence: field, value, source_url, source_type（official/community/test）, observed_at, checked_at, confidence
 - Verification: method, status（passed/failed/untested/unknown）, tested_at, opencode_version, notes
+- PerformanceRef: benchmark, url, as, note — 性能は自前評価せず出典へリンク
 - ChangeLog: entity_id, field, previous, current, detected_at, effective_at（nullable）, evidence_url, review_status
 
 **数値制限はプロバイダー単位・モデル単位・アカウント単位が混在し得るため scope と期間単位を保持する。** 0 と null を区別。IDはURLなどに依存せず安定化する。
+
+**同一モデルの判定は canonical_id で行う。** 表示名や API のモデル ID は提供元ごとに表記が異なるため、文字列一致では同一性を判定しない。一覧は canonical model 単位でまとめ、詳細で提供元を横断比較する。単位・適用範囲の異なる制限を単純な数値ランキングにしない。
 
 ## 7. 技術構成（推奨）
 
@@ -106,6 +116,7 @@ OpenCodeなどのコーディングエージェントから利用できる、無
 - 少なくとも5プロバイダーの実際の無料API情報（公式出典・確認日時つき）を掲載。
 - フィルタ/検索/詳細/設定生成が利用でき、設定例のコピーができる。
 - 恒久無料とトライアルを混同せず、機能の不明値を誤表示しない。
+- 1モデルを複数の提供元が扱うデータで、モデルが重複せず比較でき、提供元ごとの違いを正しく表示できる。
 - GitHub Pagesで無料公開し、GitHub Actionsでビルドとデータ検証が成功。
 - READMEに目的、開発・デプロイ方法、情報の鮮度と免責、コントリビューション方法を記載。
 

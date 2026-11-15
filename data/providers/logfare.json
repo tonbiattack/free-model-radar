@@ -95,9 +95,19 @@
             "scope": "account",
             "note": "Standard ティア。最初の 24 時間は 500"
           },
-          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+          {
+            "metric": "concurrency",
+            "value": 6,
+            "scope": "account",
+            "note": "Standard ティア"
+          }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "上限はアカウントの全モデル・全 API 形式で共有される。モデルごとの枠ではない。",
           "Discord サーバーを退会すると推論が止まる。",
@@ -146,7 +156,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "qwen3-8-27b"
     },
     {
       "id": "logfare-gemma-4-26b",
@@ -184,9 +195,19 @@
             "scope": "account",
             "note": "Standard ティア。最初の 24 時間は 500"
           },
-          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+          {
+            "metric": "concurrency",
+            "value": 6,
+            "scope": "account",
+            "note": "Standard ティア"
+          }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "上限はアカウント単位で全モデル共有。",
           "全リクエストの内容が記録される。",
@@ -231,7 +252,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "gemma-4-26b"
     },
     {
       "id": "logfare-deepseek-v4-1-flash-economy",
@@ -269,9 +291,19 @@
             "scope": "account",
             "note": "Standard ティア。最初の 24 時間は 500"
           },
-          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+          {
+            "metric": "concurrency",
+            "value": 6,
+            "scope": "account",
+            "note": "Standard ティア"
+          }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "モデル ID に economy/ 接頭辞が付く。通常版とは別の提供枠。",
           "上限はアカウント単位で全モデル共有。",
@@ -316,7 +348,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "deepseek-v4-1-flash"
     }
   ]
 }

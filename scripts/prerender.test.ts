@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildRoutes, renderRouteHtml } from "./prerender";
 import type { Dataset } from "../src/lib/schema";
 import { dataset as realDataset } from "../src/lib/dataset";
+import { groupModels } from "../src/lib/groups";
 
 const shell = `<!doctype html>
 <html lang="ja">
@@ -71,20 +72,42 @@ describe("renderRouteHtml", () => {
 describe("buildRoutes", () => {
   it("トップ・履歴・調べ方と全モデルのルートを作る", () => {
     const routes = buildRoutes(realDataset as Dataset);
-    expect(routes.map((route) => route.path)).toContain("/");
-    expect(routes.map((route) => route.path)).toContain("/changes");
-    expect(routes.map((route) => route.path)).toContain("/method");
-    for (const model of realDataset.models) {
-      expect(routes.some((route) => route.path === `/models/${model.id}`)).toBe(true);
+    const paths = routes.map((route) => route.path);
+    expect(paths).toContain("/");
+    expect(paths).toContain("/changes");
+    expect(paths).toContain("/method");
+    for (const group of groupModels(realDataset as Dataset)) {
+      expect(paths).toContain(`/models/${group.canonical.id}`);
+      // 提供元別の詳細も生成する
+      for (const offer of group.offers) {
+        expect(paths).toContain(`/models/${group.canonical.id}/${offer.provider.id}`);
+      }
     }
   });
 
-  it("各モデルの説明に無料枠の種別が入る", () => {
+  it("モデルの説明に提供元の名前が入る", () => {
     const routes = buildRoutes(realDataset as Dataset);
-    const ended = realDataset.models.find((model) => model.free_tier.availability === "ended");
-    if (ended) {
-      const route = routes.find((entry) => entry.path === `/models/${ended.id}`);
-      expect(route?.description).toContain("利用できません");
+    const group = groupModels(realDataset as Dataset).find((entry) => entry.offers.length > 1)!;
+    const route = routes.find((entry) => entry.path === `/models/${group.canonical.id}`);
+    expect(route?.description).toContain(group.canonical.name);
+    for (const offer of group.offers) {
+      expect(route?.description).toContain(offer.provider.name);
     }
+  });
+
+  it("提供元別の説明に API のモデル ID が入る", () => {
+    const routes = buildRoutes(realDataset as Dataset);
+    const group = groupModels(realDataset as Dataset).find((entry) => entry.offers.length > 1)!;
+    const offer = group.offers[0]!;
+    const route = routes.find(
+      (entry) => entry.path === `/models/${group.canonical.id}/${offer.provider.id}`,
+    );
+    expect(route?.description).toContain(offer.model.model_id);
+  });
+
+  it("タイトルがルートごとに重複しない", () => {
+    const routes = buildRoutes(realDataset as Dataset);
+    const titles = routes.map((route) => route.title);
+    expect(new Set(titles).size).toBe(titles.length);
   });
 });

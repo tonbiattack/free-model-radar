@@ -1,6 +1,7 @@
-import type { FreeTierType, Model, Provider, SignupFriction } from "./schema";
+import type { FreeTierType, Model, SignupFriction } from "./schema";
+import type { ModelGroup, Offer } from "./groups";
 
-export type SortKey = "checked" | "name" | "limits";
+export type SortKey = "checked" | "name" | "providers" | "limits";
 
 export interface FilterState {
   q: string;
@@ -19,6 +20,8 @@ export interface FilterState {
   signupFriction: SignupFriction[];
   /** 支払い方法の登録が要らないものだけ。 */
   noPaidSignupOnly: boolean;
+  /** 複数の提供元があるモデルだけ。 */
+  multiProviderOnly: boolean;
 }
 
 export const defaultFilters: FilterState = {
@@ -33,6 +36,7 @@ export const defaultFilters: FilterState = {
   includeEnded: false,
   signupFriction: [],
   noPaidSignupOnly: false,
+  multiProviderOnly: false,
 };
 
 const freeTypeValues: FreeTierType[] = [
@@ -44,132 +48,6 @@ const freeTypeValues: FreeTierType[] = [
   "unknown",
 ];
 
-export interface Row {
-  model: Model;
-  provider: Provider | undefined;
-}
-
-/**
- * 「不明」を「不可」として除外しない。
- * 例: toolsOnly は tool_calling === "yes" のみ通し、unknown は「可能性あり」として別扱いにする。
- * ここでは仕様に従い、明示的に yes のものだけを「対応」とみなすが、
- * UI 側で unknown を隠したことを示せるよう filteredOutUnknown を返す。
- */
-export interface FilterResult {
-  rows: Row[];
-  /** 絞り込みによって落ちたが、条件が「不明」だった件数。 */
-  hiddenUnknown: number;
-}
-
-function textOf(row: Row): string {
-  return [
-    row.model.display_name,
-    row.model.model_id,
-    row.model.id,
-    row.provider?.name ?? "",
-    row.provider?.id ?? "",
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
-function latestCheckedAt(row: Row): string {
-  // 鮮度はそのモデル自身の確認日で判断する。プロバイダー側の確認日が新しいからといって
-  // モデル固有の条件が新しいとは限らない。
-  const dates = (row.model.sources.length > 0 ? row.model.sources : (row.provider?.sources ?? []))
-    .map((source) => source.checked_at)
-    .sort();
-  return dates.at(-1) ?? "1970-01-01";
-}
-
-export function applyFilters(rows: Row[], filters: FilterState, now = new Date()): FilterResult {
-  const query = filters.q.trim().toLowerCase();
-  let hiddenUnknown = 0;
-  const result: Row[] = [];
-
-  for (const row of rows) {
-    const { model, provider } = row;
-
-    if (query && !textOf(row).includes(query)) continue;
-
-    if (!filters.includeEnded && model.free_tier.availability === "ended") continue;
-
-    if (filters.freeTypes.length > 0 && !filters.freeTypes.includes(model.free_tier.type)) {
-      continue;
-    }
-
-    if (filters.providerIds.length > 0 && !filters.providerIds.includes(model.provider_id)) {
-      continue;
-    }
-
-    if (filters.signupFriction.length > 0) {
-      const friction = provider?.signup_friction ?? "unknown";
-      if (!filters.signupFriction.includes(friction)) {
-        // 「不明」を条件から外した場合だけ、隠したことを数える
-        if (friction === "unknown") hiddenUnknown += 1;
-        continue;
-      }
-    }
-
-    if (filters.noPaidSignupOnly) {
-      // カード登録そのものが要るものだけを外す。不明は残す（不明を「要る」と決めつけない）。
-      if (provider?.signup_friction === "paid") continue;
-    }
-
-    if (filters.toolsOnly) {
-      if (model.capabilities.tool_calling === "unknown") {
-        hiddenUnknown += 1;
-        continue;
-      }
-      if (model.capabilities.tool_calling !== "yes") continue;
-    }
-
-    if (filters.noCardOnly) {
-      const cardFree = provider?.credit_card_required === "no";
-      if (provider?.credit_card_required === "unknown") hiddenUnknown += 1;
-      if (!cardFree) continue;
-    }
-
-    if (filters.verifiedOnly) {
-      const hasPassed = model.verification.some((v) => v.status === "passed");
-      if (model.verification.every((v) => v.status === "untested" || v.status === "unknown")) {
-        hiddenUnknown += 1;
-      }
-      if (!hasPassed) continue;
-    }
-
-    if (filters.freshDays !== null) {
-      const checked = latestCheckedAt(row);
-      const days = Math.floor(
-        (now.getTime() - new Date(`${checked}T00:00:00Z`).getTime()) / 86_400_000,
-      );
-      if (days > filters.freshDays) continue;
-    }
-
-    result.push(row);
-  }
-
-  result.sort((a, b) => {
-    switch (filters.sort) {
-      case "name":
-        return a.model.display_name.localeCompare(b.model.display_name, "ja");
-      case "limits": {
-        // 単位が揃っているときだけ意味を持つので、制限の種類数で近似する
-        const diff = b.model.free_tier.limits.length - a.model.free_tier.limits.length;
-        if (diff !== 0) return diff;
-        return a.model.display_name.localeCompare(b.model.display_name, "ja");
-      }
-      case "checked":
-      default:
-        return latestCheckedAt(b).localeCompare(latestCheckedAt(a));
-    }
-  });
-
-  return { rows: result, hiddenUnknown };
-}
-
-const SORT_KEYS: SortKey[] = ["checked", "name", "limits"];
-
 const signupFrictionValues: SignupFriction[] = [
   "instant",
   "discord",
@@ -177,6 +55,183 @@ const signupFrictionValues: SignupFriction[] = [
   "paid",
   "unknown",
 ];
+
+const SORT_KEYS: SortKey[] = ["checked", "name", "providers", "limits"];
+
+export interface FilterResult {
+  groups: ModelGroup[];
+  /** 絞り込みによって落ちたが、条件が「不明」だった提供元の数。 */
+  hiddenUnknown: number;
+}
+
+/**
+ * 絞り込みは「提供元ごと」に評価し、条件を満たす提供元が 1 つでもあるモデルを残す。
+ * ただし「複数の提供元がある」は提供元フィルタとは独立に判定する。
+ * そうしないと、提供元を 1 つに絞った瞬間に必ず 0 件になってしまう。
+ */
+export function visibleOffers(
+  group: ModelGroup,
+  filters: FilterState,
+  now = new Date(),
+  options: { ignoreProviderFilter?: boolean } = {},
+): Offer[] {
+  const query = filters.q.trim().toLowerCase();
+
+  return group.offers.filter((offer) => {
+    if (query && !matchesText(group, offer, query)) return false;
+    if (!filters.includeEnded && offer.model.free_tier.availability === "ended") return false;
+    if (filters.freeTypes.length > 0 && !filters.freeTypes.includes(offer.model.free_tier.type)) {
+      return false;
+    }
+    if (
+      !options.ignoreProviderFilter &&
+      filters.providerIds.length > 0 &&
+      !filters.providerIds.includes(offer.provider.id)
+    ) {
+      return false;
+    }
+    if (filters.toolsOnly && offer.model.capabilities.tool_calling !== "yes") return false;
+
+    if (filters.noCardOnly && offer.provider.credit_card_required !== "no") return false;
+
+    if (filters.signupFriction.length > 0) {
+      const friction = offer.provider.signup_friction ?? "unknown";
+      if (!filters.signupFriction.includes(friction)) return false;
+    }
+
+    if (filters.noPaidSignupOnly && offer.provider.signup_friction === "paid") return false;
+
+    if (filters.verifiedOnly) {
+      const passed = offer.model.verification.some((entry) => entry.status === "passed");
+      if (!passed) return false;
+    }
+
+    if (filters.freshDays !== null) {
+      const checked = latestCheckedAt(offer);
+      if (daysSince(checked, now) > filters.freshDays) return false;
+    }
+
+    return true;
+  });
+}
+
+function matchesText(group: ModelGroup, offer: Offer, query: string): boolean {
+  const haystack = [
+    group.canonical.name,
+    ...group.canonical.aliases,
+    group.canonical.developer,
+    offer.model.display_name,
+    offer.model.model_id,
+    offer.model.id,
+    offer.provider.name,
+    offer.provider.id,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(query);
+}
+
+function latestCheckedAt(offer: Offer): string {
+  const dates = (offer.model.sources.length > 0 ? offer.model.sources : offer.provider.sources)
+    .map((source) => source.checked_at)
+    .sort();
+  return dates.at(-1) ?? "1970-01-01";
+}
+
+function daysSince(isoDate: string, now: Date): number {
+  return Math.floor((now.getTime() - new Date(`${isoDate}T00:00:00Z`).getTime()) / 86_400_000);
+}
+
+export function applyFilters(
+  groups: ModelGroup[],
+  filters: FilterState,
+  now = new Date(),
+): FilterResult {
+  let hiddenUnknown = 0;
+  const result: Array<{ group: ModelGroup; offers: Offer[] }> = [];
+
+  for (const group of groups) {
+    const offers = visibleOffers(group, filters, now);
+    if (offers.length === 0) {
+      // 条件が「不明」で落ちたものは、非対応と混同しないよう件数を出す
+      hiddenUnknown += countUnknownExclusions(group, filters, now);
+      continue;
+    }
+
+    // 「複数の提供元がある」は提供元フィルタとは独立に判定する。
+    // 提供元を 1 つに絞ったときに必ず 0 件になるのを避ける。
+    if (filters.multiProviderOnly) {
+      const providerFiltered =
+        filters.providerIds.length > 0
+          ? visibleOffers(group, filters, now, { ignoreProviderFilter: true })
+          : offers;
+      if (providerFiltered.length < 2) continue;
+    }
+
+    result.push({ group, offers });
+  }
+
+  result.sort((a, b) => {
+    switch (filters.sort) {
+      case "name":
+        return a.group.canonical.name.localeCompare(b.group.canonical.name, "ja");
+      case "providers": {
+        const diff = b.offers.length - a.offers.length;
+        if (diff !== 0) return diff;
+        return a.group.canonical.name.localeCompare(b.group.canonical.name, "ja");
+      }
+      case "limits": {
+        // 単位も適用範囲も違う数値をまたいだランキングはしない。
+        // 比較可能性の目安として、数値制限を持つ提供元の数で並べる。
+        const count = (value: { group: ModelGroup; offers: Offer[] }) =>
+          value.offers.filter((offer) => offer.model.free_tier.limits.length > 0).length;
+        const diff = count(b) - count(a);
+        if (diff !== 0) return diff;
+        return a.group.canonical.name.localeCompare(b.group.canonical.name, "ja");
+      }
+      case "checked":
+      default: {
+        const latest = (value: { offers: Offer[] }) =>
+          value.offers
+            .flatMap((offer) => offer.model.sources.map((source) => source.checked_at))
+            .sort()
+            .at(-1) ?? "1970-01-01";
+        return latest(b).localeCompare(latest(a));
+      }
+    }
+  });
+
+  return {
+    groups: result.map((entry) => ({ ...entry.group, offers: entry.offers })),
+    hiddenUnknown,
+  };
+}
+
+/** 条件が不明なために落ちた提供元の数を数える。UI で「不明は非対応ではない」と示すために使う。 */
+function countUnknownExclusions(group: ModelGroup, filters: FilterState, now: Date): number {
+  let count = 0;
+  for (const offer of group.offers) {
+    const model: Model = offer.model;
+    const unknownTool = filters.toolsOnly && model.capabilities.tool_calling === "unknown";
+    const unknownCard =
+      filters.noCardOnly &&
+      offer.provider.credit_card_required !== "no" &&
+      offer.provider.credit_card_required !== "yes";
+    const unknownSignup =
+      (filters.signupFriction.length > 0 || filters.noPaidSignupOnly) &&
+      offer.provider.signup_friction === "unknown";
+    const unknownVerification =
+      filters.verifiedOnly &&
+      model.verification.every(
+        (entry) => entry.status === "untested" || entry.status === "unknown",
+      );
+
+    if (unknownTool || unknownCard || unknownSignup || unknownVerification) count += 1;
+  }
+  // 鮮度だけで落ちた場合は「不明」ではなく「古い」ので数えない
+  void now;
+  return count;
+}
 
 export function parseFilters(search: string): FilterState {
   const params = new URLSearchParams(search);
@@ -213,6 +268,7 @@ export function parseFilters(search: string): FilterState {
     includeEnded: params.get("ended") === "1",
     signupFriction,
     noPaidSignupOnly: params.get("nopaid") === "1",
+    multiProviderOnly: params.get("multi") === "1",
   };
 }
 
@@ -230,11 +286,11 @@ export function serializeFilters(filters: FilterState): string {
   if (filters.includeEnded) params.set("ended", "1");
   if (filters.signupFriction.length) params.set("signup", filters.signupFriction.join(","));
   if (filters.noPaidSignupOnly) params.set("nopaid", "1");
+  if (filters.multiProviderOnly) params.set("multi", "1");
   const query = params.toString();
   return query ? `?${query}` : "";
 }
 
-/** 有効な絞り込みが 1 つでもあるか。空状態の文言を変えるために使う。 */
 export function activeFilterCount(filters: FilterState): number {
   let count = 0;
   if (filters.q.trim()) count += 1;
@@ -247,5 +303,6 @@ export function activeFilterCount(filters: FilterState): number {
   if (filters.includeEnded) count += 1;
   if (filters.signupFriction.length) count += 1;
   if (filters.noPaidSignupOnly) count += 1;
+  if (filters.multiProviderOnly) count += 1;
   return count;
 }

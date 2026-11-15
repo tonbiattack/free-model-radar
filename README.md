@@ -66,6 +66,43 @@ RPM / RPD / TPM の適用範囲、ツール呼び出しの有無、API キー取
 
 OpenCode から `/connect` だけで使えるもの（OpenCode Zen の無料モデルなど）は、一覧の「/connect だけで使える」の件数に含まれます。
 
+## モデル中心の構造
+
+このサイトは **モデルを主軸** にしています。同じモデルを複数の提供元が扱う場合、一覧では 1 件にまとめ、詳細で提供元を横断比較します。
+
+```
+/                              モデル一覧（モデル中心。重複しない）
+/models/:modelId               このモデルを無料で使える提供元の比較表
+/models/:modelId/:providerId   選んだ提供元の条件・導入手順・OpenCode 設定生成
+```
+
+### 同一モデルの判定
+
+**表示名や API のモデル ID の文字列一致では判定しません。** 提供元ごとに表記が違うためです。
+
+| モデル       | 提供元 A                      | 提供元 B                                |
+| ------------ | ----------------------------- | --------------------------------------- |
+| GPT OSS 120B | `openai/gpt-oss-120b`（Groq） | `@cf/openai/gpt-oss-120b`（Cloudflare） |
+| Qwen 3.8 27B | `qwen/qwen3.8-27b`（Groq）    | `qwen-3.8-27b`（Cerebras / Logfare）    |
+
+同一性は `data/models.json` の `id`（canonical model）で明示的に定義し、
+各提供元のモデルは `canonical_id` でそれを参照します。
+
+```jsonc
+// data/models.json — モデル本体
+{ "id": "gpt-oss-120b", "name": "GPT OSS 120B", "developer": "OpenAI", ... }
+
+// data/providers/groq.json — 提供元ごとの条件
+{ "id": "groq-gpt-oss-120b", "canonical_id": "gpt-oss-120b", "model_id": "openai/gpt-oss-120b", ... }
+```
+
+### 比較の考え方
+
+- 比較表は提供元ごとに 1 行。無料枠の種別・制限・カード要否・登録の手間・検証・確認日を並べます。
+- **単位や適用範囲が違う制限を、単純な数値ランキングにしません。** RPM 30（モデル単位）と RPD 5,000（アカウント単位）は比べられません。
+- 情報が未確認の場合は「不明」と表示し、「0」や「非対応」とは書きません。
+- 絞り込みは提供元ごとに評価し、条件を満たす提供元が 1 つでもあるモデルを残します。
+
 ## はじめ方
 
 Node.js 22 以上と npm が必要です。外部の有料サービスは使いません。
@@ -105,6 +142,7 @@ npm run dev
 
 ```
 data/
+  models.json                    # モデル本体（提供元をまたぐ同一性の定義）
   providers/<provider-id>.json   # プロバイダー 1 件 = ファイル 1 件（モデルを含む）
   changelog.json                 # 変更履歴
   watch-sources.json             # 変更検知の監視対象

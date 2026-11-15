@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { dataset } from "@/lib/dataset";
+import { groupModels } from "@/lib/groups";
 import { freeTierTypeLabel } from "@/lib/labels";
 
 const staticTitles: Record<string, { title: string; description: string }> = {
@@ -22,27 +23,47 @@ const staticTitles: Record<string, { title: string; description: string }> = {
 };
 
 function describe(modelId: string): { title: string; description: string } {
-  const model = dataset.models.find((entry) => entry.id === modelId);
-  if (!model) {
+  const group = groupModels(dataset).find((entry) => entry.canonical.id === modelId);
+  if (!group) {
     return {
       title: "ページが見つかりません — Free Model Radar",
       description: "指定されたページは存在しないか、掲載を終了しました。",
     };
   }
-  const provider = dataset.providers.find((entry) => entry.id === model.provider_id);
-  const limits = model.free_tier.limits
+
+  const providers = group.offers.map((offer) => offer.provider.name).join("、");
+  const primary = group.offers[0]?.model;
+  const limits = primary?.free_tier.limits
     .slice(0, 3)
     .map((limit) => `${limit.metric.toUpperCase()} ${limit.value.toLocaleString("ja-JP")}`)
     .join(", ");
 
   return {
-    title: `${model.display_name}（${freeTierTypeLabel[model.free_tier.type]}）— Free Model Radar`,
+    title: `${group.canonical.name} を無料で使える提供元 — Free Model Radar`,
     description:
-      `${provider?.name ?? model.provider_id} の ${model.display_name}。` +
-      `${freeTierTypeLabel[model.free_tier.type]}` +
-      (model.context_tokens ? `、コンテキスト ${Math.round(model.context_tokens / 1000)}K` : "") +
+      `${group.canonical.developer} の ${group.canonical.name}。${providers} が無料枠で提供しています。` +
+      (primary ? freeTierTypeLabel[primary.free_tier.type] : "") +
       (limits ? `。主な制限: ${limits}` : "") +
       "。出典と確認日つきで掲載しています。",
+  };
+}
+
+function describeOffer(
+  modelId: string,
+  providerId: string,
+): { title: string; description: string } {
+  const group = groupModels(dataset).find((entry) => entry.canonical.id === modelId);
+  const offer = group?.offers.find((entry) => entry.provider.id === providerId);
+  if (!group || !offer) {
+    return {
+      title: "ページが見つかりません — Free Model Radar",
+      description: "指定されたページは存在しないか、掲載を終了しました。",
+    };
+  }
+
+  return {
+    title: `${group.canonical.name}（${offer.provider.name}）— Free Model Radar`,
+    description: `${offer.provider.name} で ${group.canonical.name} を無料で使う条件と、OpenCode の設定例。API のモデル ID は ${offer.model.model_id}。`,
   };
 }
 
@@ -58,14 +79,19 @@ export function RouteMeta() {
     // 末尾スラッシュ（/models/x/ や /）を落として正規化する。
     // GitHub Pages はどちらの形でも返すため、ここで揃えないと一致しない。
     const path = pathname.replace(/\/+$/, "") || "/";
-    const modelId = path.startsWith("/models/") ? path.slice("/models/".length) : null;
+    const segments = path.split("/").filter(Boolean);
 
-    const meta = modelId
-      ? describe(modelId)
-      : (staticTitles[path] ?? {
-          title: "ページが見つかりません — Free Model Radar",
-          description: "指定されたページは存在しないか、掲載を終了しました。",
-        });
+    let meta: { title: string; description: string };
+    if (segments[0] === "models" && segments.length >= 2) {
+      const modelId = segments[1] ?? "";
+      const providerId = segments[2];
+      meta = providerId ? describeOffer(modelId, providerId) : describe(modelId);
+    } else {
+      meta = staticTitles[path] ?? {
+        title: "ページが見つかりません — Free Model Radar",
+        description: "指定されたページは存在しないか、掲載を終了しました。",
+      };
+    }
 
     document.title = meta.title;
 

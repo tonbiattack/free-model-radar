@@ -126,7 +126,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "big-pickle"
     },
     {
       "id": "zen-glm-5-3-flash-free",
@@ -196,7 +197,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "glm-5-3-flash"
     },
     {
       "id": "zen-deepseek-v4-1-flash-free",
@@ -266,7 +268,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "deepseek-v4-1-flash"
     },
     {
       "id": "zen-minimax-m3-1-flash-free",
@@ -339,7 +342,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "minimax-m3-1-flash"
     },
     {
       "id": "zen-nemotron-3-5-lightning-free",
@@ -410,7 +414,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "nemotron-3-5-lightning"
     },
     {
       "id": "zen-longcat-2-5-free",
@@ -437,7 +442,12 @@
             "note": "公式に 1 日 100 リクエストまでの記載がある唯一の無料モデル"
           }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "期間限定の無料提供。",
           "1 日 100 リクエストの上限がある。",
@@ -485,7 +495,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "longcat-2-5"
     },
     {
       "id": "zen-beam-free",
@@ -556,7 +567,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "beam-1-0"
     },
     {
       "id": "zen-inkling-2-small-free",
@@ -631,7 +643,8 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
-      ]
+      ],
+      "canonical_id": "inkling-2-small"
     }
   ]
 }

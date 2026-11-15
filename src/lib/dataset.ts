@@ -14,10 +14,14 @@ export const validationWarnings = generated.warnings as {
 
 export const providersById = new Map(dataset.providers.map((provider) => [provider.id, provider]));
 
+export const canonicalById = new Map(
+  dataset.canonical_models.map((canonical) => [canonical.id, canonical]),
+);
+
 export function providerOf(model: Dataset["models"][number]) {
   return providersById.get(model.provider_id);
 }
 
 export function modelPath(model: Dataset["models"][number]): string {
-  return `/models/${model.id}`;
+  return `/models/${model.canonical_id}`;
 }

@@ -1,6 +1,14 @@
 import changelogFile from "../../data/changelog.json";
+import modelsFile from "../../data/models.json";
 import watchFile from "../../data/watch-sources.json";
-import type { ChangeLogEntry, Dataset, Model, Provider, WatchSource } from "./schema";
+import type {
+  CanonicalModel,
+  ChangeLogEntry,
+  Dataset,
+  Model,
+  Provider,
+  WatchSource,
+} from "./schema";
 import { validateDataset } from "./validate";
 
 interface ProviderFile {
@@ -36,6 +44,7 @@ export function assembleDataset(): unknown {
 
   return {
     meta: { last_updated: latest ?? "1970-01-01", spec_version: "1.0.0" },
+    canonical_models: (modelsFile as { models: CanonicalModel[] }).models,
     providers,
     models,
     changelog: (changelogFile as { entries: ChangeLogEntry[] }).entries,

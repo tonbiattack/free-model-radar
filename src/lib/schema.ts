@@ -173,6 +173,27 @@ export const performanceRefSchema = z.object({
 });
 export type PerformanceRef = z.infer<typeof performanceRefSchema>;
 
+/**
+ * モデル本体の定義。提供元ごとの API モデル ID とは分離して持つ。
+ * 表示名の文字列一致ではなく、この ID で同一モデルを判定する。
+ */
+export const canonicalModelSchema = z.object({
+  /** URL に使う安定 ID。提供元が増えても変えない。 */
+  id: z
+    .string()
+    .min(2)
+    .regex(/^[a-z0-9][a-z0-9-]*$/, "小文字英数字とハイフンのみ使用できます"),
+  name: z.string().min(1),
+  /** モデルを開発した組織。提供元（API 事業者）とは別。 */
+  developer: z.string().min(1),
+  /** 同じ系列の別サイズをまとめるときの識別子。 */
+  family: z.string().min(1).nullable(),
+  /** 表記揺れ。検索でヒットさせるために使う。 */
+  aliases: z.array(z.string().min(1)),
+  notes: z.array(z.string().min(1)),
+});
+export type CanonicalModel = z.infer<typeof canonicalModelSchema>;
+
 export const providerSchema = z.object({
   /** URL に使う安定 ID。名前変更で変えない。 */
   id: z
@@ -205,8 +226,14 @@ export const modelSchema = z.object({
     .min(2)
     .regex(/^[a-z0-9][a-z0-9-]*$/, "小文字英数字とハイフンのみ使用できます"),
   provider_id: z.string().min(1),
+  /**
+   * モデル本体の ID。同じモデルを複数の提供元が扱う場合、
+   * この値が一致するものを同一モデルとしてまとめる。
+   * 表示名の一致では判定しない。
+   */
+  canonical_id: z.string().min(1),
   display_name: z.string().min(1),
-  /** API に渡すモデル ID。 */
+  /** 提供元の API に渡すモデル ID。 */
   model_id: z.string().min(1),
   /** 公式記載のコンテキスト長。不明なら null。 */
   context_tokens: z.number().int().positive().nullable(),
@@ -262,6 +289,8 @@ export const datasetSchema = z.object({
     last_updated: isoDate,
     spec_version: z.string().min(1),
   }),
+  /** モデル本体。提供元をまたいだ同一性はここで定義する。 */
+  canonical_models: z.array(canonicalModelSchema),
   providers: z.array(providerSchema),
   models: z.array(modelSchema),
   changelog: z.array(changeLogSchema),

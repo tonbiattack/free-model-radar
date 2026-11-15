@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { dataset, providersById } from "@/lib/dataset";
+import { dataset } from "@/lib/dataset";
+import { groupModels, offerPath, type ModelGroup, type Offer } from "@/lib/groups";
 import { LOADED_AT_MS } from "@/lib/clock";
 import {
   daysSinceMs,
@@ -12,6 +13,7 @@ import {
   freshnessAt,
   latestCheck,
   sortedLimits,
+  verificationSummary,
 } from "@/lib/format";
 import {
   apiFormatLabel,
@@ -29,50 +31,274 @@ import {
   verificationStatusLabel,
 } from "@/lib/labels";
 import { buildOpencodeConfig, keyEnvVar, setupSteps } from "@/lib/opencode-config";
-import { FreeTierBadge, AvailabilityMark, FreshnessNote } from "@/components/Badges";
+import {
+  FreeTierBadge,
+  AvailabilityMark,
+  FreshnessNote,
+  TristateBadge,
+  VerificationBadge,
+} from "@/components/Badges";
 import { NotFoundPage } from "./NotFoundPage";
 
+/**
+ * モデル詳細。2 階層に分かれている。
+ *
+ * /models/:modelId                      … モデル本体 + 提供元の比較表
+ * /models/:modelId/:providerId          … 選んだ提供元の条件・導入手順・設定生成
+ *
+ * 同じモデルを複数の提供元が扱う場合、条件は提供元ごとに違う。
+ * 比較表で選ばせてから、詳細に降りる導線にしている。
+ */
 export function ModelDetailPage() {
-  const { modelId } = useParams<{ modelId: string }>();
-  const model = dataset.models.find((entry) => entry.id === modelId);
-  const provider = model ? providersById.get(model.provider_id) : undefined;
+  const { modelId, providerId } = useParams<{ modelId: string; providerId?: string }>();
+  const group = groupModels(dataset).find((entry) => entry.canonical.id === modelId);
 
-  if (!model || !provider) {
+  if (!group) {
     return <NotFoundPage reason="指定されたモデルが見つかりませんでした。" />;
   }
 
-  return <ModelDetail model={model} provider={provider} />;
+  if (!providerId) {
+    return <ModelOverview group={group} />;
+  }
+
+  const offer = group.offers.find((entry) => entry.provider.id === providerId);
+  if (!offer) {
+    return (
+      <NotFoundPage reason={`${group.canonical.name} は指定された提供元では扱われていません。`} />
+    );
+  }
+
+  return <ModelDetail group={group} offer={offer} />;
 }
 
-function ModelDetail({
-  model,
-  provider,
-}: {
-  model: (typeof dataset.models)[number];
-  provider: NonNullable<ReturnType<typeof providersById.get>>;
-}) {
-  const checked = latestCheck(model);
-  const freshness = checked ? freshnessAt(checked, LOADED_AT_MS) : null;
-  const limits = sortedLimits(model.free_tier.limits);
-  // 生成は純粋で軽いので、メモ化せず素直に呼ぶ（React Compiler が自動で扱う）。
-  const config = buildOpencodeConfig(provider, model);
-
-  const siblings = dataset.models.filter(
-    (entry) => entry.provider_id === provider.id && entry.id !== model.id,
-  );
+/**
+ * モデル本体の概要と、提供元の比較表。
+ * 「このモデルを無料で使える提供元」を横断して比べるのがこの画面の役割。
+ */
+function ModelOverview({ group }: { group: ModelGroup }) {
+  const name = group.canonical.name;
+  const liveOffers = group.offers.filter((offer) => offer.model.free_tier.availability !== "ended");
+  const shown = liveOffers.length > 0 ? liveOffers : group.offers;
 
   return (
     <>
       <nav className="breadcrumb" aria-label="パンくず">
         <Link to="/">モデル一覧</Link>
         <span aria-hidden="true">/</span>
+        <span>{name}</span>
+      </nav>
+
+      <header className="detail-head">
+        <div>
+          <p className="detail-head__provider">{group.canonical.developer}</p>
+          <h1>{name}</h1>
+          <p className="detail-head__id">
+            無料で使える提供元 {shown.length} 件
+            {group.offers.length > shown.length
+              ? `（終了 ${group.offers.length - shown.length} 件）`
+              : ""}
+          </p>
+        </div>
+        <div className="detail-head__badges">
+          {group.canonical.aliases.slice(0, 3).map((alias) => (
+            <code key={alias} className="alias-chip">
+              {alias}
+            </code>
+          ))}
+        </div>
+      </header>
+
+      {group.canonical.notes.length > 0 ? (
+        <ul className="caveats caveats--tight">
+          {group.canonical.notes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      <Section title="このモデルを無料で使える提供元">
+        <p className="section-note">
+          同じモデルでも、提供元によって無料枠の種別・制限・登録の手間が違います。
+          数値は単位と適用範囲が揃っている場合だけ比較できるため、単純な優劣はつけていません。
+        </p>
+
+        <div className="compare-wrap">
+          <table className="compare-table">
+            <caption className="sr-only">
+              {name} を提供する事業者の比較。提供元ごとに条件が異なります。
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">提供元</th>
+                <th scope="col">無料枠</th>
+                <th scope="col">主な制限</th>
+                <th scope="col">カード</th>
+                <th scope="col">登録</th>
+                <th scope="col">ツール</th>
+                <th scope="col">検証</th>
+                <th scope="col">確認日</th>
+                <th scope="col">設定</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.offers.map((offer) => (
+                <CompareRow key={offer.provider.id} offer={offer} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <ul className="compare-notes">
+          <li>
+            「カード」はクレジットカード登録の要否です。「不明」は登録が要るという意味ではありません。
+          </li>
+          <li>制限の適用範囲が違うため、数値の大きさだけでは比較できません。</li>
+          <li>提供元ごとの詳しい条件と OpenCode の設定例は、提供元名から開けます。</li>
+        </ul>
+      </Section>
+
+      <Section title="性能">
+        <p className="section-note">
+          性能はこのサイトで測っていません。モデル単位の比較ページへリンクします。
+          提供元が違っても同じモデルなら同じ数値が載っていますが、配信構成の違いで実測は変わり得ます。
+        </p>
+        <PerformanceList refs={group.offers[0]?.model.performance ?? []} />
+      </Section>
+    </>
+  );
+}
+
+function CompareRow({ offer }: { offer: Offer }) {
+  const { model, provider } = offer;
+  const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
+  const checked = latestCheck(model);
+  const summary = verificationSummary(model);
+  const ended = model.free_tier.availability === "ended";
+
+  return (
+    <tr className={ended ? "is-ended" : undefined}>
+      <th scope="row">
+        <Link to={offerPath(offer)} className="model-link">
+          {provider.name}
+        </Link>
+        <span className="model-row__meta">
+          <code>{model.model_id}</code>
+        </span>
+      </th>
+      <td>
+        <span className="free-cell">
+          <AvailabilityMark availability={model.free_tier.availability} />
+          <FreeTierBadge type={model.free_tier.type} muted={ended} />
+        </span>
+      </td>
+      <td>
+        {limits.length === 0 ? (
+          <span className="muted">記載なし</span>
+        ) : (
+          <ul className="limit-list">
+            {limits.map((limit) => (
+              <li key={`${limit.metric}-${limit.scope}`}>
+                <span className="limit-list__metric">{limitMetricLabel[limit.metric]}</span>
+                <span className="limit-list__value">{formatLimitValue(limit)}</span>
+                <span className="limit-list__scope">{limitScopeLabel[limit.scope]}</span>
+              </li>
+            ))}
+            {model.free_tier.limits.length > 3 ? (
+              <li className="muted">他 {model.free_tier.limits.length - 3} 件</li>
+            ) : null}
+          </ul>
+        )}
+      </td>
+      <td>
+        {provider.credit_card_required === "yes"
+          ? "必要"
+          : provider.credit_card_required === "no"
+            ? "不要"
+            : "不明"}
+      </td>
+      <td>
+        <span className={`signup signup--${provider.signup_friction ?? "unknown"}`}>
+          {signupFrictionLabel[provider.signup_friction ?? "unknown"]}
+        </span>
+      </td>
+      <td>
+        <TristateBadge value={model.capabilities.tool_calling} />
+      </td>
+      <td>
+        <VerificationBadge status={summary.status} passed={summary.passed} total={summary.total} />
+      </td>
+      <td>
+        {checked ? (
+          <span className="checked-cell">
+            <time dateTime={checked}>{formatDate(checked)}</time>
+          </span>
+        ) : (
+          <span className="muted">不明</span>
+        )}
+      </td>
+      <td>
+        {ended ? (
+          <span className="muted">—</span>
+        ) : (
+          <Link to={offerPath(offer)} className="text-link">
+            開く
+          </Link>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function PerformanceList({ refs }: { refs: ModelGroup["offers"][number]["model"]["performance"] }) {
+  if (refs.length === 0) {
+    return <p className="empty-note">性能の参照先が登録されていません。</p>;
+  }
+  return (
+    <ul className="perf-list">
+      {refs.map((ref) => (
+        <li key={`${ref.benchmark}-${ref.url}`}>
+          <a href={ref.url} target="_blank" rel="noreferrer noopener">
+            {ref.benchmark}
+          </a>
+          {ref.as ? (
+            <span className="perf-list__as">
+              リンク先での表記: <code>{ref.as}</code>
+            </span>
+          ) : null}
+          {ref.note ? <span className="perf-list__note">{ref.note}</span> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
+  const { model, provider } = offer;
+  const checked = latestCheck(model);
+  const freshness = checked ? freshnessAt(checked, LOADED_AT_MS) : null;
+  const limits = sortedLimits(model.free_tier.limits);
+  // 生成は純粋で軽いので、メモ化せず素直に呼ぶ（React Compiler が自動で扱う）。
+  const config = buildOpencodeConfig(provider, model);
+
+  // 同じモデルの他の提供元。比較へ戻る導線として出す。
+  const siblings = group.offers.filter((entry) => entry.provider.id !== provider.id);
+
+  return (
+    <>
+      <nav className="breadcrumb" aria-label="パンくず">
+        <Link to="/">モデル一覧</Link>
+        <span aria-hidden="true">/</span>
+        <Link to={`/models/${group.canonical.id}`}>{group.canonical.name}</Link>
+        <span aria-hidden="true">/</span>
         <span>{provider.name}</span>
       </nav>
 
       <header className="detail-head">
         <div>
-          <p className="detail-head__provider">{provider.name}</p>
-          <h1>{model.display_name}</h1>
+          <p className="detail-head__provider">
+            {group.canonical.name} を {provider.name} で使う
+          </p>
+          <h1>{group.canonical.name}</h1>
           <p className="detail-head__id">
             <code>{model.model_id}</code>
           </p>
@@ -88,6 +314,13 @@ function ModelDetail({
           </span>
         </div>
       </header>
+
+      {group.offers.length > 1 ? (
+        <p className="sibling-banner">
+          このモデルは他に {siblings.length} 件の提供元があります。
+          <Link to={`/models/${group.canonical.id}`}>提供元を比較する</Link>
+        </p>
+      ) : null}
 
       {model.free_tier.availability === "ended" ? (
         <p className="callout callout--stop" role="alert">
@@ -256,33 +489,10 @@ function ModelDetail({
           </Section>
 
           <Section title="性能">
-            {model.performance.length === 0 ? (
-              <p className="empty-note">
-                性能の参照先が登録されていません。このサイトでは性能を自前評価していません。
-              </p>
-            ) : (
-              <>
-                <p className="section-note">
-                  性能はこのサイトで測っていません。コーディング性能を公開している比較ページへリンクします。
-                  ベンチマークごとに採点方法が違うため、数値を直接比べないでください。
-                </p>
-                <ul className="perf-list">
-                  {model.performance.map((ref) => (
-                    <li key={`${ref.benchmark}-${ref.url}`}>
-                      <a href={ref.url} target="_blank" rel="noreferrer noopener">
-                        {ref.benchmark}
-                      </a>
-                      {ref.as ? (
-                        <span className="perf-list__as">
-                          リンク先での表記: <code>{ref.as}</code>
-                        </span>
-                      ) : null}
-                      {ref.note ? <span className="perf-list__note">{ref.note}</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+            <p className="section-note">
+              性能はこのサイトで測っていません。モデルの比較ページへリンクします。
+            </p>
+            <PerformanceList refs={model.performance} />
           </Section>
 
           <Section title="機能と検証">
@@ -433,17 +643,17 @@ function ModelDetail({
           </div>
 
           <div className="aside-block">
-            <h2>このプロバイダーの他のモデル</h2>
+            <h2>同じモデルの他の提供元</h2>
             {siblings.length === 0 ? (
-              <p className="aside-note">他のモデルの掲載はありません。</p>
+              <p className="aside-note">このモデルを扱う他の提供元はありません。</p>
             ) : (
               <ul className="sibling-list">
                 {siblings.map((sibling) => (
-                  <li key={sibling.id}>
-                    <Link to={`/models/${sibling.id}`}>{sibling.display_name}</Link>
+                  <li key={sibling.provider.id}>
+                    <Link to={offerPath(sibling)}>{sibling.provider.name}</Link>
                     <FreeTierBadge
-                      type={sibling.free_tier.type}
-                      muted={sibling.free_tier.availability === "ended"}
+                      type={sibling.model.free_tier.type}
+                      muted={sibling.model.free_tier.availability === "ended"}
                     />
                   </li>
                 ))}

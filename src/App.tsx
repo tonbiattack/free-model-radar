@@ -41,6 +41,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<ModelListPage />} />
             <Route path="/models/:modelId" element={<ModelDetailPage />} />
+            <Route path="/models/:modelId/:providerId" element={<ModelDetailPage />} />
             <Route path="/changes" element={<ChangesPage />} />
             <Route path="/method" element={<MethodPage />} />
             <Route path="*" element={<NotFoundPage />} />

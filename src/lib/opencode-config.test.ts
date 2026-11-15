@@ -32,6 +32,7 @@ const baseProvider: Provider = {
 const baseModel: Model = {
   id: "acme-coder",
   provider_id: "acme",
+  canonical_id: "acme-model",
   display_name: "Acme Coder",
   model_id: "acme-coder-v2",
   context_tokens: 128000,

@@ -1,0 +1,171 @@
+{
+  "models": [
+    {
+      "id": "gpt-oss-120b",
+      "name": "GPT OSS 120B",
+      "developer": "OpenAI",
+      "family": "gpt-oss",
+      "aliases": ["gpt-oss-120b", "openai/gpt-oss-120b"],
+      "notes": [
+        "オープンウェイトの推論モデル。複数の提供元が同じモデルを配信している。",
+        "提供元ごとにコンテキスト長・レート制限・有料区分が異なるため、モデルが同じでも実用性は同じではない。"
+      ]
+    },
+    {
+      "id": "qwen3-8-27b",
+      "name": "Qwen 3.8 27B",
+      "developer": "Alibaba",
+      "family": "qwen3.8",
+      "aliases": ["qwen3.8-27b", "qwen/qwen3.8-27b", "qwen-3.8-27b"],
+      "notes": [
+        "提供元によってモデル ID の区切り文字が違う（ハイフンとスラッシュ）。ID の文字列一致では同一性を判定できない。"
+      ]
+    },
+    {
+      "id": "llama-3-3-70b",
+      "name": "Llama 3.3 70B",
+      "developer": "Meta",
+      "family": "llama-3.3",
+      "aliases": ["llama-3.3-70b-versatile", "llama-3.3-70b-instruct-fp8-fast"],
+      "notes": ["提供元ごとに量子化や最適化の違いがある（fp8 fast など）。"]
+    },
+    {
+      "id": "llama-4-scout-17b",
+      "name": "Llama 4 Scout 17B",
+      "developer": "Meta",
+      "family": "llama-4",
+      "aliases": ["llama-4-scout-17b-16e-instruct"],
+      "notes": ["MoE 構成。"]
+    },
+    {
+      "id": "gemini-3-8-flash",
+      "name": "Gemini 3.8 Flash",
+      "developer": "Google",
+      "family": "gemini-3.8",
+      "aliases": ["gemini-3.8-flash"],
+      "notes": []
+    },
+    {
+      "id": "gemini-3-1-flash-lite",
+      "name": "Gemini 3.1 Flash-Lite",
+      "developer": "Google",
+      "family": "gemini-3.1",
+      "aliases": ["gemini-3.1-flash-lite"],
+      "notes": []
+    },
+    {
+      "id": "gemini-4-hydrogen",
+      "name": "Gemini 4 Hydrogen",
+      "developer": "Google",
+      "family": "gemini-4",
+      "aliases": ["gemini-4-hydrogen"],
+      "notes": []
+    },
+    {
+      "id": "gemma-4-26b",
+      "name": "Gemma 4 26B A4B",
+      "developer": "Google",
+      "family": "gemma-4",
+      "aliases": ["gemma-4-26b-a4b-it", "gemma-4-26b"],
+      "notes": ["オープンウェイト。提供元によっては A4B 表記が省略される。"]
+    },
+    {
+      "id": "gemma-4-31b",
+      "name": "Gemma 4 31B",
+      "developer": "Google",
+      "family": "gemma-4",
+      "aliases": ["gemma-4-31b-it"],
+      "notes": []
+    },
+    {
+      "id": "deepseek-v4-1-flash",
+      "name": "DeepSeek V4.1 Flash",
+      "developer": "DeepSeek",
+      "family": "deepseek-v4.1",
+      "aliases": ["deepseek-v4.1-flash", "deepseek-v4.1-flash-1017", "economy/deepseek-v4.1-flash"],
+      "notes": [
+        "economy 版や -free 版は提供元の構成が異なる可能性がある。同一モデルとしてまとめるが、提供元ごとの注意は個別に表示する。"
+      ]
+    },
+    {
+      "id": "glm-5-3-flash",
+      "name": "GLM-5.3-Flash",
+      "developer": "Z.ai",
+      "family": "glm-5.3",
+      "aliases": ["glm-5.3-flash", "glm-5.3-flash-free"],
+      "notes": []
+    },
+    {
+      "id": "minimax-m3-1-flash",
+      "name": "MiniMax M3.1 Flash",
+      "developer": "MiniMax",
+      "family": "minimax-m3",
+      "aliases": ["minimax-m3.1-flash", "minimax-m3.1-flash-free", "MiniMax-M3.1-Flash"],
+      "notes": []
+    },
+    {
+      "id": "nemotron-3-5-lightning",
+      "name": "Nemotron 3.5 Lightning",
+      "developer": "NVIDIA",
+      "family": "nemotron-3.5",
+      "aliases": ["nemotron-3.5-lightning", "nemotron-3.5-lightning-free"],
+      "notes": []
+    },
+    {
+      "id": "longcat-2-5",
+      "name": "LongCat 2.5",
+      "developer": "Meituan",
+      "family": "longcat-2.5",
+      "aliases": ["longcat-2.5", "longcat-2.5-free"],
+      "notes": ["提供元が中国でホストしている。"]
+    },
+    {
+      "id": "beam-1-0",
+      "name": "Beam 1.0",
+      "developer": "Reflection",
+      "family": "beam",
+      "aliases": ["beam-1.0-501b-a23b", "beam-free"],
+      "notes": []
+    },
+    {
+      "id": "inkling-2-small",
+      "name": "Inkling 2 Small",
+      "developer": "Thinking Machines",
+      "family": "inkling-2",
+      "aliases": ["inkling-2-small", "inkling-2-small-free"],
+      "notes": []
+    },
+    {
+      "id": "north-mini-code",
+      "name": "North Mini Code",
+      "developer": "Cohere",
+      "family": "north",
+      "aliases": ["north-mini-code"],
+      "notes": ["コーディング特化。"]
+    },
+    {
+      "id": "ling-3-2-flash",
+      "name": "Ling 3.2 Flash",
+      "developer": "inclusionAI",
+      "family": "ling-3.2",
+      "aliases": ["ling-3.2-flash"],
+      "notes": []
+    },
+    {
+      "id": "big-pickle",
+      "name": "Big Pickle",
+      "developer": "不明",
+      "family": null,
+      "aliases": ["big-pickle"],
+      "notes": ["ステルスモデルのため開発元が公表されていない。"]
+    },
+    {
+      "id": "gpt-4o",
+      "name": "GPT-4o",
+      "developer": "OpenAI",
+      "family": "gpt-4",
+      "aliases": ["gpt-4o", "openai/gpt-4o"],
+      "notes": ["GitHub Models はサービス終了済み。履歴として保持している。"]
+    }
+  ]
+}

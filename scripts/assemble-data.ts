@@ -1,6 +1,12 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import type { ChangeLogEntry, Model, Provider, WatchSource } from "../src/lib/schema";
+import type {
+  CanonicalModel,
+  ChangeLogEntry,
+  Model,
+  Provider,
+  WatchSource,
+} from "../src/lib/schema";
 
 /**
  * data/ 配下のファイルを 1 つに集約する。
@@ -27,6 +33,9 @@ export function assembleDataset(dataDir = join(import.meta.dirname, "..", "data"
     .sort()
     .at(-1);
 
+  const canonical = JSON.parse(readFileSync(join(dataDir, "models.json"), "utf8")) as {
+    models: CanonicalModel[];
+  };
   const changelog = JSON.parse(readFileSync(join(dataDir, "changelog.json"), "utf8")) as {
     entries: ChangeLogEntry[];
   };
@@ -36,6 +45,7 @@ export function assembleDataset(dataDir = join(import.meta.dirname, "..", "data"
 
   return {
     meta: { last_updated: latest ?? "1970-01-01", spec_version: "1.0.0" },
+    canonical_models: canonical.models,
     providers,
     models,
     changelog: changelog.entries,

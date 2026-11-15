@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assembleDataset } from "./assemble-data";
+import { groupModels } from "../src/lib/groups";
 import type { Dataset } from "../src/lib/schema";
 
 /**
@@ -10,11 +11,16 @@ import type { Dataset } from "../src/lib/schema";
 const SITE_URL = process.env.SITE_URL ?? "https://tonbiattack.github.io/free-model-radar";
 
 export function buildSitemap(dataset: Dataset, siteUrl = SITE_URL): string {
+  const groups = groupModels(dataset);
   const paths = [
     "/",
     "/changes",
     "/method",
-    ...dataset.models.map((model) => `/models/${model.id}`),
+    ...groups.map((group) => `/models/${group.canonical.id}`),
+    // 提供元別の詳細も個別に索引させる（設定例を探している人が直接開ける）
+    ...groups.flatMap((group) =>
+      group.offers.map((offer) => `/models/${group.canonical.id}/${offer.provider.id}`),
+    ),
   ];
 
   const lastmod = dataset.meta.last_updated;

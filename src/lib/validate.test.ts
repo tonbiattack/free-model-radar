@@ -5,6 +5,16 @@ import type { Dataset } from "./schema";
 function baseDataset(): Dataset {
   return {
     meta: { last_updated: "2026-11-15", spec_version: "1.0.0" },
+    canonical_models: [
+      {
+        id: "acme-model",
+        name: "Acme Model",
+        developer: "Acme",
+        family: null,
+        aliases: ["acme-model-v1"],
+        notes: [],
+      },
+    ],
     providers: [
       {
         id: "acme",
@@ -37,6 +47,7 @@ function baseDataset(): Dataset {
       {
         id: "acme-model",
         provider_id: "acme",
+        canonical_id: "acme-model",
         display_name: "Acme Model",
         model_id: "acme-model-v1",
         context_tokens: 128000,

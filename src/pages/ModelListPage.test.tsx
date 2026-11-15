@@ -3,6 +3,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { ModelListPage } from "./ModelListPage";
+import { groupModels } from "@/lib/groups";
+import { dataset } from "@/lib/dataset";
 
 function renderPage(initialUrl = "/") {
   return render(
@@ -12,11 +14,13 @@ function renderPage(initialUrl = "/") {
   );
 }
 
+const groups = groupModels(dataset);
+
 describe("ModelListPage", () => {
   it("見出しと件数が出る", () => {
     renderPage();
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: /件/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: /モデル/ })).toBeInTheDocument();
   });
 
   it("モデル名で検索すると結果が絞られる", async () => {
@@ -26,7 +30,6 @@ describe("ModelListPage", () => {
 
     await user.type(search, "gemini");
 
-    // debounce を待つ
     await vi.waitFor(
       () => {
         const table = screen.getAllByRole("table")[0];
@@ -38,6 +41,20 @@ describe("ModelListPage", () => {
     await vi.waitFor(() => {
       expect(screen.getAllByText(/Gemini 3\.8 Flash/).length).toBeGreaterThan(0);
     });
+  });
+
+  it("提供元名でも検索できる", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.type(screen.getByLabelText("モデル名・プロバイダー名"), "Groq");
+    await vi.waitFor(
+      () => {
+        const table = screen.getAllByRole("table")[0]!;
+        expect(within(table).getAllByText(/GPT OSS 120B/).length).toBeGreaterThan(0);
+        expect(within(table).queryByText(/Gemini 3\.8 Flash/)).not.toBeInTheDocument();
+      },
+      { timeout: 2000 },
+    );
   });
 
   it("絞り込みを解除できる", async () => {
@@ -52,10 +69,10 @@ describe("ModelListPage", () => {
   it("終了したモデルは既定で表示しないが、指定すると出る", async () => {
     const user = userEvent.setup();
     renderPage();
-    expect(screen.queryByText(/GPT-4o \(GitHub Models\)/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/GPT-4o/)).not.toBeInTheDocument();
 
     await user.click(screen.getByLabelText("終了・停止したものも表示"));
-    expect(screen.getAllByText(/GPT-4o \(GitHub Models\)/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/GPT-4o/).length).toBeGreaterThan(0);
   });
 
   it("無料枠タイプで絞り込める", async () => {
@@ -63,15 +80,45 @@ describe("ModelListPage", () => {
     renderPage();
     await user.click(screen.getByLabelText("初回クレジット"));
     const table = screen.getAllByRole("table")[0]!;
+    // Cerebras の 2 モデル（GPT OSS 120B / Qwen 3.8 27B）が初回クレジット
     expect(within(table).getAllByText("GPT OSS 120B").length).toBeGreaterThan(0);
     expect(within(table).queryByText("Gemini 3.8 Flash")).not.toBeInTheDocument();
+  });
+
+  it("複数の提供元があるモデルだけに絞れる", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const expected = groups
+      .filter(
+        (group) =>
+          group.offers.filter((offer) => offer.model.free_tier.availability !== "ended").length > 1,
+      )
+      .map((group) => group.canonical.name);
+
+    await user.click(screen.getByLabelText("複数の提供元がある"));
+    const table = screen.getAllByRole("table")[0]!;
+    for (const name of expected) {
+      expect(within(table).getAllByText(name).length, name).toBeGreaterThan(0);
+    }
+    // 提供元が 1 つだけのモデルは消える
+    expect(within(table).queryByText("Gemini 3.8 Flash")).not.toBeInTheDocument();
+  });
+
+  it("同じモデルが複数の行に重複しない", () => {
+    renderPage();
+    const table = screen.getAllByRole("table")[0]!;
+    const names = within(table)
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => within(row).getAllByRole("link")[0]?.textContent);
+    const visible = names.filter(Boolean);
+    expect(new Set(visible).size).toBe(visible.length);
   });
 
   it("不明な項目を条件から外したとき、その旨を通知する", async () => {
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByLabelText("ツール呼び出しに対応"));
-    // 同梱データでは全モデルが yes のため通知は出ないが、機能自体は role=status で存在しうる
     const notices = screen.queryAllByRole("status");
     expect(notices.length).toBeGreaterThanOrEqual(0);
   });

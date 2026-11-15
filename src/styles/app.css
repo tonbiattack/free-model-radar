@@ -851,6 +851,109 @@
   color: var(--ink);
 }
 
+/* ---------- モデル比較表 ---------- */
+
+.compare-wrap {
+  overflow-x: auto;
+  margin: 0 -2px;
+  padding: 0 2px;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.compare-table thead th {
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  letter-spacing: 0.03em;
+  padding: 0 10px 7px 0;
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.compare-table tbody tr {
+  border-bottom: 1px solid var(--rule);
+}
+
+.compare-table tbody tr:hover {
+  background: var(--paper-raised);
+}
+
+.compare-table td,
+.compare-table tbody th {
+  padding: 12px 10px 12px 0;
+  vertical-align: top;
+  text-align: left;
+  font-weight: 400;
+}
+
+.compare-table tbody th {
+  min-width: 130px;
+}
+
+.compare-table tr.is-ended {
+  opacity: 0.6;
+}
+
+.compare-notes {
+  margin: 14px 0 0;
+  padding: 0 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  line-height: 1.7;
+  max-width: 70ch;
+}
+
+.provider-count {
+  color: var(--signal-ink);
+  font-weight: 500;
+}
+
+.alias-chip {
+  font-size: 0.72rem;
+  background: var(--paper-sunken);
+  color: var(--ink-soft);
+  padding: 2px 6px;
+  border: 1px solid var(--rule);
+}
+
+.caveats--tight {
+  margin-top: 16px;
+  font-size: 0.82rem;
+}
+
+.sibling-banner {
+  margin-top: 16px;
+  padding: 9px 13px;
+  background: var(--paper-sunken);
+  border-left: 2px solid var(--rule-strong);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.sibling-banner a {
+  font-weight: 600;
+}
+
+.model-card__providers {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
 /* ---------- 空状態 ---------- */
 
 .empty {

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { providersById, dataset } from "@/lib/dataset";
+import { dataset } from "@/lib/dataset";
 import {
   activeFilterCount,
   applyFilters,
   parseFilters,
   serializeFilters,
   type FilterState,
-  type Row,
   type SortKey,
 } from "@/lib/filters";
+import { groupModels, modelPath, type ModelGroup, type Offer } from "@/lib/groups";
 import {
   freshnessAt,
   formatDate,
@@ -54,6 +54,7 @@ const freshOptions = [
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: "checked", label: "最終確認日" },
   { value: "name", label: "モデル名" },
+  { value: "providers", label: "提供元の数" },
   { value: "limits", label: "制限の記載量" },
 ];
 
@@ -88,16 +89,12 @@ export function ModelListPage() {
     return () => window.clearTimeout(timer);
   }, [queryDraft, filters.q, update]);
 
-  const allRows: Row[] = useMemo(
-    () =>
-      dataset.models.map((model) => ({
-        model,
-        provider: providersById.get(model.provider_id),
-      })),
-    [],
-  );
+  const allGroups = useMemo(() => groupModels(dataset), []);
 
-  const { rows, hiddenUnknown } = useMemo(() => applyFilters(allRows, filters), [allRows, filters]);
+  const { groups, hiddenUnknown } = useMemo(
+    () => applyFilters(allGroups, filters),
+    [allGroups, filters],
+  );
 
   const providers = useMemo(
     () => [...dataset.providers].sort((a, b) => a.name.localeCompare(b.name, "ja")),
@@ -105,12 +102,20 @@ export function ModelListPage() {
   );
 
   const filterCount = activeFilterCount(filters);
-  const totalVisible = allRows.filter((row) => row.model.free_tier.availability !== "ended").length;
-  const connectOnly = allRows.filter(
-    (row) =>
-      row.provider?.native_opencode === "yes" &&
-      row.provider?.signup_friction === "instant" &&
-      row.model.free_tier.availability !== "ended",
+  const totalVisible = allGroups.filter((group) =>
+    group.offers.some((offer) => offer.model.free_tier.availability !== "ended"),
+  ).length;
+  const connectOnly = allGroups.filter((group) =>
+    group.offers.some(
+      (offer) =>
+        offer.provider.native_opencode === "yes" &&
+        offer.provider.signup_friction === "instant" &&
+        offer.model.free_tier.availability !== "ended",
+    ),
+  ).length;
+  const multiProvider = allGroups.filter(
+    (group) =>
+      group.offers.filter((offer) => offer.model.free_tier.availability !== "ended").length > 1,
   ).length;
 
   const toggleFreeType = (type: FreeTierType) => {
@@ -167,14 +172,21 @@ export function ModelListPage() {
             <dt>恒久無料</dt>
             <dd>
               {
-                allRows.filter(
-                  (row) =>
-                    row.model.free_tier.type === "permanent" &&
-                    row.model.free_tier.availability !== "ended",
+                allGroups.filter((group) =>
+                  group.offers.some(
+                    (offer) =>
+                      offer.model.free_tier.type === "permanent" &&
+                      offer.model.free_tier.availability !== "ended",
+                  ),
                 ).length
               }
             </dd>
             <dd className="hero__stat-note">継続利用できる枠</dd>
+          </div>
+          <div>
+            <dt>複数の提供元</dt>
+            <dd>{multiProvider}</dd>
+            <dd className="hero__stat-note">横断比較できるモデル</dd>
           </div>
           <div>
             <dt>/connect だけで使える</dt>
@@ -265,6 +277,16 @@ export function ModelListPage() {
                     onChange={(event) => update({ verifiedOnly: event.target.checked })}
                   />
                   <span>OpenCode で検証済み</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.multiProviderOnly}
+                    onChange={(event) => update({ multiProviderOnly: event.target.checked })}
+                  />
+                  <span>複数の提供元がある</span>
                 </label>
               </li>
               <li>
@@ -362,9 +384,9 @@ export function ModelListPage() {
         <section className="results" aria-labelledby="results-title">
           <div className="results__head">
             <h2 id="results-title">
-              {rows.length} 件
-              {rows.length !== totalVisible ? (
-                <span className="results__of"> / 全 {totalVisible} 件</span>
+              {groups.length} モデル
+              {groups.length !== totalVisible ? (
+                <span className="results__of"> / 全 {totalVisible} モデル</span>
               ) : null}
             </h2>
             <p className="results__hint">
@@ -376,19 +398,20 @@ export function ModelListPage() {
 
           {hiddenUnknown > 0 ? (
             <p className="results__notice" role="status">
-              条件が「不明」のため表示していない項目が {hiddenUnknown}{" "}
+              条件が「不明」のため表示していない提供元が {hiddenUnknown}{" "}
               件あります。不明は非対応ではありません。
             </p>
           ) : null}
 
-          {rows.length === 0 ? (
+          {groups.length === 0 ? (
             <EmptyState filterCount={filterCount} />
           ) : (
             <>
               <div className="model-table-wrap">
                 <table className="model-table">
                   <caption className="sr-only">
-                    無料枠のあるモデルの一覧。各行からモデル詳細を開けます。
+                    無料枠のあるモデルの一覧。同じモデルを複数の提供元が扱う場合は 1
+                    行にまとめています。
                   </caption>
                   <thead>
                     <tr>
@@ -402,16 +425,16 @@ export function ModelListPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row) => (
-                      <ModelRow key={row.model.id} row={row} />
+                    {groups.map((group) => (
+                      <ModelGroupRow key={group.canonical.id} group={group} />
                     ))}
                   </tbody>
                 </table>
               </div>
 
               <ul className="model-cards">
-                {rows.map((row) => (
-                  <ModelCard key={row.model.id} row={row} />
+                {groups.map((group) => (
+                  <ModelGroupCard key={group.canonical.id} group={group} />
                 ))}
               </ul>
             </>
@@ -427,23 +450,36 @@ export function ModelListPage() {
   );
 }
 
-function ModelRow({ row }: { row: Row }) {
-  const { model, provider } = row;
+/**
+ * 一覧の 1 行。同じモデルを複数の提供元が扱う場合は 1 行にまとめ、
+ * 提供元の数と代表的な条件を見せる。詳細で比較表を出す。
+ */
+function ModelGroupRow({ group }: { group: ModelGroup }) {
+  const primary = group.offers[0];
+  if (!primary) return null;
+
+  const liveOffers = group.offers.filter((offer) => offer.model.free_tier.availability !== "ended");
+  const shown = liveOffers.length > 0 ? liveOffers : group.offers;
+  const model = primary.model;
   const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
   const checked = latestCheck(model);
   const freshness = checked ? freshnessAt(checked, LOADED_AT_MS) : null;
-  const summary = verificationSummary(model);
+  const allEnded = group.offers.every((offer) => offer.model.free_tier.availability === "ended");
 
   return (
-    <tr className={model.free_tier.availability === "ended" ? "is-ended" : undefined}>
+    <tr className={allEnded ? "is-ended" : undefined}>
       <th scope="row">
-        <Link to={`/models/${model.id}`} className="model-link">
-          {model.display_name}
+        <Link to={modelPath(group)} className="model-link">
+          {group.canonical.name}
         </Link>
         <span className="model-row__meta">
-          {provider?.name ?? model.provider_id}
-          <span aria-hidden="true"> · </span>
-          <code>{model.model_id}</code>
+          {group.canonical.developer}
+          {group.offers.length > 1 ? (
+            <>
+              <span aria-hidden="true"> · </span>
+              <span className="provider-count">{group.offers.length} 提供元</span>
+            </>
+          ) : null}
         </span>
         <span className="model-row__ctx">
           コンテキスト{" "}
@@ -453,20 +489,19 @@ function ModelRow({ row }: { row: Row }) {
       <td>
         <span className="free-cell">
           <AvailabilityMark availability={model.free_tier.availability} />
-          <FreeTierBadge
-            type={model.free_tier.type}
-            muted={model.free_tier.availability === "ended"}
-          />
+          <FreeTierBadge type={model.free_tier.type} muted={allEnded} />
         </span>
-        {model.free_tier.availability === "restricted" ? (
-          <span className="free-cell__note">条件あり</span>
-        ) : model.free_tier.availability === "ended" ? (
-          <span className="free-cell__note">利用不可</span>
-        ) : null}
+        {shown.length > 1 ? (
+          <span className="free-cell__note">
+            {shown.map((offer) => offer.provider.name).join(" / ")}
+          </span>
+        ) : (
+          <span className="free-cell__note">{primary.provider.name}</span>
+        )}
       </td>
       <td>
-        <span className={`signup signup--${provider?.signup_friction ?? "unknown"}`}>
-          {signupFrictionLabel[provider?.signup_friction ?? "unknown"]}
+        <span className={`signup signup--${primary.provider.signup_friction ?? "unknown"}`}>
+          {signupFrictionLabel[primary.provider.signup_friction ?? "unknown"]}
         </span>
       </td>
       <td>
@@ -493,7 +528,7 @@ function ModelRow({ row }: { row: Row }) {
         <TristateBadge value={model.capabilities.tool_calling} />
       </td>
       <td>
-        <VerificationBadge status={summary.status} passed={summary.passed} total={summary.total} />
+        <GroupVerification offers={shown} />
       </td>
       <td>
         {checked ? (
@@ -511,32 +546,50 @@ function ModelRow({ row }: { row: Row }) {
   );
 }
 
-function ModelCard({ row }: { row: Row }) {
-  const { model, provider } = row;
+/** 提供元ごとに検証状況が違うので、最も進んでいる結果を代表として見せる。 */
+function GroupVerification({ offers }: { offers: Offer[] }) {
+  const best = offers
+    .map((offer) => verificationSummary(offer.model))
+    .sort((a, b) => {
+      const rank = { passed: 0, failed: 1, unknown: 2, untested: 3 } as const;
+      return rank[a.status] - rank[b.status];
+    })[0];
+  if (!best) return <span className="muted">不明</span>;
+  return <VerificationBadge status={best.status} passed={best.passed} total={best.total} />;
+}
+
+function ModelGroupCard({ group }: { group: ModelGroup }) {
+  const primary = group.offers[0];
+  if (!primary) return null;
+
+  const liveOffers = group.offers.filter((offer) => offer.model.free_tier.availability !== "ended");
+  const shown = liveOffers.length > 0 ? liveOffers : group.offers;
+  const model = primary.model;
   const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
   const checked = latestCheck(model);
-  const summary = verificationSummary(model);
+  const allEnded = group.offers.every((offer) => offer.model.free_tier.availability === "ended");
 
   return (
-    <li className={model.free_tier.availability === "ended" ? "model-card is-ended" : "model-card"}>
+    <li className={allEnded ? "model-card is-ended" : "model-card"}>
       <div className="model-card__head">
-        <Link to={`/models/${model.id}`} className="model-link">
-          {model.display_name}
+        <Link to={modelPath(group)} className="model-link">
+          {group.canonical.name}
         </Link>
-        <FreeTierBadge
-          type={model.free_tier.type}
-          muted={model.free_tier.availability === "ended"}
-        />
+        <FreeTierBadge type={model.free_tier.type} muted={allEnded} />
       </div>
       <p className="model-card__meta">
-        {provider?.name ?? model.provider_id} <code>{model.model_id}</code>
+        {group.canonical.developer}
+        {group.offers.length > 1 ? ` · ${group.offers.length} 提供元` : ""}
+      </p>
+      <p className="model-card__providers">
+        {shown.map((offer) => offer.provider.name).join(" / ")}
       </p>
       <dl className="model-card__facts">
         <div>
           <dt>登録</dt>
           <dd>
-            <span className={`signup signup--${provider?.signup_friction ?? "unknown"}`}>
-              {signupFrictionLabel[provider?.signup_friction ?? "unknown"]}
+            <span className={`signup signup--${primary.provider.signup_friction ?? "unknown"}`}>
+              {signupFrictionLabel[primary.provider.signup_friction ?? "unknown"]}
             </span>
           </dd>
         </div>
@@ -563,11 +616,7 @@ function ModelCard({ row }: { row: Row }) {
         <div>
           <dt>検証</dt>
           <dd>
-            <VerificationBadge
-              status={summary.status}
-              passed={summary.passed}
-              total={summary.total}
-            />
+            <GroupVerification offers={shown} />
           </dd>
         </div>
         <div>

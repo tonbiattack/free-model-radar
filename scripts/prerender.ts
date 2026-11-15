@@ -1,7 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assembleDataset } from "./assemble-data";
-import type { Dataset, Model } from "../src/lib/schema";
+import { groupModels } from "../src/lib/groups";
+import type { CanonicalModel, Dataset, Model } from "../src/lib/schema";
 
 const SITE_URL = process.env.SITE_URL ?? "https://tonbiattack.github.io/free-model-radar";
 
@@ -37,36 +38,25 @@ const freeTypeText: Record<string, string> = {
   unknown: "種別不明",
 };
 
-const limitUnit: Record<string, string> = {
-  rpm: "RPM",
-  rph: "RPH",
-  rpd: "RPD",
-  "rpm-month": "回/月",
-  tpm: "TPM",
-  tph: "TPH",
-  tpd: "TPD",
-  itpm: "入力TPM",
-  otpm: "出力TPM",
-  concurrency: "同時接続",
-};
-
-function modelDescription(model: Model, dataset: Dataset): string {
-  const provider = dataset.providers.find((entry) => entry.id === model.provider_id);
-  const limits = model.free_tier.limits
-    .slice(0, 3)
-    .map(
-      (limit) =>
-        `${limitUnit[limit.metric] ?? limit.metric} ${limit.value.toLocaleString("ja-JP")}`,
-    )
-    .join(", ");
+function modelDescription(
+  canonical: CanonicalModel,
+  offers: Array<{ model: Model; provider: { name: string } }>,
+  dataset: Dataset,
+): string {
+  void dataset;
+  const providers = offers.map((offer) => offer.provider.name).join("、");
+  const primary = offers[0]?.model;
+  const freeType = primary ? (freeTypeText[primary.free_tier.type] ?? "種別不明") : "種別不明";
 
   const parts = [
-    `${provider?.name ?? model.provider_id} の ${model.display_name}。`,
-    `${freeTypeText[model.free_tier.type] ?? model.free_tier.type}、${tokensText(model)}。`,
-  ];
-  if (limits) parts.push(`主な制限: ${limits}。`);
-  if (model.free_tier.availability === "ended") parts.push("このサービスは現在利用できません。");
-  parts.push("出典と確認日つきで掲載しています。");
+    `${canonical.developer} の ${canonical.name}。`,
+    `${providers} が無料枠で提供しています。`,
+    primary ? `${freeType}、${tokensText(primary)}。` : "",
+  ].filter(Boolean);
+
+  parts.push(
+    "提供元ごとに無料枠・レート制限・登録の手間が異なります。出典と確認日つきで掲載しています。",
+  );
   return parts.join("");
 }
 
@@ -77,12 +67,29 @@ interface Route {
 }
 
 export function buildRoutes(dataset: Dataset): Route[] {
+  const groups = groupModels(dataset);
+
+  const modelRoutes: Route[] = groups.map((group) => ({
+    path: `/models/${group.canonical.id}`,
+    title: `${group.canonical.name} を無料で使える提供元 — Free Model Radar`,
+    description: modelDescription(group.canonical, group.offers, dataset),
+  }));
+
+  // 提供元別の詳細。設定例をコピーしたい人が直接開けるようにする。
+  const offerRoutes: Route[] = groups.flatMap((group) =>
+    group.offers.map((offer) => ({
+      path: `/models/${group.canonical.id}/${offer.provider.id}`,
+      title: `${group.canonical.name}（${offer.provider.name}）— Free Model Radar`,
+      description: `${offer.provider.name} で ${group.canonical.name} を無料で使う条件と、OpenCode の設定例。API のモデル ID は ${offer.model.model_id}。`,
+    })),
+  );
+
   return [
     {
       path: "/",
       title: "Free Model Radar — OpenCode で使える無料 LLM API を根拠つきで探す",
       description:
-        "OpenCode などのコーディングエージェントから課金なしで使える LLM API を、公式の出典・確認日・実機検証の状態つきで比較できます。",
+        "OpenCode などのコーディングエージェントから課金なしで使える LLM API を、公式の出典・確認日・実機検証の状態つきで比較できます。同じモデルを扱う提供元も横断して比べられます。",
     },
     {
       path: "/changes",
@@ -96,11 +103,8 @@ export function buildRoutes(dataset: Dataset): Route[] {
       description:
         "無料枠の 6 分類、3 値の機能情報、数値の適用範囲、鮮度の扱い、実機検証の条件と限界を公開しています。",
     },
-    ...dataset.models.map((model) => ({
-      path: `/models/${model.id}`,
-      title: `${model.display_name}（${freeTypeText[model.free_tier.type] ?? "不明"}）— Free Model Radar`,
-      description: modelDescription(model, dataset),
-    })),
+    ...modelRoutes,
+    ...offerRoutes,
   ];
 }
 

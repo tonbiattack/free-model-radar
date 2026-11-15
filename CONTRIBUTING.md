@@ -16,19 +16,41 @@
 
 ### 1. ファイルを決める
 
-プロバイダー 1 件につき 1 ファイルです。既存のプロバイダーなら、そのファイルにモデルを足します。
+データは 2 種類あります。**モデル本体**（`data/models.json`）と、**提供元ごとの条件**（`data/providers/*.json`）です。
 
-```
-data/providers/google.json
-data/providers/groq.json
-data/providers/openrouter.json
-data/providers/cloudflare-workers-ai.json
-data/providers/cerebras.json
-data/providers/github-models.json
+同一モデルを複数の提供元が扱う場合、モデルは `models.json` に 1 件だけ定義し、
+各提供元のファイルから `canonical_id` で参照します。
+
+```jsonc
+// data/models.json — モデル本体。提供元をまたぐ同一性はここで決める
+{
+  "id": "gpt-oss-120b",
+  "name": "GPT OSS 120B",
+  "developer": "OpenAI",
+  "family": "gpt-oss",
+  "aliases": ["gpt-oss-120b", "openai/gpt-oss-120b"],
+  "notes": []
+}
+
+// data/providers/groq.json — 提供元ごとの条件
+{
+  "id": "groq-gpt-oss-120b",
+  "provider_id": "groq",
+  "canonical_id": "gpt-oss-120b",
+  "display_name": "GPT OSS 120B",
+  "model_id": "openai/gpt-oss-120b"
+}
 ```
 
-新しいプロバイダーは `data/providers/<provider-id>.json` を追加してください。
-`id` は小文字英数字とハイフンのみです。名前を変えても ID は変えないでください（URL が壊れます）。
+**表示名や API のモデル ID の一致で同一モデルを判定しないでください。**
+提供元ごとに表記が違うため（`qwen/qwen3.8-27b` と `qwen-3.8-27b` など）、
+必ず `canonical_id` で明示します。
+
+#### 既存モデルに提供元を追加する
+
+1. `data/models.json` にそのモデルが既にあるか確認する
+2. 無ければモデル本体を追加する（`id` は URL になるので安定させる）
+3. `data/providers/<provider-id>.json` にモデルを追加し、`canonical_id` で参照する
 
 ### 2. 必須の項目
 
@@ -116,6 +138,8 @@ npm run build:data
 ## CI で弾かれるもの
 
 - プロバイダー ID・モデル ID の重複
+- `data/models.json` に存在しない `canonical_id` を参照している
+- どの提供元も扱っていないモデル本体が残っている（警告）
 - 存在しないプロバイダーへの参照
 - 出典のない確定的な条件
 - 未来の確認日
