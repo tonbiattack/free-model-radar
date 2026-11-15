@@ -1,4 +1,4 @@
-import type { FreeTierType, Model, Provider } from "./schema";
+import type { FreeTierType, Model, Provider, SignupFriction } from "./schema";
 
 export type SortKey = "checked" | "name" | "limits";
 
@@ -15,6 +15,10 @@ export interface FilterState {
   sort: SortKey;
   /** 終了済みも表示するか。既定は非表示。 */
   includeEnded: boolean;
+  /** 登録の手間で絞る。空配列は絞り込まない。 */
+  signupFriction: SignupFriction[];
+  /** 支払い方法の登録が要らないものだけ。 */
+  noPaidSignupOnly: boolean;
 }
 
 export const defaultFilters: FilterState = {
@@ -27,6 +31,8 @@ export const defaultFilters: FilterState = {
   freshDays: null,
   sort: "checked",
   includeEnded: false,
+  signupFriction: [],
+  noPaidSignupOnly: false,
 };
 
 const freeTypeValues: FreeTierType[] = [
@@ -96,6 +102,20 @@ export function applyFilters(rows: Row[], filters: FilterState, now = new Date()
       continue;
     }
 
+    if (filters.signupFriction.length > 0) {
+      const friction = provider?.signup_friction ?? "unknown";
+      if (!filters.signupFriction.includes(friction)) {
+        // 「不明」を条件から外した場合だけ、隠したことを数える
+        if (friction === "unknown") hiddenUnknown += 1;
+        continue;
+      }
+    }
+
+    if (filters.noPaidSignupOnly) {
+      // カード登録そのものが要るものだけを外す。不明は残す（不明を「要る」と決めつけない）。
+      if (provider?.signup_friction === "paid") continue;
+    }
+
     if (filters.toolsOnly) {
       if (model.capabilities.tool_calling === "unknown") {
         hiddenUnknown += 1;
@@ -150,12 +170,27 @@ export function applyFilters(rows: Row[], filters: FilterState, now = new Date()
 
 const SORT_KEYS: SortKey[] = ["checked", "name", "limits"];
 
+const signupFrictionValues: SignupFriction[] = [
+  "instant",
+  "discord",
+  "waitlist",
+  "paid",
+  "unknown",
+];
+
 export function parseFilters(search: string): FilterState {
   const params = new URLSearchParams(search);
   const freeTypes = (params.get("free") ?? "")
     .split(",")
     .map((value) => value.trim())
     .filter((value): value is FreeTierType => freeTypeValues.includes(value as FreeTierType));
+
+  const signupFriction = (params.get("signup") ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value): value is SignupFriction =>
+      signupFrictionValues.includes(value as SignupFriction),
+    );
 
   const sortParam = params.get("sort");
   const sort = SORT_KEYS.includes(sortParam as SortKey) ? (sortParam as SortKey) : "checked";
@@ -176,6 +211,8 @@ export function parseFilters(search: string): FilterState {
     freshDays,
     sort,
     includeEnded: params.get("ended") === "1",
+    signupFriction,
+    noPaidSignupOnly: params.get("nopaid") === "1",
   };
 }
 
@@ -191,6 +228,8 @@ export function serializeFilters(filters: FilterState): string {
   if (filters.freshDays !== null) params.set("fresh", String(filters.freshDays));
   if (filters.sort !== "checked") params.set("sort", filters.sort);
   if (filters.includeEnded) params.set("ended", "1");
+  if (filters.signupFriction.length) params.set("signup", filters.signupFriction.join(","));
+  if (filters.noPaidSignupOnly) params.set("nopaid", "1");
   const query = params.toString();
   return query ? `?${query}` : "";
 }
@@ -206,5 +245,7 @@ export function activeFilterCount(filters: FilterState): number {
   if (filters.providerIds.length) count += 1;
   if (filters.freshDays !== null) count += 1;
   if (filters.includeEnded) count += 1;
+  if (filters.signupFriction.length) count += 1;
+  if (filters.noPaidSignupOnly) count += 1;
   return count;
 }

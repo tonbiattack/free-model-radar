@@ -57,6 +57,34 @@
       "failure_threshold": 3
     },
     {
+      "provider_id": "opencode-zen",
+      "label": "OpenCode Zen の料金と無料モデル",
+      "url": "https://opencode.ai/docs/zen",
+      "target": "pricing",
+      "failure_threshold": 3
+    },
+    {
+      "provider_id": "opencode-zen",
+      "label": "OpenCode Zen のモデル一覧（料金 0 の判定を含む）",
+      "url": "https://opencode.ai/inference/v1/models",
+      "target": "models",
+      "failure_threshold": 3
+    },
+    {
+      "provider_id": "logfare",
+      "label": "Logfare のリクエスト上限",
+      "url": "https://logfare.ai/docs",
+      "target": "rate-limits",
+      "failure_threshold": 3
+    },
+    {
+      "provider_id": "logfare",
+      "label": "Logfare のモデル一覧（ティアと対応機能）",
+      "url": "https://logfare.ai/v1/models",
+      "target": "models",
+      "failure_threshold": 3
+    },
+    {
       "provider_id": "github-models",
       "label": "GitHub Models 提供状況",
       "url": "https://docs.github.com/en/github-models/use-github-models/prototyping-with-ai-models",

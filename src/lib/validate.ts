@@ -134,10 +134,12 @@ export function validateDataset(input: unknown, options: { today?: Date } = {}):
       });
     }
 
-    if (model.free_tier.type === "trial" && model.free_tier.expires_on === null) {
+    // 期間限定で期限が非公表なのは正当な状態。警告ではなく UI で「期限不明」と表示する。
+    // 一方、終了済みなのに期限がないのは矛盾なので弾く。
+    if (model.free_tier.availability === "ended" && model.free_tier.expires_on === null) {
       warnings.push({
         path: `${at}.free_tier.expires_on`,
-        message: "期間限定トライアルですが期限が不明です。判明したら expires_on を埋めてください",
+        message: "終了済みですが終了日がありません。判明していれば expires_on を埋めてください",
       });
     }
 

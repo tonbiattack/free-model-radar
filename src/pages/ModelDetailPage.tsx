@@ -22,6 +22,8 @@ import {
   limitMetricLabel,
   limitMetricLong,
   limitScopeLabel,
+  signupFrictionDescription,
+  signupFrictionLabel,
   tristateLabel,
   verificationMethodLabel,
   verificationStatusLabel,
@@ -218,6 +220,15 @@ function ModelDetail({
                 </dd>
               </div>
               <div>
+                <dt>キー取得までの手間</dt>
+                <dd>
+                  {signupFrictionLabel[provider.signup_friction]}
+                  <span className="facts__note">
+                    {signupFrictionDescription[provider.signup_friction]}
+                  </span>
+                </dd>
+              </div>
+              <div>
                 <dt>OpenCode ネイティブ対応</dt>
                 <dd>
                   {provider.native_opencode === "yes"
@@ -242,6 +253,36 @@ function ModelDetail({
                 </dd>
               </div>
             </dl>
+          </Section>
+
+          <Section title="性能">
+            {model.performance.length === 0 ? (
+              <p className="empty-note">
+                性能の参照先が登録されていません。このサイトでは性能を自前評価していません。
+              </p>
+            ) : (
+              <>
+                <p className="section-note">
+                  性能はこのサイトで測っていません。コーディング性能を公開している比較ページへリンクします。
+                  ベンチマークごとに採点方法が違うため、数値を直接比べないでください。
+                </p>
+                <ul className="perf-list">
+                  {model.performance.map((ref) => (
+                    <li key={`${ref.benchmark}-${ref.url}`}>
+                      <a href={ref.url} target="_blank" rel="noreferrer noopener">
+                        {ref.benchmark}
+                      </a>
+                      {ref.as ? (
+                        <span className="perf-list__as">
+                          リンク先での表記: <code>{ref.as}</code>
+                        </span>
+                      ) : null}
+                      {ref.note ? <span className="perf-list__note">{ref.note}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </Section>
 
           <Section title="機能と検証">

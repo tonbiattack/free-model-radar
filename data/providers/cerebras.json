@@ -35,7 +35,8 @@
         "checked_at": "2026-11-15",
         "confidence": "high"
       }
-    ]
+    ],
+    "signup_friction": "paid"
   },
   "models": [
     {
@@ -56,7 +57,12 @@
         "availability": "restricted",
         "requirements": ["支払い方法の登録", "アカウント作成"],
         "limits": [
-          { "metric": "rpm", "value": 5, "scope": "model", "note": "Free Trial ティアの上限" },
+          {
+            "metric": "rpm",
+            "value": 5,
+            "scope": "model",
+            "note": "Free Trial ティアの上限"
+          },
           {
             "metric": "tpm",
             "value": 30000,
@@ -69,7 +75,12 @@
             "scope": "model",
             "note": "Free Trial ティアの上限"
           },
-          { "metric": "tpd", "value": 1000000, "scope": "model", "note": "Free Trial ティアの上限" }
+          {
+            "metric": "tpd",
+            "value": 1000000,
+            "scope": "model",
+            "note": "Free Trial ティアの上限"
+          }
         ],
         "quota": {
           "kind": "currency",
@@ -124,6 +135,14 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -144,7 +163,12 @@
         "availability": "restricted",
         "requirements": ["支払い方法の登録", "アカウント作成"],
         "limits": [
-          { "metric": "rpm", "value": 300, "scope": "model", "note": "Free Trial ティアの上限" },
+          {
+            "metric": "rpm",
+            "value": 300,
+            "scope": "model",
+            "note": "Free Trial ティアの上限"
+          },
           {
             "metric": "tpm",
             "value": 150000,
@@ -194,6 +218,14 @@
           "observed_at": null,
           "checked_at": "2026-11-15",
           "confidence": "high"
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
         }
       ]
     }

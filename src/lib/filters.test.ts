@@ -22,6 +22,7 @@ const provider: Provider = {
   opencode_provider_id: null,
   authentication: "api-key",
   credit_card_required: "no",
+  signup_friction: "instant",
   notes: [],
   sources: [
     {
@@ -61,6 +62,7 @@ function makeModel(overrides: Partial<Model> & { id: string }): Model {
       expires_on: null,
     },
     verification: [],
+    performance: [],
     caveats: [],
     sources: [
       {
@@ -177,6 +179,7 @@ describe("applyFilters", () => {
       {
         model: makeModel({
           id: "verified",
+          performance: [],
           verification: [
             {
               method: "connection",
@@ -193,6 +196,32 @@ describe("applyFilters", () => {
     ];
     const result = applyFilters(verified, withFilters({ verifiedOnly: true }), now);
     expect(result.rows.map((r) => r.model.id)).toEqual(["verified"]);
+  });
+
+  it("登録の手間で絞り込める", () => {
+    const withFriction: Row[] = rows.map((row, index) => ({
+      ...row,
+      provider: { ...provider, signup_friction: index === 0 ? "instant" : "discord" },
+    }));
+    const result = applyFilters(withFriction, withFilters({ signupFriction: ["discord"] }), now);
+    expect(result.rows.map((r) => r.model.id)).toEqual(["beta", "gamma"]);
+  });
+
+  it("カード登録が要らないものだけを選ぶと、要るものは落ち不明は残す", () => {
+    const mixed: Row[] = [
+      {
+        model: makeModel({ id: "instant" }),
+        provider: { ...provider, signup_friction: "instant" },
+      },
+      { model: makeModel({ id: "paid" }), provider: { ...provider, signup_friction: "paid" } },
+      {
+        model: makeModel({ id: "unsure" }),
+        provider: { ...provider, signup_friction: "unknown" },
+      },
+    ];
+    const result = applyFilters(mixed, withFilters({ noPaidSignupOnly: true }), now);
+    expect(result.rows.map((r) => r.model.id)).toEqual(["instant", "unsure"]);
+    expect(result.hiddenUnknown).toBe(0);
   });
 
   it("鮮度で絞り込む", () => {
@@ -267,6 +296,8 @@ describe("URL 同期", () => {
       freshDays: 30,
       sort: "name",
       includeEnded: true,
+      signupFriction: ["instant", "discord"],
+      noPaidSignupOnly: true,
     });
     const query = serializeFilters(filters);
     expect(parseFilters(query)).toEqual(filters);

@@ -44,7 +44,8 @@
         "checked_at": "2026-11-15",
         "confidence": "high"
       }
-    ]
+    ],
+    "signup_friction": "instant"
   },
   "models": [
     {
@@ -65,7 +66,12 @@
         "availability": "available",
         "requirements": [],
         "limits": [
-          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpm",
+            "value": 20,
+            "scope": "account",
+            "note": "無料モデル共通の上限"
+          },
           {
             "metric": "rpd",
             "value": 50,
@@ -73,7 +79,12 @@
             "note": "クレジット購入実績が 10 未満のアカウントの上限。10 以上で 1000 に上がる"
           }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "上限は無料モデル全体で共有される。複数の :free モデルを併用しても枠は増えない。",
           "フォールバックに有料モデルを入れると、無料枠超過時に課金される。"
@@ -128,6 +139,14 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -148,7 +167,12 @@
         "availability": "available",
         "requirements": [],
         "limits": [
-          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpm",
+            "value": 20,
+            "scope": "account",
+            "note": "無料モデル共通の上限"
+          },
           {
             "metric": "rpd",
             "value": 50,
@@ -156,7 +180,12 @@
             "note": "クレジット購入実績が 10 未満のアカウントの上限"
           }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": [
           "無料モデル全体で枠を共有する。",
           "1M コンテキストでも RPD 50 が実用上の制約になる。"
@@ -192,6 +221,14 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -212,7 +249,12 @@
         "availability": "available",
         "requirements": [],
         "limits": [
-          { "metric": "rpm", "value": 20, "scope": "account", "note": "無料モデル共通の上限" },
+          {
+            "metric": "rpm",
+            "value": 20,
+            "scope": "account",
+            "note": "無料モデル共通の上限"
+          },
           {
             "metric": "rpd",
             "value": 50,
@@ -220,7 +262,12 @@
             "note": "クレジット購入実績が 10 未満のアカウントの上限"
           }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "account"
+        },
         "caveats": ["無料モデル全体で枠を共有する。"],
         "expires_on": null
       },
@@ -254,6 +301,14 @@
           "observed_at": "2026-11-15",
           "checked_at": "2026-11-15",
           "confidence": "high"
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
         }
       ]
     }

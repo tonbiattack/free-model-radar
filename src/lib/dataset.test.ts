@@ -72,4 +72,42 @@ describe("同梱データ", () => {
       }
     }
   });
+
+  it("すべてのプロバイダーがキー取得の手間を持つ", () => {
+    for (const provider of dataset.providers) {
+      expect(provider.signup_friction, provider.id).toBeTruthy();
+    }
+    // 実際に登録だけで始められるプロバイダーが存在する
+    expect(dataset.providers.some((p) => p.signup_friction === "instant")).toBe(true);
+  });
+
+  it("すべてのモデルに性能の参照先がある", () => {
+    for (const model of dataset.models) {
+      expect(model.performance.length, model.id).toBeGreaterThan(0);
+      for (const ref of model.performance) {
+        expect(ref.url.startsWith("https://")).toBe(true);
+      }
+    }
+  });
+
+  it("OpenCode から /connect だけで使えるモデルが複数ある", () => {
+    const zen = dataset.providers.find((p) => p.id === "opencode-zen");
+    expect(zen).toBeTruthy();
+    expect(zen?.native_opencode).toBe("yes");
+    expect(zen?.credit_card_required).toBe("no");
+    expect(zen?.signup_friction).toBe("instant");
+    const zenModels = dataset.models.filter((m) => m.provider_id === "opencode-zen");
+    expect(zenModels.length).toBeGreaterThanOrEqual(5);
+    for (const model of zenModels) {
+      expect(model.free_tier.availability).toBe("available");
+      expect(model.capabilities.tool_calling).toBe("yes");
+    }
+  });
+
+  it("期間限定の無料は恒久無料と混同していない", () => {
+    const zenModels = dataset.models.filter((m) => m.provider_id === "opencode-zen");
+    for (const model of zenModels) {
+      expect(model.free_tier.type).toBe("trial");
+    }
+  });
 });

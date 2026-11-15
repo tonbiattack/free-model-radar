@@ -14,6 +14,7 @@ const baseProvider: Provider = {
   opencode_provider_id: null,
   authentication: "api-key",
   credit_card_required: "no",
+  signup_friction: "instant",
   notes: [],
   sources: [
     {
@@ -51,6 +52,7 @@ const baseModel: Model = {
     expires_on: null,
   },
   verification: [],
+  performance: [],
   caveats: [],
   sources: [
     {

@@ -19,8 +19,14 @@ import {
   verificationSummary,
 } from "@/lib/format";
 import { LOADED_AT_MS } from "@/lib/clock";
-import { freeTierTypeLabel, limitMetricLabel, limitScopeLabel } from "@/lib/labels";
-import type { FreeTierType } from "@/lib/schema";
+import {
+  freeTierTypeLabel,
+  limitMetricLabel,
+  limitScopeLabel,
+  signupFrictionDescription,
+  signupFrictionLabel,
+} from "@/lib/labels";
+import type { FreeTierType, SignupFriction } from "@/lib/schema";
 import {
   AvailabilityMark,
   FreeTierBadge,
@@ -100,6 +106,12 @@ export function ModelListPage() {
 
   const filterCount = activeFilterCount(filters);
   const totalVisible = allRows.filter((row) => row.model.free_tier.availability !== "ended").length;
+  const connectOnly = allRows.filter(
+    (row) =>
+      row.provider?.native_opencode === "yes" &&
+      row.provider?.signup_friction === "instant" &&
+      row.model.free_tier.availability !== "ended",
+  ).length;
 
   const toggleFreeType = (type: FreeTierType) => {
     const next = filters.freeTypes.includes(type)
@@ -113,6 +125,13 @@ export function ModelListPage() {
       ? filters.providerIds.filter((value) => value !== id)
       : [...filters.providerIds, id];
     update({ providerIds: next });
+  };
+
+  const toggleSignup = (value: SignupFriction) => {
+    const next = filters.signupFriction.includes(value)
+      ? filters.signupFriction.filter((entry) => entry !== value)
+      : [...filters.signupFriction, value];
+    update({ signupFriction: next });
   };
 
   return (
@@ -158,14 +177,9 @@ export function ModelListPage() {
             <dd className="hero__stat-note">継続利用できる枠</dd>
           </div>
           <div>
-            <dt>要カード登録</dt>
-            <dd>
-              {
-                dataset.providers.filter((provider) => provider.credit_card_required === "yes")
-                  .length
-              }
-            </dd>
-            <dd className="hero__stat-note">プロバイダー単位</dd>
+            <dt>/connect だけで使える</dt>
+            <dd>{connectOnly}</dd>
+            <dd className="hero__stat-note">登録と接続のみ</dd>
           </div>
         </dl>
       </section>
@@ -267,6 +281,34 @@ export function ModelListPage() {
           </fieldset>
 
           <fieldset className="field">
+            <legend>登録の手間</legend>
+            <ul className="check-list">
+              {(["instant", "discord", "waitlist", "paid"] as const).map((value) => (
+                <li key={value}>
+                  <label title={signupFrictionDescription[value]}>
+                    <input
+                      type="checkbox"
+                      checked={filters.signupFriction.includes(value)}
+                      onChange={() => toggleSignup(value)}
+                    />
+                    <span>{signupFrictionLabel[value]}</span>
+                  </label>
+                </li>
+              ))}
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={filters.noPaidSignupOnly}
+                    onChange={(event) => update({ noPaidSignupOnly: event.target.checked })}
+                  />
+                  <span>カード登録なしで始められる</span>
+                </label>
+              </li>
+            </ul>
+          </fieldset>
+
+          <fieldset className="field">
             <legend>プロバイダー</legend>
             <ul className="check-list">
               {providers.map((provider) => (
@@ -352,6 +394,7 @@ export function ModelListPage() {
                     <tr>
                       <th scope="col">モデル</th>
                       <th scope="col">無料枠</th>
+                      <th scope="col">登録</th>
                       <th scope="col">主な制限</th>
                       <th scope="col">ツール</th>
                       <th scope="col">検証</th>
@@ -422,6 +465,11 @@ function ModelRow({ row }: { row: Row }) {
         ) : null}
       </td>
       <td>
+        <span className={`signup signup--${provider?.signup_friction ?? "unknown"}`}>
+          {signupFrictionLabel[provider?.signup_friction ?? "unknown"]}
+        </span>
+      </td>
+      <td>
         {limits.length === 0 ? (
           <span className="muted">数値の記載なし</span>
         ) : (
@@ -484,6 +532,14 @@ function ModelCard({ row }: { row: Row }) {
         {provider?.name ?? model.provider_id} <code>{model.model_id}</code>
       </p>
       <dl className="model-card__facts">
+        <div>
+          <dt>登録</dt>
+          <dd>
+            <span className={`signup signup--${provider?.signup_friction ?? "unknown"}`}>
+              {signupFrictionLabel[provider?.signup_friction ?? "unknown"]}
+            </span>
+          </dd>
+        </div>
         <div>
           <dt>コンテキスト</dt>
           <dd>{model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : "不明"}</dd>

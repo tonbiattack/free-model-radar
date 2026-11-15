@@ -44,7 +44,8 @@
         "checked_at": "2026-11-15",
         "confidence": "high"
       }
-    ]
+    ],
+    "signup_friction": "instant"
   },
   "models": [
     {
@@ -65,12 +66,33 @@
         "availability": "available",
         "requirements": [],
         "limits": [
-          { "metric": "rpm", "value": 30, "scope": "model" },
-          { "metric": "rpd", "value": 1000, "scope": "model" },
-          { "metric": "tpm", "value": 8000, "scope": "model" },
-          { "metric": "tpd", "value": 200000, "scope": "model" }
+          {
+            "metric": "rpm",
+            "value": 30,
+            "scope": "model"
+          },
+          {
+            "metric": "rpd",
+            "value": 1000,
+            "scope": "model"
+          },
+          {
+            "metric": "tpm",
+            "value": 8000,
+            "scope": "model"
+          },
+          {
+            "metric": "tpd",
+            "value": 200000,
+            "scope": "model"
+          }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "model" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "model"
+        },
         "caveats": [
           "無料枠は組織単位ではなくモデル単位の制限。",
           "無料枠の上限は予告なく変更されうる。"
@@ -125,6 +147,14 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -145,12 +175,33 @@
         "availability": "available",
         "requirements": [],
         "limits": [
-          { "metric": "rpm", "value": 30, "scope": "model" },
-          { "metric": "rpd", "value": 1000, "scope": "model" },
-          { "metric": "tpm", "value": 8000, "scope": "model" },
-          { "metric": "tpd", "value": 200000, "scope": "model" }
+          {
+            "metric": "rpm",
+            "value": 30,
+            "scope": "model"
+          },
+          {
+            "metric": "rpd",
+            "value": 1000,
+            "scope": "model"
+          },
+          {
+            "metric": "tpm",
+            "value": 8000,
+            "scope": "model"
+          },
+          {
+            "metric": "tpd",
+            "value": 200000,
+            "scope": "model"
+          }
         ],
-        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "model" },
+        "quota": {
+          "kind": "none",
+          "amount": null,
+          "period": "none",
+          "scope": "model"
+        },
         "caveats": ["無料枠はモデル単位の制限。", "上限値は予告なく変更されうる。"],
         "expires_on": null
       },
@@ -182,6 +233,14 @@
           "observed_at": null,
           "checked_at": "2026-11-15",
           "confidence": "high"
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
         }
       ]
     },
@@ -244,6 +303,14 @@
           "observed_at": null,
           "checked_at": "2026-11-15",
           "confidence": "high"
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
         }
       ]
     }

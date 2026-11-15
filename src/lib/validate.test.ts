@@ -18,6 +18,7 @@ function baseDataset(): Dataset {
         opencode_provider_id: null,
         authentication: "api-key",
         credit_card_required: "no",
+        signup_friction: "instant",
         notes: [],
         sources: [
           {
@@ -56,6 +57,7 @@ function baseDataset(): Dataset {
           expires_on: null,
         },
         verification: [],
+        performance: [],
         caveats: [],
         sources: [
           {
@@ -140,12 +142,21 @@ describe("validateDataset", () => {
     expect(result.errors.some((e) => e.message.includes("検証日時"))).toBe(true);
   });
 
-  it("期間限定トライアルで期限不明なら警告する（エラーにはしない）", () => {
+  it("期間限定トライアルで期限が非公表なのは警告にしない", () => {
     const data = baseDataset();
     data.models[0]!.free_tier.type = "trial";
     const result = validateDataset(data, { today });
     expect(result.ok).toBe(true);
-    expect(result.warnings.some((w) => w.message.includes("期限"))).toBe(true);
+    expect(result.warnings.some((w) => w.message.includes("期限"))).toBe(false);
+  });
+
+  it("終了済みなのに終了日がない場合は警告する", () => {
+    const data = baseDataset();
+    data.models[0]!.free_tier.type = "ended";
+    data.models[0]!.free_tier.availability = "ended";
+    const result = validateDataset(data, { today });
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => w.message.includes("終了日"))).toBe(true);
   });
 
   it("同じ metric/scope の制限重複を拒否する", () => {

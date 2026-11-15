@@ -17,6 +17,7 @@
         "opencode_provider_id": "cerebras",
         "authentication": "api-key",
         "credit_card_required": "yes",
+        "signup_friction": "paid",
         "notes": [
           "恒久無料の枠はなく、Free Trial の $5 クレジットのみ。",
           "Free Trial のクレジットは付与から 30 日で失効する。",
@@ -55,6 +56,7 @@
         "opencode_provider_id": "cloudflare-workers-ai",
         "authentication": "api-key",
         "credit_card_required": "no",
+        "signup_friction": "instant",
         "notes": [
           "Workers Free プランでも 1 日 10,000 Neurons の無料割当が使える。",
           "Neurons は GPU 計算量の単位で、モデルごとの消費レートが異なる。",
@@ -102,6 +104,7 @@
         "opencode_provider_id": null,
         "authentication": "github-account",
         "credit_card_required": "no",
+        "signup_friction": "instant",
         "notes": [
           "2026 年 7 月 30 日に完全終了した。Playground・モデルカタログ・推論 API・BYOK のいずれも利用できない。",
           "終了済みの情報を「現在使える無料枠」として掲載しないために保持している。",
@@ -131,6 +134,7 @@
         "opencode_provider_id": "google",
         "authentication": "google-account",
         "credit_card_required": "no",
+        "signup_friction": "instant",
         "notes": [
           "無料枠では入力・出力とも無料だが、送信内容が製品改善に使われると明記されている。業務コードを扱う場合は有料枠との差を確認すること。",
           "OpenAI 互換エンドポイント https://generativelanguage.googleapis.com/v1beta/openai/ も提供されている。",
@@ -178,6 +182,7 @@
         "opencode_provider_id": "groq",
         "authentication": "api-key",
         "credit_card_required": "no",
+        "signup_friction": "instant",
         "notes": [
           "無料枠（Free Plan）はカード登録なしで使える。Developer Plan に上げると上限が増える。",
           "無料枠のレート制限はモデル単位で公表されている。",
@@ -214,6 +219,123 @@
         ]
       },
       {
+        "id": "logfare",
+        "name": "Logfare",
+        "website_url": "https://logfare.ai/",
+        "docs_url": "https://logfare.ai/docs",
+        "signup_url": "https://logfare.ai/register",
+        "api_format": "openai-compatible",
+        "base_url": "https://logfare.ai/v1",
+        "native_opencode": "no",
+        "opencode_provider_id": null,
+        "authentication": "api-key",
+        "credit_card_required": "no",
+        "signup_friction": "discord",
+        "notes": [
+          "OpenAI 互換 API。Anthropic Messages と OpenAI Responses も同じキーで使える。",
+          "アカウント作成時に最初の API キーが発行される。キーは作成時のみ表示される。",
+          "Logfare の Discord サーバーに参加していることが利用条件。退会するとアクセスが止まる。",
+          "全リクエストの内容は記録される。Premium はモデル学習、Pro は学習とデータ販売への同意が必要。",
+          "標準（Standard）ティアは学習・販売への同意なしで使えるが、記録自体は残る。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠",
+            "value": "全ティアが無料。課金なしで使え、支払い方法の登録も不要",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "レート制限",
+            "value": "Standard: 40/分, 1,000/時, 5,000/日、同時 6。新規アカウントは最初の 24 時間 10/分, 200/時, 500/日、同時 2",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "利用条件",
+            "value": "Discord サーバーへの参加が必須。1 人 1 アカウントで、上限回避のためのアカウント・キー・IP のローテーションは禁止",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "利用モデル",
+            "value": "chat/completions を提供するモデルのうち Standard ティアで使えるのは qwen-3.8-27b、gemma-4-26b など",
+            "source_url": "https://logfare.ai/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "opencode-zen",
+        "name": "OpenCode Zen",
+        "website_url": "https://opencode.ai/",
+        "docs_url": "https://opencode.ai/docs/zen",
+        "signup_url": "https://opencode.ai/console",
+        "api_format": "openai-compatible",
+        "base_url": "https://opencode.ai/inference/openai/v1",
+        "native_opencode": "yes",
+        "opencode_provider_id": "opencode",
+        "authentication": "api-key",
+        "credit_card_required": "no",
+        "signup_friction": "instant",
+        "notes": [
+          "OpenCode の提供元が運営する推論ゲートウェイ。無料モデルはクレジットを追加せずに使える。",
+          "無料モデルは期間限定で、予告なく終了・差し替えになる。",
+          "OpenCode からは /connect で OpenCode を選ぶだけで接続できる。API キーを手動で設定する必要はない。",
+          "無料モデルを隠したい場合は OPENCODE_DISABLE_FREE_MODELS=1 を設定する。"
+        ],
+        "sources": [
+          {
+            "field": "無料モデルの一覧と料金",
+            "value": "Big Pickle、GLM-5.3-Flash Free、DeepSeek V4.1 Flash Free など 12 モデルが入力・出力とも Free",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "無料モデルの利用条件",
+            "value": "Console のクレジットなしで使える。期間限定で終了することがある",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "OpenCode での接続方法",
+            "value": "/connect で OpenCode を選び、API キーを貼り付ける。/models で選択する",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "モデルごとの能力と上限",
+            "value": "inference/v1/models が context / output / tools / reasoning / structured_output を返す",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
         "id": "openrouter",
         "name": "OpenRouter",
         "website_url": "https://openrouter.ai/",
@@ -225,6 +347,7 @@
         "opencode_provider_id": "openrouter",
         "authentication": "api-key",
         "credit_card_required": "no",
+        "signup_friction": "instant",
         "notes": [
           ":free サフィックスの付いたモデルが無料で利用できる。",
           "無料モデルには 1 分・1 日あたりのリクエスト上限があり、過去の購入クレジット額で日次上限が変わる。",
@@ -332,6 +455,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "高速だが、Free Trial では RPM 5 とコンテキスト 65K が実用上の足枷になる。"
         ],
@@ -422,6 +553,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "クレジット制のため、使い続けられるかは残額次第。"
         ],
@@ -484,6 +623,14 @@
             "tested_at": null,
             "opencode_version": null,
             "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
           }
         ],
         "caveats": [
@@ -558,6 +705,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "入力 $0.350 / M, 出力 $0.750 / M。10,000 Neurons（$0.11 相当）では入力だけで約 31 万トークン分。"
         ],
@@ -621,6 +776,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "コンテキスト 24K のため、システムプロンプトとツール定義だけでかなり消費する。"
         ],
@@ -675,9 +838,17 @@
             "サービス自体が終了しているため、現在は無料枠を利用できない。",
             "代替として Azure AI Foundry への移行が案内されている。"
           ],
-          "expires_on": null
+          "expires_on": "2026-07-30"
         },
         "verification": [],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "終了済み。新規に設定しないこと。"
         ],
@@ -738,6 +909,14 @@
             "tested_at": null,
             "opencode_version": null,
             "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
           }
         ],
         "caveats": [
@@ -813,6 +992,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "大量のファイル編集を一度に投げる用途より、小さな修正の反復に向く。"
         ],
@@ -875,6 +1062,14 @@
             "tested_at": null,
             "opencode_version": null,
             "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
           }
         ],
         "caveats": [
@@ -966,6 +1161,14 @@
             "tested_at": null,
             "opencode_version": null,
             "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
           }
         ],
         "caveats": [
@@ -1062,6 +1265,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "最大出力 16K のため、大きなファイルの一括書き換えより差分編集に向く。"
         ],
@@ -1126,6 +1337,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "ツール呼び出しに対応するが、reasoning 機能は持たない。"
         ],
@@ -1143,6 +1362,898 @@
             "field": "コンテキスト長",
             "value": "131,072 tokens, 最大出力 32,768",
             "source_url": "https://console.groq.com/docs/models",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "logfare-qwen-3-8-27b",
+        "provider_id": "logfare",
+        "display_name": "Qwen 3.8 27B (Logfare)",
+        "model_id": "qwen-3.8-27b",
+        "context_tokens": 262144,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "unknown"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [
+            "Discord サーバーへの参加",
+            "アカウント作成"
+          ],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 40,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 10"
+            },
+            {
+              "metric": "rph",
+              "value": 1000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 200"
+            },
+            {
+              "metric": "rpd",
+              "value": 5000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 500"
+            },
+            {
+              "metric": "concurrency",
+              "value": 6,
+              "scope": "account",
+              "note": "Standard ティア"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "上限はアカウントの全モデル・全 API 形式で共有される。モデルごとの枠ではない。",
+            "Discord サーバーを退会すると推論が止まる。",
+            "全リクエストの内容が記録される。Standard は学習・販売には使われないが、ログは残る。",
+            "429 では Retry-After 以上待つ。連続で再試行するとキーが自動的に一時停止される。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "Qwen 3.8 27B",
+            "note": "同一モデル ID のため比較できる可能性が高いが、Logfare 経由の構成が同じかは未確認。"
+          }
+        ],
+        "caveats": [
+          "1 分 40 リクエスト・同時 6 なら、エージェントの反復作業にも実用範囲。",
+          "アカウント単位の共有枠のため、複数モデルを併用しても枠は増えない。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠とレート制限",
+            "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "Standard ティアでの提供",
+            "value": "access_tier=standard, tools=true, context_length=262144",
+            "source_url": "https://logfare.ai/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "logfare-gemma-4-26b",
+        "provider_id": "logfare",
+        "display_name": "Gemma 4 26B (Logfare)",
+        "model_id": "gemma-4-26b",
+        "context_tokens": 256000,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "unknown"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [
+            "Discord サーバーへの参加",
+            "アカウント作成"
+          ],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 40,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 10"
+            },
+            {
+              "metric": "rph",
+              "value": 1000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 200"
+            },
+            {
+              "metric": "rpd",
+              "value": 5000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 500"
+            },
+            {
+              "metric": "concurrency",
+              "value": 6,
+              "scope": "account",
+              "note": "Standard ティア"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "上限はアカウント単位で全モデル共有。",
+            "全リクエストの内容が記録される。",
+            "ツール呼び出しに対応するが、モデル自体の reasoning 制御は不明。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "Gemma 4 26B",
+            "note": "同一モデル名の記録がある場合のみ比較できる。"
+          }
+        ],
+        "caveats": [
+          "27B クラスのため、複雑な多段タスクより単発の編集に向く。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠とレート制限",
+            "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "Standard ティアでの提供",
+            "value": "access_tier=standard, tools=true, context_length=256000",
+            "source_url": "https://logfare.ai/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "logfare-deepseek-v4-1-flash-economy",
+        "provider_id": "logfare",
+        "display_name": "DeepSeek V4.1 Flash Economy (Logfare)",
+        "model_id": "economy/deepseek-v4.1-flash",
+        "context_tokens": 256000,
+        "max_output_tokens": null,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "unknown"
+        },
+        "free_tier": {
+          "type": "permanent",
+          "availability": "available",
+          "requirements": [
+            "Discord サーバーへの参加",
+            "アカウント作成"
+          ],
+          "limits": [
+            {
+              "metric": "rpm",
+              "value": 40,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 10"
+            },
+            {
+              "metric": "rph",
+              "value": 1000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 200"
+            },
+            {
+              "metric": "rpd",
+              "value": 5000,
+              "scope": "account",
+              "note": "Standard ティア。最初の 24 時間は 500"
+            },
+            {
+              "metric": "concurrency",
+              "value": 6,
+              "scope": "account",
+              "note": "Standard ティア"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "モデル ID に economy/ 接頭辞が付く。通常版とは別の提供枠。",
+            "上限はアカウント単位で全モデル共有。",
+            "全リクエストの内容が記録される。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "DeepSeek V4.1 Flash",
+            "note": "economy 版は通常版と同一構成とは限らないため、数値をそのまま当てはめない。"
+          }
+        ],
+        "caveats": [
+          "economy 版のため、提供元の構成や量子化が通常版と異なる可能性がある。"
+        ],
+        "sources": [
+          {
+            "field": "無料枠とレート制限",
+            "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+            "source_url": "https://logfare.ai/docs",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "Standard ティアでの提供",
+            "value": "access_tier=standard, tools=true, context_length=256000",
+            "source_url": "https://logfare.ai/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-big-pickle",
+        "provider_id": "opencode-zen",
+        "display_name": "Big Pickle",
+        "model_id": "big-pickle",
+        "context_tokens": 200000,
+        "max_output_tokens": 32000,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。ステルスモデルのため、終了後に同じモデルが有料で残るとは限らない。",
+            "無料期間中は収集したデータがモデル改善に使われると明記されている。業務コードを送らないこと。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "ステルスモデルのため公開ベンチマークの記録がない可能性が高い。"
+          }
+        ],
+        "caveats": [
+          "200K のコンテキストで、エージェント用途を想定した推論モデルと説明されている。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "無料提供の条件",
+            "value": "Big Pickle は期間限定で無料。無料期間中のデータはモデル改善に使われうる",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-glm-5-3-flash-free",
+        "provider_id": "opencode-zen",
+        "display_name": "GLM-5.3-Flash Free",
+        "model_id": "glm-5.3-flash-free",
+        "context_tokens": 200000,
+        "max_output_tokens": 32000,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "プロバイダーはゼロ保持方針で、データを学習に使わないと明記されている。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "GLM-5.3 Flash",
+            "note": "有料版の GLM-5.3 Flash と同一モデルの可能性があるが、無料版が同じ構成かは未確認。"
+          }
+        ],
+        "caveats": [
+          "ゼロ保持方針のため、無料モデルの中では業務利用の制約が比較的小さい。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "無料提供とデータの扱い",
+            "value": "GLM-5.3-Flash Free は期間限定で無料。ゼロ保持で学習に使わない",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-deepseek-v4-1-flash-free",
+        "provider_id": "opencode-zen",
+        "display_name": "DeepSeek V4.1 Flash Free",
+        "model_id": "deepseek-v4.1-flash-free",
+        "context_tokens": 200000,
+        "max_output_tokens": 32000,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "プロバイダーはゼロ保持方針で、データを学習に使わないと明記されている。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "DeepSeek V4.1 Flash",
+            "note": "有料版の DeepSeek V4.1 Flash と同一系列。無料版が同じ構成かは未確認。"
+          }
+        ],
+        "caveats": [
+          "有料版はコンテキストがより大きい。無料版は 200K に制限されている。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "無料提供とデータの扱い",
+            "value": "DeepSeek V4.1 Flash Free は期間限定で無料。ゼロ保持で学習に使わない",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-minimax-m3-1-flash-free",
+        "provider_id": "opencode-zen",
+        "display_name": "MiniMax M3.1 Flash Free",
+        "model_id": "minimax-m3.1-flash-free",
+        "context_tokens": 1000000,
+        "max_output_tokens": 512000,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "プロバイダーはゼロ保持方針で、データを学習に使わないと明記されている。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "MiniMax M3",
+            "note": "有料版は M3。無料版は M3.1 Flash のため、同一の数値としては扱えない。"
+          }
+        ],
+        "caveats": [
+          "1M コンテキスト・最大出力 512K と公称値が大きい。実際にその長さを安定して扱えるかは未検証。",
+          "JSON モードはモデル一覧に structured_output の記載がないため不明。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "上限",
+            "value": "context 1,000,000 / output 512,000",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-nemotron-3-5-lightning-free",
+        "provider_id": "opencode-zen",
+        "display_name": "Nemotron 3.5 Lightning Free",
+        "model_id": "nemotron-3.5-lightning-free",
+        "context_tokens": 262144,
+        "max_output_tokens": 262144,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "NVIDIA の無料エンドポイントは試用目的とされ、個人情報や機密情報を送ってはいけないと明記されている。",
+            "利用状況はセキュリティと製品改善のために記録される。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "Nemotron 3.5 Lightning",
+            "note": "公開ベンチマークの記録があるかは未確認。"
+          }
+        ],
+        "caveats": [
+          "試用目的のため、機密コードを含むリポジトリでの利用は避ける。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "データの扱い",
+            "value": "NVIDIA 無料エンドポイントは試用のみ。個人情報・機密情報の送信不可。利用はログに残る",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-longcat-2-5-free",
+        "provider_id": "opencode-zen",
+        "display_name": "LongCat 2.5 Free",
+        "model_id": "longcat-2.5-free",
+        "context_tokens": 1000000,
+        "max_output_tokens": 262144,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [
+            {
+              "metric": "rpd",
+              "value": 100,
+              "scope": "account",
+              "note": "公式に 1 日 100 リクエストまでの記載がある唯一の無料モデル"
+            }
+          ],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "1 日 100 リクエストの上限がある。",
+            "プロバイダーは中国でホストされている。ゼロ保持で学習には使わないと明記されているが、管轄が異なる点は把握しておく。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "LongCat 2.5",
+            "note": "公開ベンチマークの記録があるかは未確認。"
+          }
+        ],
+        "caveats": [
+          "1M コンテキストは大きいが、1 日 100 リクエストでは長いエージェント作業は続かない。",
+          "JSON モードはモデル一覧に記載がないため不明。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "リクエスト上限",
+            "value": "1 日 100 リクエストまで",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-beam-free",
+        "provider_id": "opencode-zen",
+        "display_name": "Beam Free",
+        "model_id": "beam-free",
+        "context_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "yes",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "提供元はデータを学習に使わないが、安全のため 30 日間保持すると明記されている。",
+            "EU を含む一部の国・地域では利用できない。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "Beam 1.0",
+            "note": "公開ベンチマークの記録があるかは未確認。"
+          }
+        ],
+        "caveats": [
+          "1M コンテキスト。地域制限があるため、利用前に自分の所在地を確認する。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "データの扱いと地域制限",
+            "value": "学習には使わない。安全のため 30 日保持。一部地域では利用不可",
+            "source_url": "https://opencode.ai/docs/zen",
+            "source_type": "official",
+            "observed_at": null,
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          }
+        ]
+      },
+      {
+        "id": "zen-inkling-2-small-free",
+        "provider_id": "opencode-zen",
+        "display_name": "Inkling 2 Small Free",
+        "model_id": "inkling-2-small-free",
+        "context_tokens": 1048576,
+        "max_output_tokens": 131072,
+        "capabilities": {
+          "tool_calling": "yes",
+          "streaming": "yes",
+          "json_mode": "unknown",
+          "reasoning": "yes"
+        },
+        "free_tier": {
+          "type": "trial",
+          "availability": "available",
+          "requirements": [],
+          "limits": [],
+          "quota": {
+            "kind": "none",
+            "amount": null,
+            "period": "none",
+            "scope": "account",
+            "note": "トークン課金は 0。リクエスト数の上限は公式に数値の記載がない"
+          },
+          "caveats": [
+            "期間限定の無料提供。",
+            "提供元がデータを保持し、モデルの実世界性能の監視と学習に使う可能性があると明記されている。",
+            "EU・アイスランド・リヒテンシュタイン・ノルウェーなどでは利用できない。"
+          ],
+          "expires_on": null
+        },
+        "verification": [
+          {
+            "method": "connection",
+            "status": "untested",
+            "tested_at": null,
+            "opencode_version": null,
+            "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": "Inkling 2 Small",
+            "note": "公開ベンチマークの記録があるかは未確認。"
+          }
+        ],
+        "caveats": [
+          "データが学習に使われうるため、業務コードには向かない。",
+          "地域制限がある。",
+          "JSON モードはモデル一覧に記載がないため不明。"
+        ],
+        "sources": [
+          {
+            "field": "料金",
+            "value": "input / output とも price 0",
+            "source_url": "https://opencode.ai/inference/v1/models",
+            "source_type": "official",
+            "observed_at": "2026-11-15",
+            "checked_at": "2026-11-15",
+            "confidence": "high"
+          },
+          {
+            "field": "データの扱いと地域制限",
+            "value": "データを保持し、性能監視と学習に使う可能性がある。EU など一部地域では利用不可",
+            "source_url": "https://opencode.ai/docs/zen",
             "source_type": "official",
             "observed_at": null,
             "checked_at": "2026-11-15",
@@ -1207,6 +2318,14 @@
             "tested_at": null,
             "opencode_version": null,
             "notes": null
+          }
+        ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
           }
         ],
         "caveats": [
@@ -1295,6 +2414,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "長いコンテキストを持つが、無料枠ではリクエスト数が先に尽きる。"
         ],
@@ -1370,6 +2497,14 @@
             "notes": null
           }
         ],
+        "performance": [
+          {
+            "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+            "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+            "as": null,
+            "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+          }
+        ],
         "caveats": [
           "supported_parameters に response_format が含まれないため、JSON モードは未確認（非対応とは断定しない）。"
         ],
@@ -1396,6 +2531,30 @@
       }
     ],
     "changelog": [
+      {
+        "entity_id": "provider:opencode-zen",
+        "entity_type": "provider",
+        "field": "free_tier",
+        "previous": null,
+        "current": "期間限定無料 12 モデル",
+        "detected_at": "2026-11-15T00:00:00Z",
+        "effective_at": null,
+        "evidence_url": "https://opencode.ai/docs/zen",
+        "review_status": "confirmed",
+        "summary": "OpenCode Zen に OpenCode から /connect だけで使える無料モデルが 12 件あることを確認。トークン課金は 0 で、クレジット追加は不要。"
+      },
+      {
+        "entity_id": "provider:logfare",
+        "entity_type": "provider",
+        "field": "free_tier",
+        "previous": null,
+        "current": "全ティア無料（Standard 40 RPM / 5,000 RPD）",
+        "detected_at": "2026-11-15T00:00:00Z",
+        "effective_at": null,
+        "evidence_url": "https://logfare.ai/docs",
+        "review_status": "confirmed",
+        "summary": "Logfare を追加。全ティアが無料で課金なし。Standard は 40/分・1,000/時・5,000/日・同時 6。Discord 参加が条件。"
+      },
       {
         "entity_id": "model:github-models-gpt-4o",
         "entity_type": "model",
@@ -1488,6 +2647,34 @@
         "label": "Cerebras レート制限（Free Trial）",
         "url": "https://inference-docs.cerebras.ai/support/rate-limits",
         "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "opencode-zen",
+        "label": "OpenCode Zen の料金と無料モデル",
+        "url": "https://opencode.ai/docs/zen",
+        "target": "pricing",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "opencode-zen",
+        "label": "OpenCode Zen のモデル一覧（料金 0 の判定を含む）",
+        "url": "https://opencode.ai/inference/v1/models",
+        "target": "models",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "logfare",
+        "label": "Logfare のリクエスト上限",
+        "url": "https://logfare.ai/docs",
+        "target": "rate-limits",
+        "failure_threshold": 3
+      },
+      {
+        "provider_id": "logfare",
+        "label": "Logfare のモデル一覧（ティアと対応機能）",
+        "url": "https://logfare.ai/v1/models",
+        "target": "models",
         "failure_threshold": 3
       },
       {

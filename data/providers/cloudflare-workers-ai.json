@@ -44,7 +44,8 @@
         "checked_at": "2026-11-15",
         "confidence": "high"
       }
-    ]
+    ],
+    "signup_friction": "instant"
   },
   "models": [
     {
@@ -118,6 +119,14 @@
           "checked_at": "2026-11-15",
           "confidence": "medium"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -179,6 +188,14 @@
           "checked_at": "2026-11-15",
           "confidence": "high"
         }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
+        }
       ]
     },
     {
@@ -239,6 +256,14 @@
           "observed_at": "2026-11-12",
           "checked_at": "2026-11-15",
           "confidence": "high"
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": null,
+          "note": "同名モデルの記録がある場合のみ比較できます。ベンチマークごとに採点方法が違うため、数値を直接比べないでください。"
         }
       ]
     }

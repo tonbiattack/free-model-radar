@@ -38,6 +38,7 @@ const catalogEnv: Record<string, string[]> = {
   openrouter: ["OPENROUTER_API_KEY"],
   cerebras: ["CEREBRAS_API_KEY"],
   "cloudflare-workers-ai": ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_KEY"],
+  "opencode-zen": ["OPENCODE_API_KEY"],
 };
 
 /** ターミナルで案内する環境変数名。実キーは決して生成物に含めない。 */
@@ -117,6 +118,15 @@ export function buildOpencodeConfig(
     notes.push(
       "上記の設定は、カタログに未登録のモデルを追加する場合の例です。すでにモデル一覧に出ているなら、この設定は不要です。",
     );
+
+    if (provider.id === "opencode-zen") {
+      notes.push(
+        "無料モデルは Console のクレジットを追加しなくても使えます。/connect で OpenCode を選び、/models に無料モデルが並びます。",
+      );
+      notes.push(
+        "無料モデルが不要な場合は、サーバーの環境変数に OPENCODE_DISABLE_FREE_MODELS=1 を設定すると一覧から消えます。",
+      );
+    }
 
     return { strategy: "native", json: JSON.stringify(config, null, 2), blockers, notes };
   }

@@ -97,6 +97,23 @@ export const apiFormatLabel = {
   unknown: "不明",
 } as const;
 
+/** キー取得までの手間。「登録すれば使える」かどうかを一覧で判断できるようにする。 */
+export const signupFrictionLabel = {
+  instant: "登録だけ",
+  discord: "Discord 参加",
+  waitlist: "順番待ち",
+  paid: "カード登録",
+  unknown: "不明",
+} as const;
+
+export const signupFrictionDescription = {
+  instant: "アカウントを作ると API キーがすぐ発行される。",
+  discord: "提供元の Discord サーバーへの参加が条件。退会するとアクセスが止まる。",
+  waitlist: "順番待ちや承認待ちがある。",
+  paid: "支払い方法の登録が必須。無料枠を使うにもカード情報が要る。",
+  unknown: "キー取得までの手順を確認できていない。",
+} as const;
+
 export const authLabel = {
   "api-key": "API キー",
   "google-account": "Google アカウント",

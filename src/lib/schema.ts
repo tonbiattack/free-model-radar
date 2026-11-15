@@ -54,6 +54,19 @@ export const authSchema = z.enum([
 ]);
 export type Auth = z.infer<typeof authSchema>;
 
+/**
+ * API キーを手に入れるまでの手間。「登録すれば使える」かどうかを
+ * 利用者が判断できるようにするための軸で、無料枠の種別とは独立。
+ */
+export const signupFrictionSchema = z.enum([
+  "instant", // アカウント作成だけでキーが即時発行される
+  "discord", // Discord サーバーへの参加が条件
+  "waitlist", // 順番待ち・承認待ちがある
+  "paid", // 支払い方法の登録が必須
+  "unknown",
+]);
+export type SignupFriction = z.infer<typeof signupFrictionSchema>;
+
 /** 制限が何に対して掛かるか。プロバイダー/アカウント/モデルが混在するため必須。 */
 export const limitScopeSchema = z.enum([
   "provider",
@@ -146,6 +159,20 @@ export const verificationSchema = z.object({
 });
 export type Verification = z.infer<typeof verificationSchema>;
 
+/**
+ * 性能の参照先。このサイトでは性能を自前評価せず、
+ * 出典のある比較ページへリンクする。
+ */
+export const performanceRefSchema = z.object({
+  /** 例: "SWE-bench Verified", "Aider Polyglot" */
+  benchmark: z.string().min(1),
+  url: z.string().url(),
+  /** リンク先でこのモデルが何と呼ばれているか。表記が違う場合に使う。 */
+  as: z.string().min(1).nullable(),
+  note: z.string().min(1).nullable(),
+});
+export type PerformanceRef = z.infer<typeof performanceRefSchema>;
+
 export const providerSchema = z.object({
   /** URL に使う安定 ID。名前変更で変えない。 */
   id: z
@@ -165,6 +192,8 @@ export const providerSchema = z.object({
   opencode_provider_id: z.string().min(1).nullable(),
   authentication: authSchema,
   credit_card_required: tristateSchema,
+  /** キー取得までの手間。登録すれば使えるかを判断するために使う。 */
+  signup_friction: signupFrictionSchema,
   notes: z.array(z.string().min(1)),
   sources: z.array(evidenceSchema),
 });
@@ -191,6 +220,8 @@ export const modelSchema = z.object({
   free_tier: freeTierSchema,
   /** 公式記載と実機検証を分離して持つ。 */
   verification: z.array(verificationSchema),
+  /** 性能は自前評価せず、出典つきの比較ページへリンクする。 */
+  performance: z.array(performanceRefSchema),
   /** エージェント用途の注意点（長文で崩れる、など）。 */
   caveats: z.array(z.string().min(1)),
   sources: z.array(evidenceSchema),

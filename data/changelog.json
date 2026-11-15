@@ -1,6 +1,30 @@
 {
   "entries": [
     {
+      "entity_id": "provider:opencode-zen",
+      "entity_type": "provider",
+      "field": "free_tier",
+      "previous": null,
+      "current": "期間限定無料 12 モデル",
+      "detected_at": "2026-11-15T00:00:00Z",
+      "effective_at": null,
+      "evidence_url": "https://opencode.ai/docs/zen",
+      "review_status": "confirmed",
+      "summary": "OpenCode Zen に OpenCode から /connect だけで使える無料モデルが 12 件あることを確認。トークン課金は 0 で、クレジット追加は不要。"
+    },
+    {
+      "entity_id": "provider:logfare",
+      "entity_type": "provider",
+      "field": "free_tier",
+      "previous": null,
+      "current": "全ティア無料（Standard 40 RPM / 5,000 RPD）",
+      "detected_at": "2026-11-15T00:00:00Z",
+      "effective_at": null,
+      "evidence_url": "https://logfare.ai/docs",
+      "review_status": "confirmed",
+      "summary": "Logfare を追加。全ティアが無料で課金なし。Standard は 40/分・1,000/時・5,000/日・同時 6。Discord 参加が条件。"
+    },
+    {
       "entity_id": "model:github-models-gpt-4o",
       "entity_type": "model",
       "field": "free_tier.availability",

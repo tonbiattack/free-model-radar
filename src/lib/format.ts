@@ -149,3 +149,11 @@ export function verificationSummary(model: Model): {
   }
   return { status: "untested", passed, total: model.verification.length };
 }
+
+/**
+ * 性能リンクを 1 本にまとめる。同じベンチマークを複数持ち回らないよう、
+ * 先頭の参照を代表として返す。
+ */
+export function primaryPerformance(model: Model): Model["performance"][number] | null {
+  return model.performance[0] ?? null;
+}

@@ -1,0 +1,322 @@
+{
+  "provider": {
+    "id": "logfare",
+    "name": "Logfare",
+    "website_url": "https://logfare.ai/",
+    "docs_url": "https://logfare.ai/docs",
+    "signup_url": "https://logfare.ai/register",
+    "api_format": "openai-compatible",
+    "base_url": "https://logfare.ai/v1",
+    "native_opencode": "no",
+    "opencode_provider_id": null,
+    "authentication": "api-key",
+    "credit_card_required": "no",
+    "signup_friction": "discord",
+    "notes": [
+      "OpenAI 互換 API。Anthropic Messages と OpenAI Responses も同じキーで使える。",
+      "アカウント作成時に最初の API キーが発行される。キーは作成時のみ表示される。",
+      "Logfare の Discord サーバーに参加していることが利用条件。退会するとアクセスが止まる。",
+      "全リクエストの内容は記録される。Premium はモデル学習、Pro は学習とデータ販売への同意が必要。",
+      "標準（Standard）ティアは学習・販売への同意なしで使えるが、記録自体は残る。"
+    ],
+    "sources": [
+      {
+        "field": "無料枠",
+        "value": "全ティアが無料。課金なしで使え、支払い方法の登録も不要",
+        "source_url": "https://logfare.ai/docs",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "レート制限",
+        "value": "Standard: 40/分, 1,000/時, 5,000/日、同時 6。新規アカウントは最初の 24 時間 10/分, 200/時, 500/日、同時 2",
+        "source_url": "https://logfare.ai/docs",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "利用条件",
+        "value": "Discord サーバーへの参加が必須。1 人 1 アカウントで、上限回避のためのアカウント・キー・IP のローテーションは禁止",
+        "source_url": "https://logfare.ai/docs",
+        "source_type": "official",
+        "observed_at": null,
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      },
+      {
+        "field": "利用モデル",
+        "value": "chat/completions を提供するモデルのうち Standard ティアで使えるのは qwen-3.8-27b、gemma-4-26b など",
+        "source_url": "https://logfare.ai/v1/models",
+        "source_type": "official",
+        "observed_at": "2026-11-15",
+        "checked_at": "2026-11-15",
+        "confidence": "high"
+      }
+    ]
+  },
+  "models": [
+    {
+      "id": "logfare-qwen-3-8-27b",
+      "provider_id": "logfare",
+      "display_name": "Qwen 3.8 27B (Logfare)",
+      "model_id": "qwen-3.8-27b",
+      "context_tokens": 262144,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "unknown",
+        "reasoning": "unknown"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": ["Discord サーバーへの参加", "アカウント作成"],
+        "limits": [
+          {
+            "metric": "rpm",
+            "value": 40,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 10"
+          },
+          {
+            "metric": "rph",
+            "value": 1000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 200"
+          },
+          {
+            "metric": "rpd",
+            "value": 5000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 500"
+          },
+          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "上限はアカウントの全モデル・全 API 形式で共有される。モデルごとの枠ではない。",
+          "Discord サーバーを退会すると推論が止まる。",
+          "全リクエストの内容が記録される。Standard は学習・販売には使われないが、ログは残る。",
+          "429 では Retry-After 以上待つ。連続で再試行するとキーが自動的に一時停止される。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": "Qwen 3.8 27B",
+          "note": "同一モデル ID のため比較できる可能性が高いが、Logfare 経由の構成が同じかは未確認。"
+        }
+      ],
+      "caveats": [
+        "1 分 40 リクエスト・同時 6 なら、エージェントの反復作業にも実用範囲。",
+        "アカウント単位の共有枠のため、複数モデルを併用しても枠は増えない。"
+      ],
+      "sources": [
+        {
+          "field": "無料枠とレート制限",
+          "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+          "source_url": "https://logfare.ai/docs",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "Standard ティアでの提供",
+          "value": "access_tier=standard, tools=true, context_length=262144",
+          "source_url": "https://logfare.ai/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "logfare-gemma-4-26b",
+      "provider_id": "logfare",
+      "display_name": "Gemma 4 26B (Logfare)",
+      "model_id": "gemma-4-26b",
+      "context_tokens": 256000,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "unknown",
+        "reasoning": "unknown"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": ["Discord サーバーへの参加", "アカウント作成"],
+        "limits": [
+          {
+            "metric": "rpm",
+            "value": 40,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 10"
+          },
+          {
+            "metric": "rph",
+            "value": 1000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 200"
+          },
+          {
+            "metric": "rpd",
+            "value": 5000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 500"
+          },
+          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "上限はアカウント単位で全モデル共有。",
+          "全リクエストの内容が記録される。",
+          "ツール呼び出しに対応するが、モデル自体の reasoning 制御は不明。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": "Gemma 4 26B",
+          "note": "同一モデル名の記録がある場合のみ比較できる。"
+        }
+      ],
+      "caveats": ["27B クラスのため、複雑な多段タスクより単発の編集に向く。"],
+      "sources": [
+        {
+          "field": "無料枠とレート制限",
+          "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+          "source_url": "https://logfare.ai/docs",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "Standard ティアでの提供",
+          "value": "access_tier=standard, tools=true, context_length=256000",
+          "source_url": "https://logfare.ai/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "id": "logfare-deepseek-v4-1-flash-economy",
+      "provider_id": "logfare",
+      "display_name": "DeepSeek V4.1 Flash Economy (Logfare)",
+      "model_id": "economy/deepseek-v4.1-flash",
+      "context_tokens": 256000,
+      "max_output_tokens": null,
+      "capabilities": {
+        "tool_calling": "yes",
+        "streaming": "yes",
+        "json_mode": "unknown",
+        "reasoning": "unknown"
+      },
+      "free_tier": {
+        "type": "permanent",
+        "availability": "available",
+        "requirements": ["Discord サーバーへの参加", "アカウント作成"],
+        "limits": [
+          {
+            "metric": "rpm",
+            "value": 40,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 10"
+          },
+          {
+            "metric": "rph",
+            "value": 1000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 200"
+          },
+          {
+            "metric": "rpd",
+            "value": 5000,
+            "scope": "account",
+            "note": "Standard ティア。最初の 24 時間は 500"
+          },
+          { "metric": "concurrency", "value": 6, "scope": "account", "note": "Standard ティア" }
+        ],
+        "quota": { "kind": "none", "amount": null, "period": "none", "scope": "account" },
+        "caveats": [
+          "モデル ID に economy/ 接頭辞が付く。通常版とは別の提供枠。",
+          "上限はアカウント単位で全モデル共有。",
+          "全リクエストの内容が記録される。"
+        ],
+        "expires_on": null
+      },
+      "verification": [
+        {
+          "method": "connection",
+          "status": "untested",
+          "tested_at": null,
+          "opencode_version": null,
+          "notes": null
+        }
+      ],
+      "performance": [
+        {
+          "benchmark": "ProgramBench / SWE-bench Verified / Aider Polyglot",
+          "url": "https://tonbiattack.github.io/ai-plan-radar/models/",
+          "as": "DeepSeek V4.1 Flash",
+          "note": "economy 版は通常版と同一構成とは限らないため、数値をそのまま当てはめない。"
+        }
+      ],
+      "caveats": ["economy 版のため、提供元の構成や量子化が通常版と異なる可能性がある。"],
+      "sources": [
+        {
+          "field": "無料枠とレート制限",
+          "value": "Standard は無料。40/分・1,000/時・5,000/日、同時 6",
+          "source_url": "https://logfare.ai/docs",
+          "source_type": "official",
+          "observed_at": null,
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        },
+        {
+          "field": "Standard ティアでの提供",
+          "value": "access_tier=standard, tools=true, context_length=256000",
+          "source_url": "https://logfare.ai/v1/models",
+          "source_type": "official",
+          "observed_at": "2026-11-15",
+          "checked_at": "2026-11-15",
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}

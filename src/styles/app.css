@@ -503,6 +503,91 @@
   color: var(--ink-faint);
 }
 
+/* 登録の手間は「使えるまでの障壁」なので、色ではなく形で強弱を付ける。 */
+.signup {
+  display: inline-block;
+  font-size: 0.69rem;
+  padding: 1px 5px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  border: 1px solid transparent;
+  color: var(--ink-soft);
+  background: var(--paper-sunken);
+  border-color: var(--rule);
+}
+
+.signup--instant {
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-color: color-mix(in srgb, var(--ok) 25%, transparent);
+}
+
+.signup--discord {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: color-mix(in srgb, var(--warn) 28%, transparent);
+}
+
+.signup--paid {
+  color: var(--stop);
+  background: var(--stop-soft);
+  border-color: color-mix(in srgb, var(--stop) 28%, transparent);
+}
+
+.signup--waitlist {
+  color: var(--unknown);
+  background: var(--unknown-soft);
+  border-color: color-mix(in srgb, var(--unknown) 25%, transparent);
+}
+
+.signup--unknown {
+  color: var(--ink-faint);
+  background: transparent;
+  border: 1px dashed var(--rule-strong);
+}
+
+.facts__note {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  line-height: 1.55;
+}
+
+.perf-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.84rem;
+}
+
+.perf-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 2px solid var(--rule);
+  padding-left: 12px;
+}
+
+.perf-list a {
+  font-weight: 600;
+}
+
+.perf-list__as {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+}
+
+.perf-list__note {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  line-height: 1.65;
+  max-width: 62ch;
+}
+
 .limit-list {
   list-style: none;
   margin: 0;
