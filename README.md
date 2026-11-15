@@ -106,7 +106,6 @@ npm run dev
 ```
 data/
   providers/<provider-id>.json   # プロバイダー 1 件 = ファイル 1 件（モデルを含む）
-  models.json                    # 提供元をまたぐモデルの正規名・別名
   changelog.json                 # 変更履歴
   watch-sources.json             # 変更検知の監視対象
 docs/SPEC.md                     # 仕様書
