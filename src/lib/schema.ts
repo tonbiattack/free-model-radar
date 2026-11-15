@@ -9,12 +9,11 @@ import { z } from "zod";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD 形式で指定してください");
 
-const isoDateTime = z
-  .string()
-  .regex(
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:\d{2})$/,
-    "ISO 8601 の日時で指定してください",
-  );
+const isoDateTime = z.string().regex(
+  // 小数秒（ミリ秒）を含む ISO 8601 を許可する。Date#toISOString は .123Z を返すため。
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/,
+  "ISO 8601 の日時で指定してください",
+);
 
 /** 3値。unknown は「未確認」であり、no（非対応）ではない。 */
 export const tristateSchema = z.enum(["yes", "no", "unknown"]);

@@ -50,10 +50,10 @@ export function SiteFooter() {
             <Link to={withLocale("/method", locale)}>{t.nav.method}</Link>
             <Link to={withLocale("/changes", locale)}>{t.nav.changes}</Link>
             <a href="https://github.com/tonbiattack/free-model-radar">GitHub</a>
-            <a href="https://github.com/tonbiattack/ai-plan-radar">
+            <a href="https://tonbiattack.github.io/ai-plan-radar/">
               {locale === "ja"
-                ? "ai-plan-radar（料金プラン比較）"
-                : "ai-plan-radar (plan comparison)"}
+                ? "AI Plan Radar（AIコーディングサービスの料金・利用枠を比較）"
+                : "AI Plan Radar (compare AI coding service plans and limits, in Japanese)"}
             </a>
           </p>
         </div>

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import source from "../data/i18n/source.json";
@@ -47,6 +48,74 @@ for (const entry of entries) {
   const lost = [...before].filter((n) => !after.has(n));
   if (lost.length > 0) {
     problems.push(`数値の欠落: "${entry.ja.slice(0, 40)}" に ${lost.join(", ")}`);
+  }
+}
+
+// 5. 原文の識別性の高いトークンが訳に残っているか。
+//    位置ずれで別の訳が入ると、ここで検出できる。
+const tokens = [
+  "SSE",
+  "response_format",
+  "OpenCode",
+  "Neurons",
+  "Discord",
+  "chat/completions",
+  "DeepSeek",
+  "Gemini",
+  "Groq",
+  "Logfare",
+  "Cerebras",
+  "OpenRouter",
+  "Cloudflare",
+  "GLM",
+  "Qwen",
+  "Gemma",
+  "Kimi",
+  "MiniMax",
+  "Nemotron",
+  "Llama",
+  "Mistral",
+  "Big Pickle",
+  "Inkling",
+  "LongCat",
+  "Beam",
+  "NVIDIA",
+  "Workers",
+];
+// "tool_calls" は英語で "tool_call" と単数形になり得るため、語幹で比較する
+const stemWords = ["tool_call"];
+const paraphraseable = new Set(["RPM", "RPD", "TPM", "TPD"]);
+
+for (const entry of entries) {
+  const translated = translations[entry.key] ?? "";
+  const present = tokens.filter((token) => entry.ja.toLowerCase().includes(token.toLowerCase()));
+  const missing = present.filter((token) => {
+    if (paraphraseable.has(token)) return false;
+    if (translated.toLowerCase().includes(token.toLowerCase())) return false;
+    // 英語では複数形・単数形の差やアンダースコアの有無があり得る
+    const loose = token.toLowerCase().replace(/[_-]/g, "");
+    return !translated.toLowerCase().replace(/[_-]/g, "").includes(loose);
+  });
+  // 語幹で見るものは別に判定する（単数形を許容）
+  const normalize = (value: string) => value.toLowerCase().replace(/[_-]/g, "");
+  const stemMissing = stemWords.filter(
+    (stem) =>
+      normalize(entry.ja).includes(normalize(stem)) &&
+      !normalize(translated).includes(normalize(stem)),
+  );
+
+  if (missing.length > 0 || stemMissing.length > 0) {
+    problems.push(
+      `訳の位置ずれ疑い: "${entry.ja.slice(0, 40)}" の ${[...missing, ...stemMissing].join(", ")} が訳にありません`,
+    );
+  }
+}
+
+// 6. 原文ハッシュが現在の原文と一致しているか
+for (const entry of entries) {
+  const expected = createHash("sha256").update(entry.ja, "utf8").digest("hex").slice(0, 16);
+  if (expected !== entry.key) {
+    problems.push(`キーの不整合: "${entry.ja.slice(0, 40)}"`);
   }
 }
 

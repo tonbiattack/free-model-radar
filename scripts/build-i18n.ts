@@ -17,33 +17,37 @@ interface Source {
 
 const source = JSON.parse(readFileSync(sourceFile, "utf8")) as Source;
 
-if (source.entries.length !== translations.length) {
-  console.error(
-    `件数が一致しません: 原文 ${source.entries.length} 件 / 訳 ${translations.length} 件\n` +
-      "scripts/translations.ts を data/i18n/source.json と同じ順序・件数にしてください。",
-  );
-  process.exit(1);
-}
+// 原文をキーにした対応表。順序に依存しないため、翻訳対象が増えても
+// 位置ずれで別の訳が入ることがない。
+const byOriginal = translations as Record<string, string>;
 
 const en: Record<string, string> = {};
 const problems: string[] = [];
 
-source.entries.forEach((entry, index) => {
-  const translated = translations[index];
+for (const entry of source.entries) {
+  const translated = byOriginal[entry.ja];
   if (translated === undefined) {
     problems.push(`訳がありません: ${entry.ja.slice(0, 40)}`);
-    return;
+    continue;
   }
   if (!translated.trim()) {
     problems.push(`訳が空です: ${entry.ja.slice(0, 40)}`);
-    return;
+    continue;
   }
   // 日本語が残っていないか（訳し忘れの検出）
   if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(translated)) {
     problems.push(`訳に日本語が残っています: ${translated.slice(0, 40)}`);
   }
   en[entry.key] = translated;
-});
+}
+
+// 参照されていない訳（原文が変わった・消えた）
+const japanese = new Set(source.entries.map((entry) => entry.ja));
+for (const original of Object.keys(byOriginal)) {
+  if (!japanese.has(original)) {
+    problems.push(`参照されていない訳: "${original.slice(0, 40)}"（原文が変わった可能性）`);
+  }
+}
 
 if (problems.length > 0) {
   console.error(`翻訳に問題があります (${problems.length} 件):`);
@@ -53,33 +57,9 @@ if (problems.length > 0) {
 
 writeFileSync(enFile, `${JSON.stringify(en, null, 2)}\n`, "utf8");
 
-// 原文に含まれる数値・URL・ID が訳でも保持されているかを確認する。
-// 数値の取り違えは情報の誤りに直結するため、機械的に検査する。
-// 「1 日」→「per day」のような言い換えは正当なので、3 桁以上の数値だけを見る
-// （レート制限・料金・コンテキスト長はすべて 3 桁以上になる）。
-const significantNumbers = (text: string) =>
-  (text.match(/\d[\d,]*(?:\.\d+)?/g) ?? [])
-    .map((n) => n.replace(/,$/, ""))
-    .filter((n) => Number(n.replace(/,/g, "")) >= 100);
-
-let missingNumbers = 0;
-source.entries.forEach((entry, index) => {
-  const before = new Set(significantNumbers(entry.ja));
-  const after = new Set(significantNumbers(translations[index] ?? ""));
-  const lost = [...before].filter((n) => !after.has(n));
-  if (lost.length > 0) {
-    missingNumbers += 1;
-    if (missingNumbers <= 10) {
-      console.log(`数値の欠落: "${entry.ja.slice(0, 40)}" に ${lost.join(", ")}`);
-    }
-  }
-});
-
 // 照合のための補助情報
 const unused = Object.keys(en).filter((key) => !source.entries.some((e) => e.key === key));
 console.log(`翻訳を ${Object.keys(en).length} 件書き出しました: ${enFile}`);
-if (missingNumbers > 0)
-  console.log(`数値が原文にない訳: ${missingNumbers} 件（意図した言い換えか確認してください）`);
 if (unused.length > 0) console.log(`参照されない訳: ${unused.length} 件`);
 
 // ハッシュ関数が安定していることの自己確認

@@ -230,6 +230,13 @@
       ]
     },
     {
+      "key": "26a5cd44bfe6698c",
+      "ja": "API のモデル ID にスラッシュが含まれる（economy/deepseek-v4.1-flash）。OpenCode の provider/model 区切りと衝突するため、素の API 呼び出しは成功するが OpenCode からは provider.no-route で解決できなかった（OpenCode 2.3.0 で検証）。",
+      "where": [
+        "model:logfare-deepseek-v4-1-flash-economy:caveats[1]"
+      ]
+    },
+    {
       "key": "624ca18adc99fda6",
       "ja": "base_url を https://generativelanguage.googleapis.com/v1beta/openai/ にすると OpenAI ライブラリから呼べる",
       "where": [
@@ -262,6 +269,15 @@
       "ja": "Cerebras レート制限（Free Trial）",
       "where": [
         "watch:cerebras:rate-limits"
+      ]
+    },
+    {
+      "key": "89f2c91227d0093e",
+      "ja": "chat/completions が応答した",
+      "where": [
+        "model:logfare-qwen-3-8-27b:verification[0].notes",
+        "model:logfare-gemma-4-26b:verification[0].notes",
+        "model:logfare-deepseek-v4-1-flash-economy:verification[0].notes"
       ]
     },
     {
@@ -738,6 +754,13 @@
       ]
     },
     {
+      "key": "25ea0e257f10c367",
+      "ja": "OpenCode で読み取りタスクが失敗",
+      "where": [
+        "model:logfare-deepseek-v4-1-flash-economy:verification[4].notes"
+      ]
+    },
+    {
       "key": "4dd8ac332f865df9",
       "ja": "OpenCode のドキュメントに Groq 専用のセットアップ手順が用意されている。",
       "where": [
@@ -749,6 +772,14 @@
       "ja": "OpenCode の提供元が運営する推論ゲートウェイ。無料モデルはクレジットを追加せずに使える。",
       "where": [
         "provider:opencode-zen:notes[0]"
+      ]
+    },
+    {
+      "key": "24555e267ae590cc",
+      "ja": "OpenCode 経由でファイル読み取りと短い編集タスクを完走した",
+      "where": [
+        "model:logfare-qwen-3-8-27b:verification[4].notes",
+        "model:logfare-gemma-4-26b:verification[4].notes"
       ]
     },
     {
@@ -815,6 +846,15 @@
       ]
     },
     {
+      "key": "1debdcfa4ec59bfa",
+      "ja": "response_format を指定して JSON を取得（keys: language, line_count）",
+      "where": [
+        "model:logfare-qwen-3-8-27b:verification[3].notes",
+        "model:logfare-gemma-4-26b:verification[3].notes",
+        "model:logfare-deepseek-v4-1-flash-economy:verification[3].notes"
+      ]
+    },
+    {
       "key": "b3b833c5f0d1fef6",
       "ja": "RPD 1,000 は 1 日の試行回数の上限として意識する。",
       "where": [
@@ -840,6 +880,15 @@
       "ja": "RPM 5 はエージェントの反復実行には少なすぎる。",
       "where": [
         "model:cerebras-gpt-oss-120b:freeTier.caveats[2]"
+      ]
+    },
+    {
+      "key": "97116905803aa418",
+      "ja": "SSE の data チャンクを確認",
+      "where": [
+        "model:logfare-qwen-3-8-27b:verification[1].notes",
+        "model:logfare-gemma-4-26b:verification[1].notes",
+        "model:logfare-deepseek-v4-1-flash-economy:verification[1].notes"
       ]
     },
     {
@@ -923,6 +972,15 @@
       "where": [
         "model:groq-gpt-oss-120b:sources[2].value",
         "model:groq-llama-3-3-70b:sources[0].value"
+      ]
+    },
+    {
+      "key": "6ed983b16ab0cb45",
+      "ja": "tool_calls を 1 件返した",
+      "where": [
+        "model:logfare-qwen-3-8-27b:verification[2].notes",
+        "model:logfare-gemma-4-26b:verification[2].notes",
+        "model:logfare-deepseek-v4-1-flash-economy:verification[2].notes"
       ]
     },
     {

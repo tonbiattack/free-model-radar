@@ -224,15 +224,34 @@ CI で弾かれるものの例:
 手順・書き方・レビューの流れは [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 脆弱性の報告は [SECURITY.md](SECURITY.md) へお願いします。
 
-## 実機検証
+## 実機検証 / Verification
 
 `verify-models.ts` は環境変数にキーがある場合だけ実行し、**費用が発生する検証は行いません**。
 キーがない場合はスキップして「未実施」のままにします。
 
 ```bash
-# 例: Groq のモデルで接続とツール呼び出しを確認する
-GROQ_API_KEY=... npm run verify:models -- --provider groq
+# API レベル（接続・ストリーミング・ツール呼び出し・JSON・短い編集）
+LOGFARE_API_KEY=... npm run verify:models -- --provider logfare
+
+# OpenCode 経由（実際にエージェントタスクを走らせる）
+LOGFARE_API_KEY=... npm run verify:opencode -- --provider logfare --write
 ```
+
+### 2026-11-15 時点の実測結果（Logfare, OpenCode 2.3.0）
+
+| モデル                      | 接続 | Streaming | Tool calling | JSON | OpenCode 編集タスク |
+| --------------------------- | ---- | --------- | ------------ | ---- | ------------------- |
+| Qwen 3.8 27B                | 成功 | 成功      | 成功         | 成功 | 成功                |
+| Gemma 4 26B                 | 成功 | 成功      | 成功         | 成功 | 成功                |
+| DeepSeek V4.1 Flash Economy | 成功 | 成功      | 成功         | 成功 | **失敗**            |
+
+DeepSeek Economy は素の API では全項目通りますが、OpenCode からは解決できませんでした。
+モデル ID が `economy/deepseek-v4.1-flash` で、OpenCode の `provider/model` 区切りと
+スラッシュが衝突するためです（`provider.no-route`）。この制約はデータの注意点にも記載しています。
+
+**429 は失敗として記録しません。** レート制限は能力の失敗ではないため `unknown` とし、
+`Retry-After` を尊重して再試行します。実際、初回実行では Gemma が 429 になりましたが、
+待って再試行すると全項目通しました。
 
 利用者の API キーをサイトが預かることはありません。サイト上にキーの入力欄もありません。
 

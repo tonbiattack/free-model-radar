@@ -119,10 +119,38 @@
       "verification": [
         {
           "method": "connection",
-          "status": "untested",
-          "tested_at": null,
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
           "opencode_version": null,
-          "notes": null
+          "notes": "chat/completions が応答した"
+        },
+        {
+          "method": "streaming",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "SSE の data チャンクを確認"
+        },
+        {
+          "method": "tool-calling",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "tool_calls を 1 件返した"
+        },
+        {
+          "method": "json-mode",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "response_format を指定して JSON を取得（keys: language, line_count）"
+        },
+        {
+          "method": "agent-task",
+          "status": "passed",
+          "tested_at": "2026-11-15T15:15:54.961Z",
+          "opencode_version": "2.3.0",
+          "notes": "OpenCode 経由でファイル読み取りと短い編集タスクを完走した"
         }
       ],
       "performance": [
@@ -218,10 +246,38 @@
       "verification": [
         {
           "method": "connection",
-          "status": "untested",
-          "tested_at": null,
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
           "opencode_version": null,
-          "notes": null
+          "notes": "chat/completions が応答した"
+        },
+        {
+          "method": "streaming",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "SSE の data チャンクを確認"
+        },
+        {
+          "method": "tool-calling",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "tool_calls を 1 件返した"
+        },
+        {
+          "method": "json-mode",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "response_format を指定して JSON を取得（keys: language, line_count）"
+        },
+        {
+          "method": "agent-task",
+          "status": "passed",
+          "tested_at": "2026-11-15T15:17:39.361Z",
+          "opencode_version": "2.3.0",
+          "notes": "OpenCode 経由でファイル読み取りと短い編集タスクを完走した"
         }
       ],
       "performance": [
@@ -314,10 +370,38 @@
       "verification": [
         {
           "method": "connection",
-          "status": "untested",
-          "tested_at": null,
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
           "opencode_version": null,
-          "notes": null
+          "notes": "chat/completions が応答した"
+        },
+        {
+          "method": "streaming",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "SSE の data チャンクを確認"
+        },
+        {
+          "method": "tool-calling",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "tool_calls を 1 件返した"
+        },
+        {
+          "method": "json-mode",
+          "status": "passed",
+          "tested_at": "2026-11-15T14:59:31.166Z",
+          "opencode_version": null,
+          "notes": "response_format を指定して JSON を取得（keys: language, line_count）"
+        },
+        {
+          "method": "agent-task",
+          "status": "failed",
+          "tested_at": "2026-11-15T15:17:44.507Z",
+          "opencode_version": "2.3.0",
+          "notes": "OpenCode で読み取りタスクが失敗"
         }
       ],
       "performance": [
@@ -328,7 +412,10 @@
           "note": "economy 版は通常版と同一構成とは限らないため、数値をそのまま当てはめない。"
         }
       ],
-      "caveats": ["economy 版のため、提供元の構成や量子化が通常版と異なる可能性がある。"],
+      "caveats": [
+        "economy 版のため、提供元の構成や量子化が通常版と異なる可能性がある。",
+        "API のモデル ID にスラッシュが含まれる（economy/deepseek-v4.1-flash）。OpenCode の provider/model 区切りと衝突するため、素の API 呼び出しは成功するが OpenCode からは provider.no-route で解決できなかった（OpenCode 2.3.0 で検証）。"
+      ],
       "sources": [
         {
           "field": "無料枠とレート制限",

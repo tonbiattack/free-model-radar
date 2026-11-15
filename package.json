@@ -21,6 +21,7 @@
     "validate:data": "tsx scripts/validate-data.ts",
     "check": "npm run lint && npm run build:data && npm run test && npm run build",
     "verify:models": "tsx scripts/verify-models.ts",
+    "verify:opencode": "node scripts/verify-opencode.mjs",
     "watch:changes": "tsx scripts/watch-changes.ts"
   },
   "dependencies": {

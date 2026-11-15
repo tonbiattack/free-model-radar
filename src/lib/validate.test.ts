@@ -137,6 +137,21 @@ describe("validateDataset", () => {
     expect(result.errors.some((e) => e.message.includes("恒久無料"))).toBe(true);
   });
 
+  it("ミリ秒付きの ISO 8601 日時を受け付ける（Date#toISOString の形式）", () => {
+    const data = baseDataset();
+    data.models[0]!.verification = [
+      {
+        method: "connection",
+        status: "passed",
+        tested_at: new Date("2026-11-15T15:17:44.507Z").toISOString(),
+        opencode_version: "2.3.0",
+        notes: "ok",
+      },
+    ];
+    const result = validateDataset(data, { today });
+    expect(result.ok).toBe(true);
+  });
+
   it("検証成功なのに検証日時がない場合を拒否する", () => {
     const data = baseDataset();
     data.models[0]!.verification = [
