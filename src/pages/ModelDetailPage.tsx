@@ -3,10 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { dataset } from "@/lib/dataset";
 import { groupModels, offerPath, type ModelGroup, type Offer } from "@/lib/groups";
 import { LOADED_AT_MS } from "@/lib/clock";
+import { translateText } from "@/lib/data-i18n";
 import {
   daysSinceMs,
-  formatDate,
-  formatDateTime,
   formatLimitValue,
   formatNumber,
   formatTokens,
@@ -16,20 +15,20 @@ import {
   verificationSummary,
 } from "@/lib/format";
 import {
-  apiFormatLabel,
-  authLabel,
-  availabilityLabel,
-  freeTierTypeDescription,
-  freeTierTypeLabel,
-  limitMetricLabel,
-  limitMetricLong,
-  limitScopeLabel,
-  signupFrictionDescription,
-  signupFrictionLabel,
-  tristateLabel,
-  verificationMethodLabel,
-  verificationStatusLabel,
-} from "@/lib/labels";
+  apiFormatLabelWith,
+  authLabelWith,
+  availabilityLabelWith,
+  formatDateLocale,
+  limitMetricLabelWith,
+  limitMetricLongWith,
+  limitScopeLabelWith,
+  signupFrictionLabelWith,
+  tristateLabelWith,
+  verificationMethodLabelWith,
+  verificationStatusLabelWith,
+} from "@/lib/labels-i18n";
+import { useI18n } from "@/lib/i18n";
+import { withLocale } from "@/lib/locale";
 import { buildOpencodeConfig, keyEnvVar, setupSteps } from "@/lib/opencode-config";
 import {
   FreeTierBadge,
@@ -50,11 +49,12 @@ import { NotFoundPage } from "./NotFoundPage";
  * 比較表で選ばせてから、詳細に降りる導線にしている。
  */
 export function ModelDetailPage() {
+  const { t } = useI18n();
   const { modelId, providerId } = useParams<{ modelId: string; providerId?: string }>();
   const group = groupModels(dataset).find((entry) => entry.canonical.id === modelId);
 
   if (!group) {
-    return <NotFoundPage reason="指定されたモデルが見つかりませんでした。" />;
+    return <NotFoundPage reason={t.notFound.modelMissing} />;
   }
 
   if (!providerId) {
@@ -63,9 +63,7 @@ export function ModelDetailPage() {
 
   const offer = group.offers.find((entry) => entry.provider.id === providerId);
   if (!offer) {
-    return (
-      <NotFoundPage reason={`${group.canonical.name} は指定された提供元では扱われていません。`} />
-    );
+    return <NotFoundPage reason={t.notFound.offerMissing(group.canonical.name)} />;
   }
 
   return <ModelDetail group={group} offer={offer} />;
@@ -76,14 +74,16 @@ export function ModelDetailPage() {
  * 「このモデルを無料で使える提供元」を横断して比べるのがこの画面の役割。
  */
 function ModelOverview({ group }: { group: ModelGroup }) {
+  const { locale, t } = useI18n();
   const name = group.canonical.name;
   const liveOffers = group.offers.filter((offer) => offer.model.free_tier.availability !== "ended");
   const shown = liveOffers.length > 0 ? liveOffers : group.offers;
+  const endedCount = group.offers.length - shown.length;
 
   return (
     <>
-      <nav className="breadcrumb" aria-label="パンくず">
-        <Link to="/">モデル一覧</Link>
+      <nav className="breadcrumb" aria-label={t.nav.mainLabel}>
+        <Link to={withLocale("/", locale)}>{t.detail.breadcrumbModels}</Link>
         <span aria-hidden="true">/</span>
         <span>{name}</span>
       </nav>
@@ -93,10 +93,8 @@ function ModelOverview({ group }: { group: ModelGroup }) {
           <p className="detail-head__provider">{group.canonical.developer}</p>
           <h1>{name}</h1>
           <p className="detail-head__id">
-            無料で使える提供元 {shown.length} 件
-            {group.offers.length > shown.length
-              ? `（終了 ${group.offers.length - shown.length} 件）`
-              : ""}
+            {t.detail.providersCount(shown.length)}
+            {endedCount > 0 ? t.detail.providerEnded(endedCount) : ""}
           </p>
         </div>
         <div className="detail-head__badges">
@@ -111,33 +109,28 @@ function ModelOverview({ group }: { group: ModelGroup }) {
       {group.canonical.notes.length > 0 ? (
         <ul className="caveats caveats--tight">
           {group.canonical.notes.map((note) => (
-            <li key={note}>{note}</li>
+            <li key={note}>{translateText(note, locale)}</li>
           ))}
         </ul>
       ) : null}
 
-      <Section title="このモデルを無料で使える提供元">
-        <p className="section-note">
-          同じモデルでも、提供元によって無料枠の種別・制限・登録の手間が違います。
-          数値は単位と適用範囲が揃っている場合だけ比較できるため、単純な優劣はつけていません。
-        </p>
+      <Section title={t.detail.compare.title}>
+        <p className="section-note">{t.detail.compare.note}</p>
 
         <div className="compare-wrap">
           <table className="compare-table">
-            <caption className="sr-only">
-              {name} を提供する事業者の比較。提供元ごとに条件が異なります。
-            </caption>
+            <caption className="sr-only">{t.detail.compare.title}</caption>
             <thead>
               <tr>
-                <th scope="col">提供元</th>
-                <th scope="col">無料枠</th>
-                <th scope="col">主な制限</th>
-                <th scope="col">カード</th>
-                <th scope="col">登録</th>
-                <th scope="col">ツール</th>
-                <th scope="col">検証</th>
-                <th scope="col">確認日</th>
-                <th scope="col">設定</th>
+                <th scope="col">{t.detail.compare.provider}</th>
+                <th scope="col">{t.detail.compare.freeTier}</th>
+                <th scope="col">{t.detail.compare.limits}</th>
+                <th scope="col">{t.detail.compare.card}</th>
+                <th scope="col">{t.detail.compare.signup}</th>
+                <th scope="col">{t.detail.compare.tools}</th>
+                <th scope="col">{t.detail.compare.verification}</th>
+                <th scope="col">{t.detail.compare.checked}</th>
+                <th scope="col">{t.detail.compare.config}</th>
               </tr>
             </thead>
             <tbody>
@@ -149,19 +142,14 @@ function ModelOverview({ group }: { group: ModelGroup }) {
         </div>
 
         <ul className="compare-notes">
-          <li>
-            「カード」はクレジットカード登録の要否です。「不明」は登録が要るという意味ではありません。
-          </li>
-          <li>制限の適用範囲が違うため、数値の大きさだけでは比較できません。</li>
-          <li>提供元ごとの詳しい条件と OpenCode の設定例は、提供元名から開けます。</li>
+          <li>{t.detail.compare.cardNote}</li>
+          <li>{t.detail.compare.scopeNote}</li>
+          <li>{t.detail.compare.openNote}</li>
         </ul>
       </Section>
 
-      <Section title="性能">
-        <p className="section-note">
-          性能はこのサイトで測っていません。モデル単位の比較ページへリンクします。
-          提供元が違っても同じモデルなら同じ数値が載っていますが、配信構成の違いで実測は変わり得ます。
-        </p>
+      <Section title={t.detail.sections.performance}>
+        <p className="section-note">{t.detail.perfNote}</p>
         <PerformanceList refs={group.offers[0]?.model.performance ?? []} />
       </Section>
     </>
@@ -169,6 +157,7 @@ function ModelOverview({ group }: { group: ModelGroup }) {
 }
 
 function CompareRow({ offer }: { offer: Offer }) {
+  const { locale, t } = useI18n();
   const { model, provider } = offer;
   const limits = sortedLimits(model.free_tier.limits).slice(0, 3);
   const checked = latestCheck(model);
@@ -178,7 +167,7 @@ function CompareRow({ offer }: { offer: Offer }) {
   return (
     <tr className={ended ? "is-ended" : undefined}>
       <th scope="row">
-        <Link to={offerPath(offer)} className="model-link">
+        <Link to={withLocale(offerPath(offer), locale)} className="model-link">
           {provider.name}
         </Link>
         <span className="model-row__meta">
@@ -193,32 +182,32 @@ function CompareRow({ offer }: { offer: Offer }) {
       </td>
       <td>
         {limits.length === 0 ? (
-          <span className="muted">記載なし</span>
+          <span className="muted">{t.table.noLimits}</span>
         ) : (
           <ul className="limit-list">
             {limits.map((limit) => (
               <li key={`${limit.metric}-${limit.scope}`}>
-                <span className="limit-list__metric">{limitMetricLabel[limit.metric]}</span>
+                <span className="limit-list__metric">{limitMetricLabelWith(t, limit.metric)}</span>
                 <span className="limit-list__value">{formatLimitValue(limit)}</span>
-                <span className="limit-list__scope">{limitScopeLabel[limit.scope]}</span>
+                <span className="limit-list__scope">{limitScopeLabelWith(t, limit.scope)}</span>
               </li>
             ))}
             {model.free_tier.limits.length > 3 ? (
-              <li className="muted">他 {model.free_tier.limits.length - 3} 件</li>
+              <li className="muted">{t.table.more(model.free_tier.limits.length - 3)}</li>
             ) : null}
           </ul>
         )}
       </td>
       <td>
         {provider.credit_card_required === "yes"
-          ? "必要"
+          ? t.detail.cardRequired
           : provider.credit_card_required === "no"
-            ? "不要"
-            : "不明"}
+            ? t.detail.cardNotRequired
+            : t.table.unknown}
       </td>
       <td>
         <span className={`signup signup--${provider.signup_friction ?? "unknown"}`}>
-          {signupFrictionLabel[provider.signup_friction ?? "unknown"]}
+          {signupFrictionLabelWith(t, provider.signup_friction ?? "unknown")}
         </span>
       </td>
       <td>
@@ -230,18 +219,18 @@ function CompareRow({ offer }: { offer: Offer }) {
       <td>
         {checked ? (
           <span className="checked-cell">
-            <time dateTime={checked}>{formatDate(checked)}</time>
+            <time dateTime={checked}>{formatDateLocale(checked, locale)}</time>
           </span>
         ) : (
-          <span className="muted">不明</span>
+          <span className="muted">{t.table.unknown}</span>
         )}
       </td>
       <td>
         {ended ? (
           <span className="muted">—</span>
         ) : (
-          <Link to={offerPath(offer)} className="text-link">
-            開く
+          <Link to={withLocale(offerPath(offer), locale)} className="text-link">
+            {t.detail.compare.open}
           </Link>
         )}
       </td>
@@ -250,8 +239,9 @@ function CompareRow({ offer }: { offer: Offer }) {
 }
 
 function PerformanceList({ refs }: { refs: ModelGroup["offers"][number]["model"]["performance"] }) {
+  const { t } = useI18n();
   if (refs.length === 0) {
-    return <p className="empty-note">性能の参照先が登録されていません。</p>;
+    return <p className="empty-note">{t.detail.perfNone}</p>;
   }
   return (
     <ul className="perf-list">
@@ -262,7 +252,7 @@ function PerformanceList({ refs }: { refs: ModelGroup["offers"][number]["model"]
           </a>
           {ref.as ? (
             <span className="perf-list__as">
-              リンク先での表記: <code>{ref.as}</code>
+              {t.detail.perfAs} <code>{ref.as}</code>
             </span>
           ) : null}
           {ref.note ? <span className="perf-list__note">{ref.note}</span> : null}
@@ -273,22 +263,22 @@ function PerformanceList({ refs }: { refs: ModelGroup["offers"][number]["model"]
 }
 
 function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
+  const { locale, t } = useI18n();
   const { model, provider } = offer;
   const checked = latestCheck(model);
   const freshness = checked ? freshnessAt(checked, LOADED_AT_MS) : null;
   const limits = sortedLimits(model.free_tier.limits);
   // 生成は純粋で軽いので、メモ化せず素直に呼ぶ（React Compiler が自動で扱う）。
-  const config = buildOpencodeConfig(provider, model);
+  const config = buildOpencodeConfig(provider, model, { locale });
 
-  // 同じモデルの他の提供元。比較へ戻る導線として出す。
   const siblings = group.offers.filter((entry) => entry.provider.id !== provider.id);
 
   return (
     <>
-      <nav className="breadcrumb" aria-label="パンくず">
-        <Link to="/">モデル一覧</Link>
+      <nav className="breadcrumb" aria-label={t.nav.mainLabel}>
+        <Link to={withLocale("/", locale)}>{t.detail.breadcrumbModels}</Link>
         <span aria-hidden="true">/</span>
-        <Link to={`/models/${group.canonical.id}`}>{group.canonical.name}</Link>
+        <Link to={withLocale(`/models/${group.canonical.id}`, locale)}>{group.canonical.name}</Link>
         <span aria-hidden="true">/</span>
         <span>{provider.name}</span>
       </nav>
@@ -296,7 +286,9 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
       <header className="detail-head">
         <div>
           <p className="detail-head__provider">
-            {group.canonical.name} を {provider.name} で使う
+            {t.detail.compareIn
+              .replace("{model}", group.canonical.name)
+              .replace("{provider}", provider.name)}
           </p>
           <h1>{group.canonical.name}</h1>
           <p className="detail-head__id">
@@ -310,67 +302,72 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
           />
           <span className="availability-text">
             <AvailabilityMark availability={model.free_tier.availability} />
-            {availabilityLabel[model.free_tier.availability]}
+            {availabilityLabelWith(t, model.free_tier.availability)}
           </span>
         </div>
       </header>
 
       {group.offers.length > 1 ? (
         <p className="sibling-banner">
-          このモデルは他に {siblings.length} 件の提供元があります。
-          <Link to={`/models/${group.canonical.id}`}>提供元を比較する</Link>
+          {t.detail.othersBanner(siblings.length)}
+          <Link to={withLocale(`/models/${group.canonical.id}`, locale)}>
+            {t.detail.providerCompare}
+          </Link>
         </p>
       ) : null}
 
       {model.free_tier.availability === "ended" ? (
         <p className="callout callout--stop" role="alert">
-          この無料枠は現在利用できません。設定に使わないでください。
+          {t.detail.endedCallout}
         </p>
       ) : null}
 
       {freshness === "stale" && checked ? (
         <p className="callout callout--warn" role="status">
-          最終確認から {daysSinceMs(checked, LOADED_AT_MS)} 日経過しています。
-          条件が変わっている可能性があるため、下の出典で最新の内容を確認してください。
+          {t.detail.staleCallout(daysSinceMs(checked, LOADED_AT_MS))}
         </p>
       ) : null}
 
       <div className="detail-grid">
         <div className="detail-main">
-          <Section title="無料枠">
-            <p className="section-note">{freeTierTypeDescription[model.free_tier.type]}</p>
+          <Section title={t.detail.sections.freeTier}>
+            <p className="section-note">{t.detail.freeTierNote}</p>
 
             <dl className="facts">
               <div>
-                <dt>種別</dt>
-                <dd>{freeTierTypeLabel[model.free_tier.type]}</dd>
-              </div>
-              <div>
-                <dt>現在の状態</dt>
-                <dd>{availabilityLabel[model.free_tier.availability]}</dd>
-              </div>
-              <div>
-                <dt>前提条件</dt>
+                <dt>{t.detail.type}</dt>
                 <dd>
-                  {model.free_tier.requirements.length === 0
-                    ? "公式に前提の記載なし"
-                    : model.free_tier.requirements.join(" / ")}
+                  <FreeTierBadge type={model.free_tier.type} />
                 </dd>
               </div>
               <div>
-                <dt>クレジット・総量</dt>
+                <dt>{t.detail.status}</dt>
+                <dd>{availabilityLabelWith(t, model.free_tier.availability)}</dd>
+              </div>
+              <div>
+                <dt>{t.detail.requirements}</dt>
+                <dd>
+                  {model.free_tier.requirements.length === 0
+                    ? t.detail.noRequirements
+                    : model.free_tier.requirements
+                        .map((req) => translateText(req, locale))
+                        .join(" / ")}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.detail.quota}</dt>
                 <dd>
                   {model.free_tier.quota.kind === "none"
-                    ? "なし（数値制限のみ）"
+                    ? t.detail.quotaNone
                     : model.free_tier.quota.kind === "unknown"
-                      ? "不明"
-                      : formatQuota(model.free_tier.quota)}
+                      ? t.table.unknown
+                      : formatQuota(model.free_tier.quota, locale, t)}
                 </dd>
               </div>
               {model.free_tier.expires_on ? (
                 <div>
-                  <dt>期限</dt>
-                  <dd>{formatDate(model.free_tier.expires_on)}</dd>
+                  <dt>{t.detail.expiry}</dt>
+                  <dd>{formatDateLocale(model.free_tier.expires_on, locale)}</dd>
                 </div>
               ) : null}
             </dl>
@@ -378,43 +375,50 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
             {model.free_tier.caveats.length > 0 ? (
               <ul className="caveats">
                 {model.free_tier.caveats.map((caveat) => (
-                  <li key={caveat}>{caveat}</li>
+                  <li key={caveat}>{translateText(caveat, locale)}</li>
                 ))}
               </ul>
             ) : null}
           </Section>
 
-          <Section title="レート制限">
+          <Section title={t.detail.sections.rateLimits}>
             {limits.length === 0 ? (
               <p className="empty-note">
-                公式に数値の記載がありません。これは「0」や「利用不可」ではなく、
-                <strong>確認できていない</strong>という意味です。
+                {t.detail.noLimitsDocs}
                 {model.free_tier.quota.kind === "neurons" ||
                 model.free_tier.quota.kind === "currency"
-                  ? " 総量枠（クレジット）で管理されている可能性があります。"
+                  ? t.detail.noLimitsQuotaHint
                   : ""}
               </p>
             ) : (
               <table className="limit-table">
-                <caption className="sr-only">レート制限の数値・単位・適用範囲</caption>
+                <caption className="sr-only">{t.detail.sections.rateLimits}</caption>
                 <thead>
                   <tr>
-                    <th scope="col">単位</th>
-                    <th scope="col">値</th>
-                    <th scope="col">適用範囲</th>
-                    <th scope="col">補足</th>
+                    <th scope="col">{t.detail.unit}</th>
+                    <th scope="col">{t.detail.value}</th>
+                    <th scope="col">{t.detail.scope}</th>
+                    <th scope="col">{t.detail.notes}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {limits.map((limit) => (
                     <tr key={`${limit.metric}-${limit.scope}`}>
                       <th scope="row">
-                        {limitMetricLabel[limit.metric]}
-                        <span className="limit-table__long">{limitMetricLong[limit.metric]}</span>
+                        {limitMetricLabelWith(t, limit.metric)}
+                        <span className="limit-table__long">
+                          {limitMetricLongWith(t, limit.metric)}
+                        </span>
                       </th>
                       <td className="num">{formatLimitValue(limit)}</td>
-                      <td>{limitScopeLabel[limit.scope]}</td>
-                      <td>{limit.note ?? <span className="muted">—</span>}</td>
+                      <td>{limitScopeLabelWith(t, limit.scope)}</td>
+                      <td>
+                        {limit.note ? (
+                          translateText(limit.note, locale)
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -422,183 +426,195 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
             )}
           </Section>
 
-          <Section title="接続情報">
+          <Section title={t.detail.sections.connection}>
             <dl className="facts">
               <div>
-                <dt>API 形式</dt>
-                <dd>{apiFormatLabel[provider.api_format]}</dd>
+                <dt>{t.detail.apiFormat}</dt>
+                <dd>{apiFormatLabelWith(t, provider.api_format)}</dd>
               </div>
               <div>
-                <dt>ベース URL</dt>
+                <dt>{t.detail.baseUrl}</dt>
                 <dd>
                   {provider.base_url ? (
                     <code className="wrap">{provider.base_url}</code>
                   ) : (
-                    "不明（公式に記載なし）"
+                    t.detail.baseUrlUnknown
                   )}
                 </dd>
               </div>
               <div>
-                <dt>認証</dt>
-                <dd>{authLabel[provider.authentication]}</dd>
+                <dt>{t.detail.auth}</dt>
+                <dd>{authLabelWith(t, provider.authentication)}</dd>
               </div>
               <div>
-                <dt>クレジットカード</dt>
+                <dt>{t.detail.card}</dt>
                 <dd>
                   {provider.credit_card_required === "yes"
-                    ? "登録が必要"
+                    ? t.detail.cardRequired
                     : provider.credit_card_required === "no"
-                      ? "不要"
-                      : "不明"}
+                      ? t.detail.cardNotRequired
+                      : t.table.unknown}
                 </dd>
               </div>
               <div>
-                <dt>キー取得までの手間</dt>
-                <dd>
-                  {signupFrictionLabel[provider.signup_friction]}
-                  <span className="facts__note">
-                    {signupFrictionDescription[provider.signup_friction]}
-                  </span>
-                </dd>
+                <dt>{t.detail.signupEffort}</dt>
+                <dd>{signupFrictionLabelWith(t, provider.signup_friction)}</dd>
               </div>
               <div>
-                <dt>OpenCode ネイティブ対応</dt>
+                <dt>{t.detail.opencodeNative}</dt>
                 <dd>
                   {provider.native_opencode === "yes"
-                    ? `対応（カタログ ID: ${provider.opencode_provider_id}）`
+                    ? t.detail.nativeYes(provider.opencode_provider_id ?? "-")
                     : provider.native_opencode === "no"
-                      ? "未対応（カスタム設定が必要）"
-                      : "不明"}
+                      ? t.detail.nativeNo
+                      : t.detail.nativeUnknown}
                 </dd>
               </div>
               <div>
-                <dt>コンテキスト長</dt>
+                <dt>{t.table.context}</dt>
                 <dd>
-                  {model.context_tokens ? `${formatTokens(model.context_tokens)} トークン` : "不明"}
+                  {model.context_tokens
+                    ? t.detail.contextTokens(formatTokens(model.context_tokens))
+                    : t.table.unknown}
                 </dd>
               </div>
               <div>
-                <dt>最大出力</dt>
+                <dt>{t.detail.maxOutput}</dt>
                 <dd>
                   {model.max_output_tokens
-                    ? `${formatTokens(model.max_output_tokens)} トークン`
-                    : "不明"}
+                    ? t.detail.contextTokens(formatTokens(model.max_output_tokens))
+                    : t.table.unknown}
                 </dd>
               </div>
             </dl>
           </Section>
 
-          <Section title="性能">
-            <p className="section-note">
-              性能はこのサイトで測っていません。モデルの比較ページへリンクします。
-            </p>
+          <Section title={t.detail.sections.performance}>
+            <p className="section-note">{t.detail.perfNote}</p>
             <PerformanceList refs={model.performance} />
           </Section>
 
-          <Section title="機能と検証">
+          <Section title={t.detail.sections.capabilities}>
             <div className="two-col">
               <div>
-                <h3 className="subhead">公式記載</h3>
+                <h3 className="subhead">{t.detail.documented}</h3>
                 <ul className="cap-list">
                   {(
                     [
-                      ["tool_calling", "ツール呼び出し"],
-                      ["streaming", "ストリーミング"],
-                      ["json_mode", "JSON モード"],
-                      ["reasoning", "推論（reasoning）"],
+                      ["tool_calling", t.verification["tool-calling"]],
+                      ["streaming", t.verification.streaming],
+                      ["json_mode", t.verification["json-mode"]],
+                      ["reasoning", t.verification.reason],
                     ] as const
                   ).map(([key, label]) => (
                     <li key={key}>
                       <span>{label}</span>
                       <span className={`cap-value cap-value--${model.capabilities[key]}`}>
-                        {tristateLabel[model.capabilities[key]]}
+                        {tristateLabelWith(t, model.capabilities[key])}
                       </span>
                     </li>
                   ))}
                 </ul>
-                <p className="section-note small">
-                  「不明」は公式ドキュメントで確認できなかった項目です。非対応とは限りません。
-                </p>
+                <p className="section-note small">{t.detail.capNote}</p>
               </div>
 
               <div>
-                <h3 className="subhead">実機検証</h3>
+                <h3 className="subhead">{t.detail.tested}</h3>
                 {model.verification.length === 0 ? (
-                  <p className="empty-note">検証の記録がありません。</p>
+                  <p className="empty-note">{t.detail.noVerification}</p>
                 ) : (
                   <ul className="verification-list">
                     {model.verification.map((item) => (
                       <li key={item.method}>
                         <span className="verification-list__method">
-                          {verificationMethodLabel[item.method]}
+                          {verificationMethodLabelWith(t, item.method)}
                         </span>
                         <span
-                          className={`cap-value cap-value--${item.status === "passed" ? "yes" : item.status === "failed" ? "no" : "unknown"}`}
+                          className={`cap-value cap-value--${
+                            item.status === "passed"
+                              ? "yes"
+                              : item.status === "failed"
+                                ? "no"
+                                : "unknown"
+                          }`}
                         >
-                          {verificationStatusLabel[item.status]}
+                          {verificationStatusLabelWith(t, item.status)}
                         </span>
                         {item.tested_at ? (
                           <span className="verification-list__meta">
-                            {formatDateTime(item.tested_at)}
+                            {item.tested_at}
                             {item.opencode_version ? ` / OpenCode ${item.opencode_version}` : ""}
                           </span>
                         ) : (
-                          <span className="verification-list__meta">実施日なし</span>
+                          <span className="verification-list__meta">{t.detail.noTestDate}</span>
                         )}
                         {item.notes ? (
-                          <span className="verification-list__notes">{item.notes}</span>
+                          <span className="verification-list__notes">
+                            {translateText(item.notes, locale)}
+                          </span>
                         ) : null}
                       </li>
                     ))}
                   </ul>
                 )}
                 <p className="section-note small">
-                  単発の成功は長時間のエージェント利用を保証しません。検証条件は
-                  <Link to="/method">調べ方</Link>にまとめています。
+                  {t.detail.verificationNote}{" "}
+                  <Link to={withLocale("/method", locale)}>{t.nav.method}</Link>
                 </p>
               </div>
             </div>
           </Section>
 
           {model.caveats.length > 0 ? (
-            <Section title="エージェント用途の注意">
+            <Section title={t.detail.sections.caveats}>
               <ul className="caveats">
                 {model.caveats.map((caveat) => (
-                  <li key={caveat}>{caveat}</li>
+                  <li key={caveat}>{translateText(caveat, locale)}</li>
                 ))}
               </ul>
             </Section>
           ) : null}
 
-          <Section title="出典と確認日">
+          <Section title={t.detail.sections.sources}>
             <ul className="source-list">
               {model.sources.map((source, index) => {
                 const status = freshnessAt(source.checked_at, LOADED_AT_MS);
                 return (
                   <li key={`${source.source_url}-${index}`}>
                     <p className="source-list__field">
-                      {source.field}
+                      {translateText(source.field, locale)}
                       <span className={`source-type source-type--${source.source_type}`}>
                         {source.source_type === "official"
-                          ? "公式"
+                          ? t.detail.primarySource
                           : source.source_type === "community"
-                            ? "コミュニティ"
-                            : "実機検証"}
+                            ? t.detail.communitySource
+                            : t.detail.testSource}
                       </span>
                     </p>
-                    <p className="source-list__value">{source.value}</p>
+                    <p className="source-list__value">{translateText(source.value, locale)}</p>
                     <p className="source-list__meta">
                       <a href={source.source_url} rel="noreferrer noopener" target="_blank">
                         {source.source_url}
                       </a>
                       <span>
-                        確認{" "}
-                        <time dateTime={source.checked_at}>{formatDate(source.checked_at)}</time>
+                        {t.detail.checkedOn}{" "}
+                        <time dateTime={source.checked_at}>
+                          {formatDateLocale(source.checked_at, locale)}
+                        </time>
                       </span>
                       {source.observed_at ? (
-                        <span>元情報の日付 {formatDate(source.observed_at)}</span>
+                        <span>
+                          {t.detail.observedOn} {formatDateLocale(source.observed_at, locale)}
+                        </span>
                       ) : null}
-                      <span>信頼度 {confidenceLabel[source.confidence]}</span>
+                      <span>
+                        {t.detail.confidence}{" "}
+                        {source.confidence === "high"
+                          ? t.detail.confidenceHigh
+                          : source.confidence === "medium"
+                            ? t.detail.confidenceMedium
+                            : t.detail.confidenceLow}
+                      </span>
                       {status !== "fresh" ? (
                         <FreshnessNote freshness={status} checkedAt={source.checked_at} />
                       ) : null}
@@ -609,33 +625,35 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
             </ul>
           </Section>
 
-          <Section title="プロバイダーの注意">
-            <ul className="caveats">
-              {provider.notes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </Section>
+          {provider.notes.length > 0 ? (
+            <Section title={t.detail.sections.providerNotes}>
+              <ul className="caveats">
+                {provider.notes.map((note) => (
+                  <li key={note}>{translateText(note, locale)}</li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
         </div>
 
         <aside className="detail-aside">
           <ConfigPanel config={config} provider={provider} model={model} />
 
           <div className="aside-block">
-            <h2>入手手順</h2>
+            <h2>{t.detail.howToGet}</h2>
             <ol className="steps">
-              {setupSteps(provider).map((step) => (
-                <li key={step}>{step.replace(/^\d+\.\s*/, "")}</li>
+              {setupSteps(provider, locale).map((step) => (
+                <li key={step}>{step}</li>
               ))}
             </ol>
             <p className="aside-note">
-              キーの取得先:{" "}
+              {t.detail.keyFrom}:{" "}
               <a href={provider.signup_url} target="_blank" rel="noreferrer noopener">
                 {provider.signup_url}
               </a>
             </p>
             <p className="aside-note">
-              ドキュメント:{" "}
+              {t.detail.docs}:{" "}
               <a href={provider.docs_url} target="_blank" rel="noreferrer noopener">
                 {provider.docs_url}
               </a>
@@ -643,14 +661,14 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
           </div>
 
           <div className="aside-block">
-            <h2>同じモデルの他の提供元</h2>
+            <h2>{t.detail.otherProviders}</h2>
             {siblings.length === 0 ? (
-              <p className="aside-note">このモデルを扱う他の提供元はありません。</p>
+              <p className="aside-note">{t.detail.noOtherProviders}</p>
             ) : (
               <ul className="sibling-list">
                 {siblings.map((sibling) => (
                   <li key={sibling.provider.id}>
-                    <Link to={offerPath(sibling)}>{sibling.provider.name}</Link>
+                    <Link to={withLocale(offerPath(sibling), locale)}>{sibling.provider.name}</Link>
                     <FreeTierBadge
                       type={sibling.model.free_tier.type}
                       muted={sibling.model.free_tier.availability === "ended"}
@@ -662,16 +680,11 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
           </div>
 
           <div className="aside-block">
-            <h2>数値の読み方</h2>
+            <h2>{t.detail.readingNumbers}</h2>
             <p className="aside-note">
-              制限値は公式ドキュメントの記載をそのまま載せています。
-              {formatNumber(model.free_tier.limits.length)} 件の数値制限のうち、
-              適用範囲が「モデル単位」でないものは、他のモデルと枠を共有している可能性があります。
+              {t.detail.readingNumbersBody(model.free_tier.limits.length)}
             </p>
-            <p className="aside-note">
-              最終確認から 45
-              日を超えた項目には注意表示を付けています。判断は出典を見て行ってください。
-            </p>
+            <p className="aside-note">{t.detail.readingFreshness}</p>
           </div>
         </aside>
       </div>
@@ -679,31 +692,50 @@ function ModelDetail({ group, offer }: { group: ModelGroup; offer: Offer }) {
   );
 }
 
-const confidenceLabel = { high: "高", medium: "中", low: "低" } as const;
-
 function formatQuota(
-  quota: NonNullable<(typeof dataset.models)[number]["free_tier"]["quota"]>,
+  quota: {
+    kind: string;
+    amount: number | null;
+    currency?: string;
+    period: string;
+  },
+  locale: "en" | "ja",
+  t: ReturnType<typeof useI18n>["t"],
 ): string {
-  const amount = quota.amount === null ? "不明" : formatNumber(quota.amount);
+  void t;
+  const amount =
+    quota.amount === null ? (locale === "ja" ? "不明" : "unknown") : formatNumber(quota.amount);
   const unit =
     quota.kind === "currency"
       ? (quota.currency ?? "")
       : quota.kind === "neurons"
         ? "Neurons"
         : quota.kind === "requests"
-          ? "リクエスト"
+          ? locale === "ja"
+            ? "リクエスト"
+            : "requests"
           : quota.kind === "tokens"
-            ? "トークン"
+            ? locale === "ja"
+              ? "トークン"
+              : "tokens"
             : quota.kind === "credits"
-              ? "クレジット"
+              ? locale === "ja"
+                ? "クレジット"
+                : "credits"
               : "";
   const period =
     quota.period === "day"
-      ? " / 日"
+      ? locale === "ja"
+        ? " / 日"
+        : " / day"
       : quota.period === "month"
-        ? " / 月"
+        ? locale === "ja"
+          ? " / 月"
+          : " / month"
         : quota.period === "one-time"
-          ? "（一度きり）"
+          ? locale === "ja"
+            ? "（一度きり）"
+            : " (one-time)"
           : "";
   return `${amount} ${unit}${period}`.trim();
 }
@@ -726,6 +758,7 @@ function ConfigPanel({
   provider: { id: string; name: string } & Record<string, unknown>;
   model: { free_tier: { availability: string } };
 }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [revealed, setRevealed] = useState(true);
 
@@ -735,7 +768,6 @@ function ConfigPanel({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      // クリップボードが使えない環境では選択状態にして手動コピーを促す
       setCopied(false);
     }
   };
@@ -743,15 +775,15 @@ function ConfigPanel({
   if (model.free_tier.availability === "ended") {
     return (
       <div className="config-panel">
-        <h2>OpenCode 設定</h2>
-        <p className="empty-note">終了したサービスのため、設定例は提供していません。</p>
+        <h2>{t.config.title}</h2>
+        <p className="empty-note">{t.config.unavailable}</p>
       </div>
     );
   }
 
   return (
     <div className="config-panel">
-      <h2>OpenCode 設定例</h2>
+      <h2>{t.config.title}</h2>
 
       {config.blockers.length > 0 ? (
         <ul className="blockers">
@@ -765,29 +797,24 @@ function ConfigPanel({
         <>
           <div className="config-panel__bar">
             <span className={`strategy strategy--${config.strategy}`}>
-              {config.strategy === "native" ? "ネイティブ対応" : "OpenAI 互換として追加"}
+              {config.strategy === "native" ? t.config.native : t.config.compatible}
             </span>
             <button type="button" className="ghost-button" onClick={() => setRevealed((v) => !v)}>
-              {revealed ? "隠す" : "表示"}
+              {revealed ? t.config.hide : t.config.show}
             </button>
             <button type="button" className="copy-button" onClick={copy}>
-              {copied ? "コピーしました" : "コピー"}
+              {copied ? t.config.copied : t.config.copy}
             </button>
           </div>
 
           {revealed ? (
-            <pre
-              className="config-code"
-              tabIndex={0}
-              aria-label={`${provider.name} の opencode.json 設定例`}
-            >
+            <pre className="config-code" tabIndex={0} aria-label={t.config.label(provider.name)}>
               <code>{config.json}</code>
             </pre>
           ) : null}
 
           <p className="config-panel__warn">
-            API キーは含まれていません。環境変数 <code>{keyEnvVar(provider as never)}</code>{" "}
-            に自分のキーを設定してください。 当サイトはキーを入力・送信・保存しません。
+            {t.config.noKey} <code>{keyEnvVar(provider as never)}</code>. {t.config.privacy}
           </p>
         </>
       ) : null}

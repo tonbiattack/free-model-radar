@@ -4,10 +4,18 @@
 
 # Free Model Radar
 
-**課金なしで呼べる LLM API を、エージェントとして使えるかで選ぶ。**
+**英語を既定に、日本語も使える無料 LLM API 比較サイト。**
+**Free LLM APIs you can call without paying — chosen by whether they work as an agent.**
 
 OpenCode などのコーディングエージェント向けに、無料枠つき LLM API の条件・出典・検証状態を
-ひとつの表で比較する日本語の静的サイトです。
+ひとつの表で比較する静的サイトです。同じモデルを複数の提供元が扱う場合は横断して比較できます。
+
+A static site that compares free-tier LLM APIs for coding agents such as OpenCode, with the
+conditions, official sources, and verification status side by side. When several providers offer
+the same model, they are compared against each other.
+
+- 英語版 / English: https://tonbiattack.github.io/free-model-radar/en
+- 日本語版 / Japanese: https://tonbiattack.github.io/free-model-radar/ja
 
 [![CI](https://github.com/tonbiattack/free-model-radar/actions/workflows/ci.yml/badge.svg)](https://github.com/tonbiattack/free-model-radar/actions/workflows/ci.yml)
 [![Watch changes](https://github.com/tonbiattack/free-model-radar/actions/workflows/watch.yml/badge.svg)](https://github.com/tonbiattack/free-model-radar/actions/workflows/watch.yml)
@@ -17,8 +25,8 @@ OpenCode などのコーディングエージェント向けに、無料枠つ�
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](package.json)
 
 [サイトを見る](https://tonbiattack.github.io/free-model-radar/) ·
-[調べ方](https://tonbiattack.github.io/free-model-radar/method) ·
-[変更履歴](https://tonbiattack.github.io/free-model-radar/changes) ·
+[調べ方](https://tonbiattack.github.io/free-model-radar/ja/method) ·
+[変更履歴](https://tonbiattack.github.io/free-model-radar/ja/changes) ·
 [Issues](https://github.com/tonbiattack/free-model-radar/issues)
 
 </div>
@@ -26,8 +34,11 @@ OpenCode などのコーディングエージェント向けに、無料枠つ�
 > [!NOTE]
 > 掲載内容は各項目の**確認日時点**で公式ドキュメントに書かれていた内容です。
 > プロバイダーは予告なく条件を変更します。使う前に詳細ページから公式の出典を開いて確認してください。
+>
+> Every figure is what the official documentation said on the stated check date. Providers change
+> terms without notice; confirm with the source before you rely on a number.
 
-## なぜ必要か
+## なぜ必要か / Why this exists
 
 「無料で呼べるはずのモデルが、実際にはレート制限でエージェントの 1 タスクすら完走できない」。
 この失敗は、料金ページだけを見ていると分かりません。
@@ -39,6 +50,11 @@ RPM / RPD / TPM の適用範囲、ツール呼び出しの有無、API キー取
 - **無料枠の種別** — 恒久無料 / 期間限定トライアル / 初回クレジット / 条件付き / 終了 / 不明
 - **不明は不明のまま** — 「不明」は「非対応」でも「0」でもありません。0 を入れると「まったく呼べない」と読めてしまいます
 - **公式記載と実機検証を分離** — 出典のない確定的な条件はデータ検証で拒否します
+
+A model that is "free" can still fail to finish a single agent task because of rate limits. That
+failure is invisible if you only read the pricing page. This site keeps **"free to call"** and
+**"works as an agent"** as separate facts: limit scopes, tool-calling support, how hard it is to get
+a key, and verification status are all listed before you commit.
 
 ## 主な機能
 
@@ -71,10 +87,32 @@ OpenCode から `/connect` だけで使えるもの（OpenCode Zen の無料モ�
 このサイトは **モデルを主軸** にしています。同じモデルを複数の提供元が扱う場合、一覧では 1 件にまとめ、詳細で提供元を横断比較します。
 
 ```
-/                              モデル一覧（モデル中心。重複しない）
-/models/:modelId               このモデルを無料で使える提供元の比較表
-/models/:modelId/:providerId   選んだ提供元の条件・導入手順・OpenCode 設定生成
+/:locale                              モデル一覧（モデル中心。重複しない）
+/:locale/models/:modelId              このモデルを無料で使える提供元の比較表
+/:locale/models/:modelId/:providerId  選んだ提供元の条件・導入手順・OpenCode 設定生成
 ```
+
+`:locale` は `en` または `ja` です。接頭辞なしのアクセスは英語へ誘導します。
+
+### 日英対応（i18n）
+
+**英語を既定**とし、日本語も維持します。翻訳によってデータ更新コストが倍増しないことを設計の制約にしています。
+
+| 対象                                  | 扱い                                         |
+| ------------------------------------- | -------------------------------------------- |
+| モデル ID・提供元 ID・数値・URL・日付 | 言語非依存。1 つだけ持つ                     |
+| 説明文（注意点・出典の内容など）      | 原文の内容ハッシュをキーに英語訳を対応づける |
+| UI 文言                               | `src/lib/messages.ts` に日英で持つ           |
+
+説明文の翻訳は `data/i18n/en.json` に、**原文の内容ハッシュ**をキーとして保存しています。
+原文を書き換えるとキーが変わるため、古い訳が黙って残らず「未翻訳」として検出されます。
+
+```bash
+npm run i18n:extract   # data/ から翻訳対象を抽出して data/i18n/source.json を更新
+npm run i18n:build     # scripts/translations.ts の訳を data/i18n/en.json に書き出す
+```
+
+翻訳キーの欠落・原文からの数値の欠落・英語訳に日本語が残っていないかは、ビルドとテストで検査します。
 
 ### 同一モデルの判定
 

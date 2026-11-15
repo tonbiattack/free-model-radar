@@ -35,6 +35,9 @@ jobs:
       - name: データを検証して生成
         run: npm run build:data
 
+      - name: 翻訳の欠落を検査
+        run: npm run check:i18n
+
       - name: 生成物に差分がないこと（手元での生成し忘れ防止）
         run: |
           if ! git diff --quiet -- src/generated; then

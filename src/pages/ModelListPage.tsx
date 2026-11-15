@@ -12,7 +12,6 @@ import {
 import { groupModels, modelPath, type ModelGroup, type Offer } from "@/lib/groups";
 import {
   freshnessAt,
-  formatDate,
   formatLimitValue,
   latestCheck,
   sortedLimits,
@@ -20,12 +19,13 @@ import {
 } from "@/lib/format";
 import { LOADED_AT_MS } from "@/lib/clock";
 import {
-  freeTierTypeLabel,
-  limitMetricLabel,
-  limitScopeLabel,
-  signupFrictionDescription,
-  signupFrictionLabel,
-} from "@/lib/labels";
+  formatDateLocale,
+  limitMetricLabelWith,
+  limitScopeLabelWith,
+  signupFrictionLabelWith,
+} from "@/lib/labels-i18n";
+import { useI18n } from "@/lib/i18n";
+import { withLocale } from "@/lib/locale";
 import type { FreeTierType, SignupFriction } from "@/lib/schema";
 import {
   AvailabilityMark,
@@ -44,21 +44,8 @@ const freeTypeOrder: FreeTierType[] = [
   "ended",
 ];
 
-const freshOptions = [
-  { value: null, label: "指定なし" },
-  { value: 7, label: "7日以内" },
-  { value: 30, label: "30日以内" },
-  { value: 90, label: "90日以内" },
-];
-
-const sortOptions: { value: SortKey; label: string }[] = [
-  { value: "checked", label: "最終確認日" },
-  { value: "name", label: "モデル名" },
-  { value: "providers", label: "提供元の数" },
-  { value: "limits", label: "制限の記載量" },
-];
-
 export function ModelListPage() {
+  const { locale, t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useMemo(() => parseFilters(searchParams.toString()), [searchParams]);
   const [queryDraft, setQueryDraft] = useState(filters.q);
@@ -66,7 +53,6 @@ export function ModelListPage() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   // URL が外から変わったとき（共有リンクを開いた、戻る/進む）は入力欄も追従させる。
-  // effect で setState せず、レンダー中に前回値と比べて同期する。
   if (committedQuery !== filters.q) {
     setCommittedQuery(filters.q);
     setQueryDraft(filters.q);
@@ -105,11 +91,10 @@ export function ModelListPage() {
   const totalVisible = allGroups.filter((group) =>
     group.offers.some((offer) => offer.model.free_tier.availability !== "ended"),
   ).length;
-  const connectOnly = allGroups.filter((group) =>
+  const permanent = allGroups.filter((group) =>
     group.offers.some(
       (offer) =>
-        offer.provider.native_opencode === "yes" &&
-        offer.provider.signup_friction === "instant" &&
+        offer.model.free_tier.type === "permanent" &&
         offer.model.free_tier.availability !== "ended",
     ),
   ).length;
@@ -117,6 +102,20 @@ export function ModelListPage() {
     (group) =>
       group.offers.filter((offer) => offer.model.free_tier.availability !== "ended").length > 1,
   ).length;
+
+  const freshOptions = [
+    { value: null, label: t.filters.any },
+    { value: 7, label: t.filters.days7 },
+    { value: 30, label: t.filters.days30 },
+    { value: 90, label: t.filters.days90 },
+  ];
+
+  const sortOptions: { value: SortKey; label: string }[] = [
+    { value: "checked", label: t.filters.sortChecked },
+    { value: "name", label: t.filters.sortName },
+    { value: "providers", label: t.filters.sortProviders },
+    { value: "limits", label: t.filters.sortLimits },
+  ];
 
   const toggleFreeType = (type: FreeTierType) => {
     const next = filters.freeTypes.includes(type)
@@ -143,55 +142,33 @@ export function ModelListPage() {
     <>
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero__lede">
-          <h1 id="hero-title">
-            OpenCode で
-            <br />
-            課金なしに使えるモデルを探す
-          </h1>
-          <p className="hero__sub">
-            無料枠のある LLM API を、公式の出典・確認日・検証状態つきで並べています。
-            「無料で呼べる」と「エージェントとして動く」は別の情報として扱います。
-          </p>
+          <h1 id="hero-title">{t.hero.title}</h1>
+          <p className="hero__sub">{t.hero.sub}</p>
           <p className="hero__links">
-            <Link to="/method" className="text-link">
-              何をどう確認しているか
+            <Link to={withLocale("/method", locale)} className="text-link">
+              {t.hero.howWeCheck}
             </Link>
-            <Link to="/changes" className="text-link">
-              最近の変更
+            <Link to={withLocale("/changes", locale)} className="text-link">
+              {t.hero.recentChanges}
             </Link>
           </p>
         </div>
 
         <dl className="hero__stats">
           <div>
-            <dt>掲載モデル</dt>
+            <dt>{t.hero.statModels}</dt>
             <dd>{totalVisible}</dd>
-            <dd className="hero__stat-note">終了済みを除く</dd>
+            <dd className="hero__stat-note">{t.hero.statModelsNote}</dd>
           </div>
           <div>
-            <dt>恒久無料</dt>
-            <dd>
-              {
-                allGroups.filter((group) =>
-                  group.offers.some(
-                    (offer) =>
-                      offer.model.free_tier.type === "permanent" &&
-                      offer.model.free_tier.availability !== "ended",
-                  ),
-                ).length
-              }
-            </dd>
-            <dd className="hero__stat-note">継続利用できる枠</dd>
+            <dt>{t.hero.statPermanent}</dt>
+            <dd>{permanent}</dd>
+            <dd className="hero__stat-note">{t.hero.statPermanentNote}</dd>
           </div>
           <div>
-            <dt>複数の提供元</dt>
+            <dt>{t.hero.statMulti}</dt>
             <dd>{multiProvider}</dd>
-            <dd className="hero__stat-note">横断比較できるモデル</dd>
-          </div>
-          <div>
-            <dt>/connect だけで使える</dt>
-            <dd>{connectOnly}</dd>
-            <dd className="hero__stat-note">登録と接続のみ</dd>
+            <dd className="hero__stat-note">{t.hero.statMultiNote}</dd>
           </div>
         </dl>
       </section>
@@ -199,7 +176,7 @@ export function ModelListPage() {
       <div className="browse">
         <aside className="filters" aria-labelledby="filters-title">
           <div className="filters__head">
-            <h2 id="filters-title">絞り込み</h2>
+            <h2 id="filters-title">{t.filters.title}</h2>
             {filterCount > 0 ? (
               <button
                 type="button"
@@ -210,26 +187,26 @@ export function ModelListPage() {
                   searchRef.current?.focus();
                 }}
               >
-                条件をすべて解除
+                {t.filters.clearAll}
               </button>
             ) : null}
           </div>
 
           <div className="field">
-            <label htmlFor="search">モデル名・プロバイダー名</label>
+            <label htmlFor="search">{t.filters.search}</label>
             <input
               id="search"
               ref={searchRef}
               type="search"
               value={queryDraft}
               onChange={(event) => setQueryDraft(event.target.value)}
-              placeholder="例: gemini, groq, qwen"
+              placeholder={t.filters.searchPlaceholder}
               autoComplete="off"
             />
           </div>
 
           <fieldset className="field">
-            <legend>無料枠の種別</legend>
+            <legend>{t.filters.freeType}</legend>
             <ul className="check-list">
               {freeTypeOrder.map((type) => (
                 <li key={type}>
@@ -239,7 +216,9 @@ export function ModelListPage() {
                       checked={filters.freeTypes.includes(type)}
                       onChange={() => toggleFreeType(type)}
                     />
-                    <span>{freeTierTypeLabel[type]}</span>
+                    <span>
+                      <FreeTypeOptionLabel type={type} />
+                    </span>
                   </label>
                 </li>
               ))}
@@ -247,7 +226,7 @@ export function ModelListPage() {
           </fieldset>
 
           <fieldset className="field">
-            <legend>条件</legend>
+            <legend>{t.filters.conditions}</legend>
             <ul className="check-list">
               <li>
                 <label>
@@ -256,7 +235,7 @@ export function ModelListPage() {
                     checked={filters.toolsOnly}
                     onChange={(event) => update({ toolsOnly: event.target.checked })}
                   />
-                  <span>ツール呼び出しに対応</span>
+                  <span>{t.filters.tools}</span>
                 </label>
               </li>
               <li>
@@ -266,7 +245,7 @@ export function ModelListPage() {
                     checked={filters.noCardOnly}
                     onChange={(event) => update({ noCardOnly: event.target.checked })}
                   />
-                  <span>クレジットカード不要</span>
+                  <span>{t.filters.noCard}</span>
                 </label>
               </li>
               <li>
@@ -276,7 +255,7 @@ export function ModelListPage() {
                     checked={filters.verifiedOnly}
                     onChange={(event) => update({ verifiedOnly: event.target.checked })}
                   />
-                  <span>OpenCode で検証済み</span>
+                  <span>{t.filters.verified}</span>
                 </label>
               </li>
               <li>
@@ -286,7 +265,7 @@ export function ModelListPage() {
                     checked={filters.multiProviderOnly}
                     onChange={(event) => update({ multiProviderOnly: event.target.checked })}
                   />
-                  <span>複数の提供元がある</span>
+                  <span>{t.filters.multi}</span>
                 </label>
               </li>
               <li>
@@ -296,24 +275,24 @@ export function ModelListPage() {
                     checked={filters.includeEnded}
                     onChange={(event) => update({ includeEnded: event.target.checked })}
                   />
-                  <span>終了・停止したものも表示</span>
+                  <span>{t.filters.showEnded}</span>
                 </label>
               </li>
             </ul>
           </fieldset>
 
           <fieldset className="field">
-            <legend>登録の手間</legend>
+            <legend>{t.filters.signup}</legend>
             <ul className="check-list">
               {(["instant", "discord", "waitlist", "paid"] as const).map((value) => (
                 <li key={value}>
-                  <label title={signupFrictionDescription[value]}>
+                  <label>
                     <input
                       type="checkbox"
                       checked={filters.signupFriction.includes(value)}
                       onChange={() => toggleSignup(value)}
                     />
-                    <span>{signupFrictionLabel[value]}</span>
+                    <span>{signupFrictionLabelWith(t, value)}</span>
                   </label>
                 </li>
               ))}
@@ -324,14 +303,14 @@ export function ModelListPage() {
                     checked={filters.noPaidSignupOnly}
                     onChange={(event) => update({ noPaidSignupOnly: event.target.checked })}
                   />
-                  <span>カード登録なしで始められる</span>
+                  <span>{t.filters.noPaid}</span>
                 </label>
               </li>
             </ul>
           </fieldset>
 
           <fieldset className="field">
-            <legend>プロバイダー</legend>
+            <legend>{t.filters.providers}</legend>
             <ul className="check-list">
               {providers.map((provider) => (
                 <li key={provider.id}>
@@ -349,7 +328,7 @@ export function ModelListPage() {
           </fieldset>
 
           <div className="field">
-            <label htmlFor="fresh">情報の鮮度</label>
+            <label htmlFor="fresh">{t.filters.freshness}</label>
             <select
               id="fresh"
               value={filters.freshDays ?? ""}
@@ -366,7 +345,7 @@ export function ModelListPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="sort">並び順</label>
+            <label htmlFor="sort">{t.filters.sort}</label>
             <select
               id="sort"
               value={filters.sort}
@@ -384,44 +363,38 @@ export function ModelListPage() {
         <section className="results" aria-labelledby="results-title">
           <div className="results__head">
             <h2 id="results-title">
-              {groups.length} モデル
+              {t.results.modelsCount(groups.length)}
               {groups.length !== totalVisible ? (
-                <span className="results__of"> / 全 {totalVisible} モデル</span>
+                <span className="results__of">{t.results.ofTotal(totalVisible)}</span>
               ) : null}
             </h2>
             <p className="results__hint">
-              {filters.sort === "limits"
-                ? "制限の記載量は、単位の異なる数値をまとめた目安です。厳密な比較には使えません。"
-                : "\u00a0"}
+              {filters.sort === "limits" ? t.results.limitsHint : "\u00a0"}
             </p>
           </div>
 
           {hiddenUnknown > 0 ? (
             <p className="results__notice" role="status">
-              条件が「不明」のため表示していない提供元が {hiddenUnknown}{" "}
-              件あります。不明は非対応ではありません。
+              {t.results.hiddenUnknown(hiddenUnknown)}
             </p>
           ) : null}
 
           {groups.length === 0 ? (
-            <EmptyState filterCount={filterCount} />
+            <EmptyState />
           ) : (
             <>
               <div className="model-table-wrap">
                 <table className="model-table">
-                  <caption className="sr-only">
-                    無料枠のあるモデルの一覧。同じモデルを複数の提供元が扱う場合は 1
-                    行にまとめています。
-                  </caption>
+                  <caption className="sr-only">{t.table.caption}</caption>
                   <thead>
                     <tr>
-                      <th scope="col">モデル</th>
-                      <th scope="col">無料枠</th>
-                      <th scope="col">登録</th>
-                      <th scope="col">主な制限</th>
-                      <th scope="col">ツール</th>
-                      <th scope="col">検証</th>
-                      <th scope="col">最終確認</th>
+                      <th scope="col">{t.table.model}</th>
+                      <th scope="col">{t.table.freeTier}</th>
+                      <th scope="col">{t.table.signup}</th>
+                      <th scope="col">{t.table.limits}</th>
+                      <th scope="col">{t.table.tools}</th>
+                      <th scope="col">{t.table.verification}</th>
+                      <th scope="col">{t.table.checked}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -440,14 +413,25 @@ export function ModelListPage() {
             </>
           )}
 
-          <p className="results__foot">
-            数値は公式ドキュメントの記載値です。未記載の項目は空欄や「不明」と表示し、0
-            や「非対応」としては扱いません。 空欄の理由は各モデルの詳細で確認できます。
-          </p>
+          <p className="results__foot">{t.results.foot}</p>
         </section>
       </div>
     </>
   );
+}
+
+function EmptyState() {
+  const { t } = useI18n();
+  return (
+    <div className="empty">
+      <h3>{t.results.emptyTitle}</h3>
+      <p>{t.results.emptyWithFilters}</p>
+    </div>
+  );
+}
+
+function FreeTypeOptionLabel({ type }: { type: FreeTierType }) {
+  return <FreeTierBadge type={type} />;
 }
 
 /**
@@ -455,6 +439,7 @@ export function ModelListPage() {
  * 提供元の数と代表的な条件を見せる。詳細で比較表を出す。
  */
 function ModelGroupRow({ group }: { group: ModelGroup }) {
+  const { locale, t } = useI18n();
   const primary = group.offers[0];
   if (!primary) return null;
 
@@ -469,7 +454,7 @@ function ModelGroupRow({ group }: { group: ModelGroup }) {
   return (
     <tr className={allEnded ? "is-ended" : undefined}>
       <th scope="row">
-        <Link to={modelPath(group)} className="model-link">
+        <Link to={withLocale(modelPath(group), locale)} className="model-link">
           {group.canonical.name}
         </Link>
         <span className="model-row__meta">
@@ -477,13 +462,13 @@ function ModelGroupRow({ group }: { group: ModelGroup }) {
           {group.offers.length > 1 ? (
             <>
               <span aria-hidden="true"> · </span>
-              <span className="provider-count">{group.offers.length} 提供元</span>
+              <span className="provider-count">{t.table.providerCount(group.offers.length)}</span>
             </>
           ) : null}
         </span>
         <span className="model-row__ctx">
-          コンテキスト{" "}
-          {model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : "不明"}
+          {t.table.context}{" "}
+          {model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : t.table.unknown}
         </span>
       </th>
       <td>
@@ -491,35 +476,29 @@ function ModelGroupRow({ group }: { group: ModelGroup }) {
           <AvailabilityMark availability={model.free_tier.availability} />
           <FreeTierBadge type={model.free_tier.type} muted={allEnded} />
         </span>
-        {shown.length > 1 ? (
-          <span className="free-cell__note">
-            {shown.map((offer) => offer.provider.name).join(" / ")}
-          </span>
-        ) : (
-          <span className="free-cell__note">{primary.provider.name}</span>
-        )}
+        <span className="free-cell__note">
+          {shown.map((offer) => offer.provider.name).join(" / ")}
+        </span>
       </td>
       <td>
         <span className={`signup signup--${primary.provider.signup_friction ?? "unknown"}`}>
-          {signupFrictionLabel[primary.provider.signup_friction ?? "unknown"]}
+          {signupFrictionLabelWith(t, primary.provider.signup_friction ?? "unknown")}
         </span>
       </td>
       <td>
         {limits.length === 0 ? (
-          <span className="muted">数値の記載なし</span>
+          <span className="muted">{t.table.noLimits}</span>
         ) : (
           <ul className="limit-list">
             {limits.map((limit) => (
               <li key={`${limit.metric}-${limit.scope}`}>
-                <span className="limit-list__metric">{limitMetricLabel[limit.metric]}</span>
+                <span className="limit-list__metric">{limitMetricLabelWith(t, limit.metric)}</span>
                 <span className="limit-list__value">{formatLimitValue(limit)}</span>
-                {limit.scope !== "model" ? (
-                  <span className="limit-list__scope">{limitScopeLabel[limit.scope]}</span>
-                ) : null}
+                {limit.scope !== "model" ? <ScopeInline scope={limit.scope} /> : null}
               </li>
             ))}
             {model.free_tier.limits.length > 3 ? (
-              <li className="muted">他 {model.free_tier.limits.length - 3} 件</li>
+              <li className="muted">{t.table.more(model.free_tier.limits.length - 3)}</li>
             ) : null}
           </ul>
         )}
@@ -533,17 +512,22 @@ function ModelGroupRow({ group }: { group: ModelGroup }) {
       <td>
         {checked ? (
           <span className="checked-cell">
-            <time dateTime={checked}>{formatDate(checked)}</time>
+            <time dateTime={checked}>{formatDateLocale(checked, locale)}</time>
             {freshness && freshness !== "fresh" ? (
               <FreshnessNote freshness={freshness} checkedAt={checked} />
             ) : null}
           </span>
         ) : (
-          <span className="muted">不明</span>
+          <span className="muted">{t.table.unknown}</span>
         )}
       </td>
     </tr>
   );
+}
+
+function ScopeInline({ scope }: { scope: string }) {
+  const { t } = useI18n();
+  return <span className="limit-list__scope">{limitScopeLabelWith(t, scope)}</span>;
 }
 
 /** 提供元ごとに検証状況が違うので、最も進んでいる結果を代表として見せる。 */
@@ -554,11 +538,12 @@ function GroupVerification({ offers }: { offers: Offer[] }) {
       const rank = { passed: 0, failed: 1, unknown: 2, untested: 3 } as const;
       return rank[a.status] - rank[b.status];
     })[0];
-  if (!best) return <span className="muted">不明</span>;
+  if (!best) return null;
   return <VerificationBadge status={best.status} passed={best.passed} total={best.total} />;
 }
 
 function ModelGroupCard({ group }: { group: ModelGroup }) {
+  const { locale, t } = useI18n();
   const primary = group.offers[0];
   if (!primary) return null;
 
@@ -572,74 +557,63 @@ function ModelGroupCard({ group }: { group: ModelGroup }) {
   return (
     <li className={allEnded ? "model-card is-ended" : "model-card"}>
       <div className="model-card__head">
-        <Link to={modelPath(group)} className="model-link">
+        <Link to={withLocale(modelPath(group), locale)} className="model-link">
           {group.canonical.name}
         </Link>
         <FreeTierBadge type={model.free_tier.type} muted={allEnded} />
       </div>
       <p className="model-card__meta">
         {group.canonical.developer}
-        {group.offers.length > 1 ? ` · ${group.offers.length} 提供元` : ""}
+        {group.offers.length > 1 ? ` · ${t.table.providerCount(group.offers.length)}` : ""}
       </p>
       <p className="model-card__providers">
         {shown.map((offer) => offer.provider.name).join(" / ")}
       </p>
       <dl className="model-card__facts">
         <div>
-          <dt>登録</dt>
+          <dt>{t.table.signup}</dt>
           <dd>
             <span className={`signup signup--${primary.provider.signup_friction ?? "unknown"}`}>
-              {signupFrictionLabel[primary.provider.signup_friction ?? "unknown"]}
+              {signupFrictionLabelWith(t, primary.provider.signup_friction ?? "unknown")}
             </span>
           </dd>
         </div>
         <div>
-          <dt>コンテキスト</dt>
-          <dd>{model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : "不明"}</dd>
+          <dt>{t.table.context}</dt>
+          <dd>
+            {model.context_tokens ? `${Math.round(model.context_tokens / 1000)}K` : t.table.unknown}
+          </dd>
         </div>
         <div>
-          <dt>ツール</dt>
+          <dt>{t.table.tools}</dt>
           <dd>
             <TristateBadge value={model.capabilities.tool_calling} />
           </dd>
         </div>
         <div>
-          <dt>主な制限</dt>
+          <dt>{t.table.limits}</dt>
           <dd>
             {limits.length === 0
-              ? "記載なし"
+              ? t.table.noLimits
               : limits
-                  .map((limit) => `${limitMetricLabel[limit.metric]} ${formatLimitValue(limit)}`)
+                  .map(
+                    (limit) =>
+                      `${limitMetricLabelWith(t, limit.metric)} ${formatLimitValue(limit)}`,
+                  )
                   .join(" / ")}
           </dd>
         </div>
         <div>
-          <dt>検証</dt>
+          <dt>{t.table.verification}</dt>
           <dd>
             <GroupVerification offers={shown} />
           </dd>
         </div>
         <div>
-          <dt>最終確認</dt>
-          <dd>{checked ? formatDate(checked) : "不明"}</dd>
+          <dt>{t.table.checked}</dt>
+          <dd>{checked ? formatDateLocale(checked, locale) : t.table.unknown}</dd>
         </div>
       </dl>
     </li>
-  );
-}
-
-function EmptyState({ filterCount }: { filterCount: number }) {
-  return (
-    <div className="empty">
-      <h3>条件に合うモデルがない</h3>
-      {filterCount > 0 ? (
-        <p>
-          絞り込みが厳しすぎる可能性があります。「終了・停止したものも表示」を有効にするか、条件を減らして試してください。
-          掲載数がまだ少ないため、条件を 1 つ外すと見つかることがあります。
-        </p>
-      ) : (
-        <p>掲載データがありません。</p>
-      )}
-    </div>
   );
 }

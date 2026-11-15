@@ -4,27 +4,20 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ModelDetailPage } from "./ModelDetailPage";
 import { groupModels } from "@/lib/groups";
 import { dataset } from "@/lib/dataset";
+import { I18nProvider } from "@/lib/i18n";
+import { messages } from "@/lib/messages";
 
 const groups = groupModels(dataset);
 
-function renderModel(modelId: string) {
+function renderAt(path: string, locale: "en" | "ja" = "en") {
   return render(
-    <MemoryRouter initialEntries={[`/models/${modelId}`]}>
-      <Routes>
-        <Route path="/models/:modelId" element={<ModelDetailPage />} />
-        <Route path="/models/:modelId/:providerId" element={<ModelDetailPage />} />
-      </Routes>
-    </MemoryRouter>,
-  );
-}
-
-function renderOffer(modelId: string, providerId: string) {
-  return render(
-    <MemoryRouter initialEntries={[`/models/${modelId}/${providerId}`]}>
-      <Routes>
-        <Route path="/models/:modelId" element={<ModelDetailPage />} />
-        <Route path="/models/:modelId/:providerId" element={<ModelDetailPage />} />
-      </Routes>
+    <MemoryRouter initialEntries={[path]}>
+      <I18nProvider value={{ locale, t: messages[locale] }}>
+        <Routes>
+          <Route path="/:locale/models/:modelId" element={<ModelDetailPage />} />
+          <Route path="/:locale/models/:modelId/:providerId" element={<ModelDetailPage />} />
+        </Routes>
+      </I18nProvider>
     </MemoryRouter>,
   );
 }
@@ -32,7 +25,7 @@ function renderOffer(modelId: string, providerId: string) {
 describe("ModelDetailPage（モデル概要）", () => {
   it("モデル名を h1 に出し、提供元の比較表を出す", () => {
     const group = groups.find((entry) => entry.canonical.id === "gpt-oss-120b")!;
-    renderModel(group.canonical.id);
+    renderAt(`/en/models/${group.canonical.id}`);
     expect(
       screen.getByRole("heading", { level: 1, name: group.canonical.name }),
     ).toBeInTheDocument();
@@ -41,7 +34,7 @@ describe("ModelDetailPage（モデル概要）", () => {
 
   it("複数提供元のモデルでは、提供元ごとの行が出る", () => {
     const group = groups.find((entry) => entry.offers.length > 1)!;
-    renderModel(group.canonical.id);
+    renderAt(`/en/models/${group.canonical.id}`);
     const table = screen.getByRole("table");
     for (const offer of group.offers) {
       expect(
@@ -52,8 +45,7 @@ describe("ModelDetailPage（モデル概要）", () => {
   });
 
   it("提供元ごとにレート制限が違うことを別々の行で示す", () => {
-    // GPT OSS 120B は Groq と Cerebras で制限が違う
-    renderModel("gpt-oss-120b");
+    renderAt("/en/models/gpt-oss-120b");
     const table = screen.getByRole("table");
     expect(within(table).getAllByText("Groq").length).toBeGreaterThan(0);
     expect(within(table).getAllByText("Cerebras Inference").length).toBeGreaterThan(0);
@@ -61,12 +53,12 @@ describe("ModelDetailPage（モデル概要）", () => {
 
   it("提供元が 1 つだけのモデルでも比較表が出る", () => {
     const group = groups.find((entry) => entry.offers.length === 1)!;
-    renderModel(group.canonical.id);
+    renderAt(`/en/models/${group.canonical.id}`);
     expect(screen.getByRole("table")).toBeInTheDocument();
   });
 
   it("性能は外部リンクとして示す", () => {
-    renderModel("gpt-oss-120b");
+    renderAt("/en/models/gpt-oss-120b");
     const links = screen
       .getAllByRole("link")
       .filter((link) => link.getAttribute("href")?.includes("ai-plan-radar"));
@@ -74,8 +66,13 @@ describe("ModelDetailPage（モデル概要）", () => {
   });
 
   it("存在しないモデルでは見つからない旨を出す", () => {
-    renderModel("does-not-exist");
-    expect(screen.getByRole("heading", { name: "ページが見つかりません" })).toBeInTheDocument();
+    renderAt("/en/models/does-not-exist");
+    expect(screen.getByRole("heading", { name: "Page not found" })).toBeInTheDocument();
+  });
+
+  it("日本語では日本語の見出しになる", () => {
+    renderAt("/ja/models/gpt-oss-120b", "ja");
+    expect(screen.getByRole("heading", { name: /無料で使える提供元/ })).toBeInTheDocument();
   });
 });
 
@@ -83,11 +80,11 @@ describe("ModelDetailPage（提供元別）", () => {
   it("選んだ提供元の条件と設定例を出す", () => {
     const group = groups.find((entry) => entry.canonical.id === "gpt-oss-120b")!;
     const offer = group.offers.find((entry) => entry.provider.id === "groq")!;
-    renderOffer(group.canonical.id, offer.provider.id);
+    renderAt(`/en/models/${group.canonical.id}/${offer.provider.id}`);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(group.canonical.name);
-    expect(screen.getByText(/Groq で使う/)).toBeInTheDocument();
-    const code = screen.getByLabelText(/opencode\.json 設定例/);
+    expect(screen.getByText(/via Groq/)).toBeInTheDocument();
+    const code = screen.getByLabelText(/opencode\.json example/);
     expect(code.textContent).toContain("GROQ_API_KEY");
   });
 
@@ -97,12 +94,12 @@ describe("ModelDetailPage（提供元別）", () => {
     const logfare = group.offers.find((entry) => entry.provider.id === "logfare");
 
     if (groq) {
-      const { unmount } = renderOffer(group.canonical.id, groq.provider.id);
+      const { unmount } = renderAt(`/en/models/${group.canonical.id}/${groq.provider.id}`);
       expect(screen.getAllByText(groq.model.model_id).length).toBeGreaterThan(0);
       unmount();
     }
     if (logfare) {
-      renderOffer(group.canonical.id, logfare.provider.id);
+      renderAt(`/en/models/${group.canonical.id}/${logfare.provider.id}`);
       expect(screen.getAllByText(logfare.model.model_id).length).toBeGreaterThan(0);
     }
   });
@@ -110,14 +107,14 @@ describe("ModelDetailPage（提供元別）", () => {
   it("同じモデルの他の提供元へ移動する導線がある", () => {
     const group = groups.find((entry) => entry.offers.length > 1)!;
     const first = group.offers[0]!;
-    renderOffer(group.canonical.id, first.provider.id);
-    const compareLink = screen.getByRole("link", { name: "提供元を比較する" });
-    expect(compareLink).toHaveAttribute("href", `/models/${group.canonical.id}`);
+    renderAt(`/en/models/${group.canonical.id}/${first.provider.id}`);
+    const compareLink = screen.getByRole("link", { name: "Compare providers" });
+    expect(compareLink).toHaveAttribute("href", `/en/models/${group.canonical.id}`);
   });
 
   it("扱っていない提供元を指定すると見つからない旨を出す", () => {
-    renderOffer("gpt-oss-120b", "openrouter");
-    expect(screen.getByRole("heading", { name: "ページが見つかりません" })).toBeInTheDocument();
+    renderAt("/en/models/gpt-oss-120b/openrouter");
+    expect(screen.getByRole("heading", { name: "Page not found" })).toBeInTheDocument();
   });
 
   it("終了した提供元では設定例を出さない", () => {
@@ -125,9 +122,9 @@ describe("ModelDetailPage（提供元別）", () => {
       entry.offers.some((offer) => offer.model.free_tier.availability === "ended"),
     )!;
     const ended = group.offers.find((offer) => offer.model.free_tier.availability === "ended")!;
-    renderOffer(group.canonical.id, ended.provider.id);
+    renderAt(`/en/models/${group.canonical.id}/${ended.provider.id}`);
     expect(
-      screen.getByText(/終了したサービスのため、設定例は提供していません/),
+      screen.getByText(/This service has ended, so no configuration example/),
     ).toBeInTheDocument();
   });
 
@@ -136,17 +133,25 @@ describe("ModelDetailPage（提供元別）", () => {
       entry.offers.some((offer) => offer.model.free_tier.limits.length === 0),
     )!;
     const offer = group.offers.find((entry) => entry.model.free_tier.limits.length === 0)!;
-    renderOffer(group.canonical.id, offer.provider.id);
-    expect(screen.getByText(/公式に数値の記載がありません/)).toBeInTheDocument();
+    renderAt(`/en/models/${group.canonical.id}/${offer.provider.id}`);
+    expect(screen.getByText(/states no numeric limits/)).toBeInTheDocument();
     expect(screen.queryByText("0 RPM")).not.toBeInTheDocument();
   });
 
   it("設定例に API キーの値が含まれない", () => {
     const group = groups.find((entry) => entry.canonical.id === "gpt-oss-120b")!;
     const offer = group.offers.find((entry) => entry.provider.id === "cerebras")!;
-    renderOffer(group.canonical.id, offer.provider.id);
-    const code = screen.getByLabelText(/opencode\.json 設定例/);
+    renderAt(`/en/models/${group.canonical.id}/${offer.provider.id}`);
+    const code = screen.getByLabelText(/opencode\.json example/);
     expect(code.textContent).not.toMatch(/sk-[A-Za-z0-9]{8,}/);
     expect(code.textContent).toContain("CEREBRAS_API_KEY");
+  });
+
+  it("日本語では設定パネルも日本語になる", () => {
+    const group = groups.find((entry) => entry.canonical.id === "gpt-oss-120b")!;
+    const offer = group.offers[0]!;
+    renderAt(`/ja/models/${group.canonical.id}/${offer.provider.id}`, "ja");
+    expect(screen.getByRole("heading", { name: "OpenCode 設定例" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "コピー" })).toBeInTheDocument();
   });
 });

@@ -9,6 +9,7 @@ import type { Dataset, Model, Provider } from "./schema";
  */
 
 export type ConfigStrategy = "native" | "openai-compatible" | "unsupported";
+export type ConfigLocale = "en" | "ja";
 
 export interface ConfigResult {
   strategy: ConfigStrategy;
@@ -21,11 +22,6 @@ export interface ConfigResult {
 }
 
 const OPENAI_COMPATIBLE_PACKAGE = "@opencode/ai/providers/openai-compatible";
-
-/** プロバイダー ID は OpenCode の設定キーにそのまま使う。 */
-function providerKey(provider: Provider): string {
-  return provider.opencode_provider_id ?? provider.id;
-}
 
 /**
  * OpenCode のカタログ（models.dev）が各プロバイダーで参照する環境変数。
@@ -41,11 +37,15 @@ const catalogEnv: Record<string, string[]> = {
   "opencode-zen": ["OPENCODE_API_KEY"],
 };
 
+/** プロバイダー ID は OpenCode の設定キーにそのまま使う。 */
+function providerKey(provider: Provider): string {
+  return provider.opencode_provider_id ?? provider.id;
+}
+
 /** ターミナルで案内する環境変数名。実キーは決して生成物に含めない。 */
 export function keyEnvVar(provider: Provider): string {
   const known = catalogEnv[provider.id];
   if (known) {
-    // アカウント ID など、キー以外の必須変数を除いた「キー本体」の名前を返す
     return (
       known.find((name) => name.endsWith("_API_KEY")) ?? known.at(-1) ?? fallbackEnvVar(provider)
     );
@@ -71,11 +71,73 @@ function normalizeBaseUrl(baseUrl: string): { url: string; placeholders: string[
   return { url: baseUrl, placeholders };
 }
 
+/** 文言は UI の言語に合わせる。生成物（JSON）自体は言語に依存しない。 */
+const text = {
+  en: {
+    nativeNote: (name: string) =>
+      `OpenCode supports ${name} natively in its catalog. The quickest route is to run \`/connect\`, choose ${name}, and paste your API key.`,
+    nativeCatalogNote:
+      "The configuration above is an example for adding a model that is not in the catalog. If the model already appears in /models, you do not need it.",
+    zenCredits:
+      "Free models work without adding Console credits. Run /connect, choose OpenCode, and the free models appear in /models.",
+    zenHide: "To hide free models, set OPENCODE_DISABLE_FREE_MODELS=1 on the server process.",
+    baseUrlUnknown: (name: string) =>
+      `${name} is not in OpenCode's native catalog and no API base URL could be confirmed from official sources. A configuration example cannot be generated until the URL is known.`,
+    notOpenAiCompatible: (name: string, format: string) =>
+      `${name} uses the "${format}" API format, which is not OpenAI-compatible. The OpenAI-compatible runtime cannot connect to it.`,
+    placeholder: (list: string) =>
+      `The API base URL contains placeholders (${list}). Replace them with your own values.`,
+    nativeNeedsBaseUrl:
+      "The catalog configuration alone will not connect. The API base URL needs an account-specific value, so replace the placeholder in settings.baseURL.",
+    compatibleNote: (name: string, env: string) =>
+      `${name} connects as an OpenAI-compatible API. Set the environment variable ${env} to your API key before starting OpenCode.`,
+    noKeyInConfig:
+      "The configuration does not contain the API key itself. OpenCode reads it from the environment variables listed in env.",
+    cloudflareAccount:
+      "Cloudflare also needs an account ID. Replace {account_id} in baseURL with your own value.",
+  },
+  ja: {
+    nativeNote: (name: string) =>
+      `OpenCode は ${name} をカタログでネイティブ対応しています。認証は \`/connect\` から ${name} を選び、API キーを入力するのが最短です。`,
+    nativeCatalogNote:
+      "上記の設定は、カタログに未登録のモデルを追加する場合の例です。すでにモデル一覧に出ているなら、この設定は不要です。",
+    zenCredits:
+      "無料モデルは Console のクレジットを追加しなくても使えます。/connect で OpenCode を選ぶと、/models に無料モデルが並びます。",
+    zenHide:
+      "無料モデルが不要な場合は、サーバーの環境変数に OPENCODE_DISABLE_FREE_MODELS=1 を設定すると一覧から消えます。",
+    baseUrlUnknown: (name: string) =>
+      `${name} は OpenCode のネイティブカタログになく、API ベース URL も公式情報で確認できていません。URL が判明するまで設定例を生成できません。`,
+    notOpenAiCompatible: (name: string, format: string) =>
+      `${name} の API 形式は「${format}」で、OpenAI 互換ではありません。OpenAI 互換ランタイムでは接続できません。`,
+    placeholder: (list: string) =>
+      `API ベース URL にプレースホルダ（${list}）が含まれます。自分の値に置き換えてください。`,
+    nativeNeedsBaseUrl:
+      "OpenCode のカタログ設定だけでは接続できません。API ベース URL にアカウント固有の値が必要なため、settings.baseURL のプレースホルダを自分の値に置き換えてください。",
+    compatibleNote: (name: string, env: string) =>
+      `${name} は OpenAI 互換 API として接続します。ターミナルで環境変数 ${env} に API キーを設定してから OpenCode を起動してください。`,
+    noKeyInConfig:
+      "設定に API キーそのものは書きません。OpenCode は env に並べた環境変数からキーを読みます。",
+    cloudflareAccount:
+      "Cloudflare はアカウント ID も必要です。baseURL の {account_id} を自分の値に置き換えてください。",
+  },
+} as const;
+
+const apiFormatName: Record<string, string> = {
+  "openai-compatible": "OpenAI-compatible",
+  "google-generative": "Google Generative AI",
+  anthropic: "Anthropic",
+  mistral: "Mistral",
+  native: "native",
+  unknown: "unknown",
+};
+
 export function buildOpencodeConfig(
   provider: Provider,
   model: Model,
-  _dataset?: Dataset,
+  options: { locale?: ConfigLocale; dataset?: Dataset } = {},
 ): ConfigResult {
+  const locale = options.locale ?? "en";
+  const s = text[locale];
   const notes: string[] = [];
   const blockers: string[] = [];
 
@@ -97,13 +159,9 @@ export function buildOpencodeConfig(
     // カタログのままでは接続できない。baseURL の上書きが要ることを明示する。
     if (provider.base_url && /\{[a-z_]+\}/i.test(provider.base_url)) {
       providerBlock.settings = { baseURL: provider.base_url };
-      blockers.push(
-        "OpenCode のカタログ設定だけでは接続できません。API ベース URL にアカウント固有の値が必要なため、settings.baseURL のプレースホルダを自分の値に置き換えてください。",
-      );
+      blockers.push(s.nativeNeedsBaseUrl);
     }
 
-    // ネイティブ対応でも、カタログに存在しないモデルは models へ追加する。
-    // 注意: env はカタログ既定を上書きしない場合があるため、指定があれば残す。
     const config = {
       $schema: "https://opencode.ai/config.json",
       model: `${providerKey(provider)}/${model.id}`,
@@ -112,44 +170,35 @@ export function buildOpencodeConfig(
       },
     };
 
-    notes.push(
-      `OpenCode は ${provider.name} をカタログでネイティブ対応しています。認証は \`/connect\` から ${provider.name} を選び、API キーを入力するのが最短です。`,
-    );
-    notes.push(
-      "上記の設定は、カタログに未登録のモデルを追加する場合の例です。すでにモデル一覧に出ているなら、この設定は不要です。",
-    );
+    notes.push(s.nativeNote(provider.name));
+    notes.push(s.nativeCatalogNote);
 
     if (provider.id === "opencode-zen") {
-      notes.push(
-        "無料モデルは Console のクレジットを追加しなくても使えます。/connect で OpenCode を選び、/models に無料モデルが並びます。",
-      );
-      notes.push(
-        "無料モデルが不要な場合は、サーバーの環境変数に OPENCODE_DISABLE_FREE_MODELS=1 を設定すると一覧から消えます。",
-      );
+      notes.push(s.zenCredits);
+      notes.push(s.zenHide);
     }
 
     return { strategy: "native", json: JSON.stringify(config, null, 2), blockers, notes };
   }
 
   if (!provider.base_url) {
-    blockers.push(
-      `${provider.name} は OpenCode のネイティブカタログになく、API ベース URL も公式情報で確認できていません。URL が判明するまで設定例を生成できません。`,
-    );
+    blockers.push(s.baseUrlUnknown(provider.name));
     return { strategy: "unsupported", json: "", blockers, notes };
   }
 
   if (provider.api_format !== "openai-compatible") {
     blockers.push(
-      `${provider.name} の API 形式は「${provider.api_format}」で、OpenAI 互換ではありません。OpenAI 互換ランタイムでは接続できません。`,
+      s.notOpenAiCompatible(
+        provider.name,
+        apiFormatName[provider.api_format] ?? provider.api_format,
+      ),
     );
     return { strategy: "unsupported", json: "", blockers, notes };
   }
 
   const { url, placeholders } = normalizeBaseUrl(provider.base_url);
   if (placeholders.length > 0) {
-    blockers.push(
-      `API ベース URL にプレースホルダ（${placeholders.map((p) => `{${p}}`).join(", ")}）が含まれます。自分の値に置き換えてください。`,
-    );
+    blockers.push(s.placeholder(placeholders.map((p) => `{${p}}`).join(", ")));
   }
 
   const config = {
@@ -170,41 +219,61 @@ export function buildOpencodeConfig(
     },
   };
 
-  notes.push(
-    `OpenAI 互換 API として接続します。ターミナルで環境変数 ${keyEnvVar(provider)} に API キーを設定してから OpenCode を起動してください。`,
-  );
-  notes.push(
-    "設定に API キーそのものは書きません。OpenCode は env に並べた環境変数からキーを読みます。",
-  );
+  notes.push(s.compatibleNote(provider.name, keyEnvVar(provider)));
+  notes.push(s.noKeyInConfig);
   if (provider.id === "cloudflare-workers-ai") {
-    notes.push(
-      "Cloudflare はアカウント ID も必要です。baseURL の {account_id} を自分の値に置き換えるか、文字列連結で埋め込まない方法を使ってください。",
-    );
+    notes.push(s.cloudflareAccount);
   }
 
   return { strategy: "openai-compatible", json: JSON.stringify(config, null, 2), blockers, notes };
 }
 
-/** 設定の入手手順をプロバイダーごとに返す。 */
-export function setupSteps(provider: Provider): string[] {
+/** 設定の入手手順を返す。文言は UI の言語に合わせる。 */
+export function setupSteps(provider: Provider, locale: ConfigLocale): string[] {
+  const ja = locale === "ja";
+  const envVar = keyEnvVar(provider);
   const steps: string[] = [];
-  steps.push(`1. ${provider.signup_url} で API キーを取得する`);
+
+  steps.push(
+    ja
+      ? `${provider.signup_url} で API キーを取得する`
+      : `Get an API key at ${provider.signup_url}`,
+  );
 
   if (provider.authentication === "google-account") {
-    steps.push("2. Google アカウントでサインインし、Google AI Studio でキーを発行する");
-    steps.push("3. ターミナルで環境変数を設定する: export GEMINI_API_KEY=...");
+    steps.push(
+      ja
+        ? "Google アカウントでサインインし、Google AI Studio でキーを発行する"
+        : "Sign in with a Google account and issue a key in Google AI Studio",
+    );
   } else if (provider.authentication === "github-account") {
-    steps.push("2. GitHub アカウントでサインインする");
+    steps.push(ja ? "GitHub アカウントでサインインする" : "Sign in with a GitHub account");
   } else {
-    steps.push(`2. ターミナルで環境変数を設定する: ${keyEnvVar(provider)}=...`);
+    steps.push(
+      ja
+        ? `ターミナルで環境変数を設定する: ${envVar}=...`
+        : `Set the environment variable in your terminal: ${envVar}=...`,
+    );
   }
 
   if (provider.native_opencode === "yes") {
-    steps.push("4. OpenCode で /connect を実行し、プロバイダーを選択してキーを貼り付ける");
-    steps.push("5. /models で対象モデルを選ぶ");
+    steps.push(
+      ja
+        ? "OpenCode で /connect を実行し、このプロバイダーを選んでキーを貼り付ける"
+        : "Run /connect in OpenCode, choose this provider, and paste the key",
+    );
+    steps.push(ja ? "/models で対象モデルを選ぶ" : "Pick the model with /models");
   } else {
-    steps.push("4. この設定例を opencode.json に保存する");
-    steps.push("5. OpenCode を起動し、/models で対象モデルを選ぶ");
+    steps.push(
+      ja
+        ? "この設定例を opencode.json に保存する"
+        : "Save the configuration example as opencode.json",
+    );
+    steps.push(
+      ja
+        ? "OpenCode を起動し、/models で対象モデルを選ぶ"
+        : "Start OpenCode and pick the model with /models",
+    );
   }
 
   return steps;

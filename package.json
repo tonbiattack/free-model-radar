@@ -6,7 +6,8 @@
   "description": "OpenCode などのコーディングエージェントから使える無料枠つき LLM API を、出典と検証状態つきで比較する静的サイト",
   "scripts": {
     "dev": "npm run build:data && vite",
-    "build": "npm run build:data && tsc --noEmit && vite build && tsx scripts/postbuild.ts && tsx scripts/prerender.ts && tsx scripts/sitemap.ts",
+    "build": "npm run build:data && npm run i18n:extract && npm run i18n:build && npm run check:i18n && tsc --noEmit && vite build && tsx scripts/postbuild.ts && tsx scripts/prerender.ts && tsx scripts/sitemap.ts",
+    "check:i18n": "tsx scripts/check-i18n.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -15,6 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:data": "tsx scripts/build-data.ts",
+    "i18n:extract": "tsx scripts/extract-i18n.ts",
+    "i18n:build": "tsx scripts/build-i18n.ts",
     "validate:data": "tsx scripts/validate-data.ts",
     "check": "npm run lint && npm run build:data && npm run test && npm run build",
     "verify:models": "tsx scripts/verify-models.ts",

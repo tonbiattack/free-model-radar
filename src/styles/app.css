@@ -120,6 +120,45 @@
   gap: 4px;
 }
 
+.site-header__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* 言語切替。現在のページと絞り込みを保ったまま切り替わる。 */
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.lang-switch__item {
+  font-size: 0.745rem;
+  padding: 4px 9px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  background: transparent;
+  line-height: 1.5;
+}
+
+.lang-switch__item + .lang-switch__item {
+  border-left: 1px solid var(--rule-strong);
+}
+
+.lang-switch__item:hover {
+  background: var(--paper-sunken);
+  color: var(--ink);
+}
+
+.lang-switch__item.is-active {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
 .site-nav__link {
   text-decoration: none;
   color: var(--ink-soft);

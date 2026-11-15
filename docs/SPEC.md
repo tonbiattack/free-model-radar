@@ -100,8 +100,27 @@ OpenCodeなどのコーディングエージェントから利用できる、無
 - 公開: GitHub Pages、クライアントサイド検索/絞り込み。
 - データ: repository/data/ 配下のJSONまたはYAML、JSON Schema / Zod 等で型・整合性検証。
 - 自動化: GitHub Actionsで定期収集・検証・ビルド・デプロイ。外部の有料サービスは不要。
-- テスト: データスキーマ、フィルタ、設定生成、ビルド、重要なUIを自動テスト。
+- テスト: データスキーマ、フィルタ、設定生成、ビルド、重要なUI、翻訳キーの欠落を自動テスト。
 - セキュリティ: シークレットはコミットしない。公開Webサイト上でAPIキーの取り扱いを行わない。
+
+## 7.1 多言語（i18n）
+
+英語を既定、日本語も維持する。**翻訳によってデータ更新コストを倍増させない**ことを制約とする。
+
+- URL は `/:locale/...`（`en` / `ja`）。接頭辞なしのアクセスは既定言語へ誘導する。
+- 事実データ（モデルID、提供元ID、数値、URL、日付）は言語非依存で1つだけ持つ。
+- 説明文は `data/i18n/en.json` に、原文の内容ハッシュをキーとして訳を保存する。原文を変えるとキーが変わり、未翻訳として検出される。
+- UI文言は `src/lib/messages.ts` に日英で持つ。日英のキー集合が一致することをテストで検証する。
+- `html lang`、title、meta description、canonical、hreflang、OGP、sitemap はロケール単位で生成する。
+- 状態語（不明 / 未検証 / 終了）は日英で意味を対応させ、誤訳による断定を防ぐ。「不明」と「非対応」を同一視しない。
+
+言語を追加する手順:
+
+1. `src/lib/locale.ts` の `locales` に追加する
+2. `src/lib/messages.ts` に同じキー集合のカタログを追加する
+3. `scripts/translations.ts` に対応する訳を追加し、`npm run i18n:build` を実行する
+4. `scripts/prerender.ts` と `scripts/sitemap.ts` の `LOCALES` に追加する
+5. `npm test` と `npm run build` が通ることを確認する
 
 ## 8. 非機能要件
 

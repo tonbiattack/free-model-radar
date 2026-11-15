@@ -1,224 +1,131 @@
 import { dataset } from "@/lib/dataset";
 import { formatDate } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
 
 export function MethodPage() {
+  const { locale, t } = useI18n();
+
   return (
     <>
       <header className="page-head">
-        <h1>何を、どう確認しているか</h1>
-        <p>
-          このサイトの数字を信用するかどうかを判断できるよう、情報の集め方と限界をそのまま書きます。
-          分からないことは「不明」と表示し、推測で埋めません。
-        </p>
+        <h1>{t.method.title}</h1>
+        <p>{t.method.intro}</p>
       </header>
 
       <div className="prose">
         <section>
-          <h2>無料枠の 6 分類</h2>
-          <p>
-            「無料」という一言でまとめると、恒久無料と使い切りのクレジットが混ざります。このサイトでは次のように分けています。
-          </p>
+          <h2>{t.method.signupTitle}</h2>
+          <p>{t.method.signupIntro}</p>
           <dl className="def-list">
             <div>
-              <dt>恒久無料</dt>
-              <dd>
-                公式に継続的な無料利用が案内されている枠。ただし将来の継続を保証するものではありません。
-              </dd>
+              <dt>{t.signup.instant}</dt>
+              <dd>{t.method.signupInstant}</dd>
             </div>
             <div>
-              <dt>期間限定トライアル</dt>
-              <dd>期間が区切られた試用。期限が過ぎると有料に移行するか、アクセスが止まります。</dd>
+              <dt>{t.signup.discord}</dt>
+              <dd>{t.method.signupDiscord}</dd>
             </div>
             <div>
-              <dt>初回クレジット</dt>
-              <dd>
-                初回に付与されるクレジット。残額か期限で必ず終わります。Cerebras の $5
-                クレジットが該当します。
-              </dd>
+              <dt>{t.signup.waitlist}</dt>
+              <dd>{t.method.signupWaitlist}</dd>
             </div>
             <div>
-              <dt>条件付き</dt>
-              <dd>支払い方法の登録など、条件を満たすと使える枠。</dd>
-            </div>
-            <div>
-              <dt>終了・停止</dt>
-              <dd>提供が終わった、または新規受付を止めている状態。設定例は生成しません。</dd>
-            </div>
-            <div>
-              <dt>不明</dt>
-              <dd>公式情報で種別を確認できていない状態。0 や「非対応」とは書きません。</dd>
+              <dt>{t.signup.paid}</dt>
+              <dd>{t.method.signupPaid}</dd>
             </div>
           </dl>
+          <p>{t.method.signupNote}</p>
         </section>
 
         <section>
-          <h2>「登録すれば使える」を別の軸で持つ</h2>
-          <p>
-            無料枠があっても、キーを手に入れるまでの手間はプロバイダーごとに違います。
-            このサイトでは 4 段階で記録し、一覧の絞り込みに使えるようにしています。
-          </p>
-          <dl className="def-list">
-            <div>
-              <dt>登録だけ</dt>
-              <dd>
-                アカウントを作ると API キーがすぐ発行されます。OpenCode の <code>/connect</code>{" "}
-                から数分で使い始められます。
-              </dd>
-            </div>
-            <div>
-              <dt>Discord 参加</dt>
-              <dd>提供元の Discord サーバーへの参加が条件。退会するとアクセスが止まります。</dd>
-            </div>
-            <div>
-              <dt>順番待ち</dt>
-              <dd>承認待ちやウェイトリストがあります。</dd>
-            </div>
-            <div>
-              <dt>カード登録</dt>
-              <dd>無料枠を使うにも支払い方法の登録が要ります。</dd>
-            </div>
-          </dl>
-          <p>
-            「カード登録なしで始められる」を有効にすると、カード登録が必須のものだけを外します。
-            手間が不明なものは残すので、不明を「カードが必要」と決めつけることはありません。
-          </p>
+          <h2>{t.method.perfTitle}</h2>
+          <p>{t.method.perfIntro}</p>
+          <p>{t.method.perfNote}</p>
         </section>
 
         <section>
-          <h2>性能は測らない</h2>
-          <p>
-            このサイトはモデルの性能を独自評価しません。コーディング性能は
-            <a href="https://tonbiattack.github.io/ai-plan-radar/models/">
-              AI Plan Radar のモデル性能ページ
-            </a>
-            にまとまっているため、各モデルの詳細からそこへリンクしています。
-          </p>
-          <p>
-            リンク先でのモデル名が違う場合は「リンク先での表記」として併記します。
-            同じ系列でも構成が異なる場合は、数値をそのまま当てはめないよう注意を書いています。
-          </p>
+          <h2>{t.method.triTitle}</h2>
+          <p>{t.method.triIntro}</p>
         </section>
 
         <section>
-          <h2>3 値で持つ機能情報</h2>
-          <p>
-            ツール呼び出し・ストリーミング・JSON モード・推論は、「対応 / 非対応 / 不明」の 3
-            値で保持します。
-            「不明」は公式ドキュメントに記載が見つからなかったという意味で、できないという意味ではありません。
-            一覧の絞り込みで「ツール呼び出しに対応」を選ぶと不明なものは外れますが、その件数を画面に出しています。
-          </p>
+          <h2>{t.method.numbersTitle}</h2>
+          <p>{t.method.numbersIntro}</p>
+          <p>{t.method.numbersMissing}</p>
         </section>
 
         <section>
-          <h2>数値の扱い</h2>
-          <p>
-            RPM・RPD・TPM などの制限は、必ず<strong>適用範囲</strong>とセットで記録します。 同じ 30
-            RPM でも、モデル単位なのかアカウント単位なのかで意味が変わります。 実際、Groq
-            はモデル単位、OpenRouter の無料モデルはアカウント単位で、共有範囲が違います。
-          </p>
-          <p>
-            制限が公式に書かれていない場合は、行を空欄にせず「数値の記載なし」と表示します。 0
-            を入れると「まったく呼べない」と読めてしまうためです。
-          </p>
+          <h2>{t.method.freshnessTitle}</h2>
+          <p>{t.method.freshnessIntro}</p>
         </section>
 
         <section>
-          <h2>鮮度</h2>
-          <p>
-            すべての確定情報に、出典 URL・情報の種類（公式 / コミュニティ /
-            実機検証）・確認日・信頼度を付けています。 最終確認から 45
-            日を超えた項目には「再確認の時期」、90
-            日を超えた項目には「情報が古い可能性」を表示します。
-            これは自動で消したり書き換えたりしません。
-          </p>
-        </section>
-
-        <section>
-          <h2>実機検証の扱い</h2>
-          <p>
-            接続・ストリーミング・ツール呼び出し・JSON
-            モード・短い編集タスクを、それぞれ別の項目として記録します。 検証は OpenCode
-            のバージョンと実施日時を残します。
-          </p>
+          <h2>{t.method.testedTitle}</h2>
+          <p>{t.method.testedIntro}</p>
           <ul>
-            <li>有効な検証用キーがない場合はスキップし、「未実施」と表示します。</li>
-            <li>費用が発生する検証は自動実行しません。</li>
-            <li>単発の成功は、長時間のエージェント利用を保証しません。</li>
-            <li>利用者の API キーを預かることはありません。サイト上での入力欄もありません。</li>
+            <li>{t.method.testedKeySkip}</li>
+            <li>{t.method.testedNoCost}</li>
+            <li>{t.method.testedOnce}</li>
+            <li>{t.method.testedNoKeys}</li>
           </ul>
         </section>
 
         <section>
-          <h2>設定例について</h2>
-          <p>
-            OpenCode の現行仕様に沿って <code>opencode.json</code> を生成します。 OpenCode
-            がカタログで対応しているプロバイダーは <code>/connect</code> からの設定を優先し、
-            カタログにないプロバイダーは OpenAI 互換ランタイムとベース URL を明示します。
-          </p>
-          <p>
-            API キーはプレースホルダーではなく環境変数の<strong>名前</strong>だけを出力します。
-            生成物にキーの値が入ることはありません。 ベース URL にアカウント ID
-            などのプレースホルダが含まれる場合は、推測で埋めずに置き換えが必要だと表示します。
-          </p>
+          <h2>{t.method.configTitle}</h2>
+          <p>{t.method.configIntro}</p>
+          <p>{t.method.configKeys}</p>
         </section>
 
         <section>
-          <h2>自動検知と人手の確認</h2>
-          <p>
-            監視対象はプロバイダーごとに <code>data/watch-sources.json</code>{" "}
-            で定義し、定期的に変更を確認します。
-          </p>
+          <h2>{t.method.autoTitle}</h2>
+          <p>{t.method.autoIntro}</p>
           <ul>
-            <li>取得に失敗しただけでは「終了」としません。連続失敗と提供終了を区別します。</li>
-            <li>変更候補は出典・検出日時・変更前後を付けて残し、確認してから確定します。</li>
-            <li>監視が止まっても、直近の有効なデータを配信し続けます。</li>
+            <li>{t.method.autoFail}</li>
+            <li>{t.method.autoReview}</li>
+            <li>{t.method.autoKeep}</li>
           </ul>
         </section>
 
         <section>
-          <h2>このサイトが扱わないこと</h2>
+          <h2>{t.method.scopeTitle}</h2>
           <ul>
-            <li>API キーを預かった代理実行、ユーザーアカウント、課金</li>
-            <li>無料枠を使い切らないようにするための複数アカウント自動切替</li>
-            <li>全プロバイダーのリアルタイムな接続保証</li>
-            <li>独自の大規模ベンチマーク</li>
+            <li>{t.method.scopeKeys}</li>
+            <li>{t.method.scopeAccounts}</li>
+            <li>{t.method.scopeRealtime}</li>
+            <li>{t.method.scopeBench}</li>
           </ul>
         </section>
 
         <section>
-          <h2>現在の収集状況</h2>
+          <h2>{t.method.dataTitle}</h2>
           <dl className="facts">
             <div>
-              <dt>プロバイダー</dt>
-              <dd>{dataset.providers.length} 件</dd>
+              <dt>{t.method.dataProviders}</dt>
+              <dd>{dataset.providers.length}</dd>
             </div>
             <div>
-              <dt>モデル</dt>
-              <dd>{dataset.models.length} 件</dd>
+              <dt>{t.method.dataModels}</dt>
+              <dd>{dataset.models.length}</dd>
             </div>
             <div>
-              <dt>監視対象</dt>
-              <dd>{dataset.watch_sources.length} 件</dd>
+              <dt>{t.method.dataWatch}</dt>
+              <dd>{dataset.watch_sources.length}</dd>
             </div>
             <div>
-              <dt>最終更新</dt>
-              <dd>{formatDate(dataset.meta.last_updated)}</dd>
+              <dt>{t.method.dataUpdated}</dt>
+              <dd>{formatDate(dataset.meta.last_updated, locale)}</dd>
             </div>
             <div>
-              <dt>実機検証済み</dt>
+              <dt>{t.method.dataVerified}</dt>
               <dd>
                 {
                   dataset.models.filter((m) => m.verification.some((v) => v.status === "passed"))
                     .length
-                }{" "}
-                件
+                }
               </dd>
             </div>
           </dl>
-          <p className="muted small">
-            実機検証はまだ実施できていない項目が大半です。検証用のキーが用意できていないためで、
-            「未実施」を「動作する」とも「動かない」とも読み替えないでください。
-          </p>
+          <p className="muted small">{t.method.dataVerifiedNote}</p>
         </section>
       </div>
     </>

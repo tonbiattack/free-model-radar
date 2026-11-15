@@ -5,22 +5,8 @@ import type { Dataset } from "../src/lib/schema";
 const dataset = {
   meta: { last_updated: "2026-11-15", spec_version: "1.0.0" },
   canonical_models: [
-    {
-      id: "acme-one",
-      name: "Acme One",
-      developer: "Acme",
-      family: null,
-      aliases: [],
-      notes: [],
-    },
-    {
-      id: "acme-two",
-      name: "Acme Two",
-      developer: "Acme",
-      family: null,
-      aliases: [],
-      notes: [],
-    },
+    { id: "acme-one", name: "Acme One", developer: "Acme", family: null, aliases: [], notes: [] },
+    { id: "acme-two", name: "Acme Two", developer: "Acme", family: null, aliases: [], notes: [] },
   ],
   providers: [
     {
@@ -133,21 +119,27 @@ const dataset = {
 } as unknown as Dataset;
 
 describe("buildSitemap", () => {
-  it("トップ・履歴・調べ方・モデル・提供元別を載せる", () => {
+  it("日英それぞれの URL を載せる", () => {
     const xml = buildSitemap(dataset, "https://example.com/radar");
-    expect(xml).toContain("<loc>https://example.com/radar/</loc>");
-    expect(xml).toContain("<loc>https://example.com/radar/models/acme-one</loc>");
-    expect(xml).toContain("<loc>https://example.com/radar/models/acme-two</loc>");
-    // 提供元別の詳細も索引する
-    expect(xml).toContain("<loc>https://example.com/radar/models/acme-one/p1</loc>");
+    expect(xml).toContain("<loc>https://example.com/radar/en</loc>");
+    expect(xml).toContain("<loc>https://example.com/radar/ja</loc>");
+    expect(xml).toContain("<loc>https://example.com/radar/en/models/acme-one</loc>");
+    expect(xml).toContain("<loc>https://example.com/radar/ja/models/acme-one</loc>");
     expect(xml).toContain("<lastmod>2026-11-15</lastmod>");
   });
 
-  it("モデルと提供元の組み合わせごとに URL を持つ", () => {
+  it("提供元別の URL も日英で持つ", () => {
     const xml = buildSitemap(dataset, "https://example.com/radar");
-    const modelUrls = [...xml.matchAll(/<loc>[^<]*\/models\/[^<]*<\/loc>/g)];
-    // モデル 2 件 + 提供元別 2 件
-    expect(modelUrls).toHaveLength(4);
+    expect(xml).toContain("<loc>https://example.com/radar/en/models/acme-one/p1</loc>");
+    expect(xml).toContain("<loc>https://example.com/radar/ja/models/acme-one/p1</loc>");
+  });
+
+  it("hreflang を併記する", () => {
+    const xml = buildSitemap(dataset, "https://example.com/radar");
+    expect(xml).toContain('hreflang="en" href="https://example.com/radar/en/models/acme-one"');
+    expect(xml).toContain('hreflang="ja" href="https://example.com/radar/ja/models/acme-one"');
+    expect(xml).toContain('hreflang="x-default"');
+    expect(xml).toContain("xmlns:xhtml");
   });
 
   it("XML 宣言と urlset を持つ", () => {
@@ -158,7 +150,7 @@ describe("buildSitemap", () => {
 
   it("末尾スラッシュの有無で URL が二重にならない", () => {
     expect(buildSitemap(dataset, "https://example.com/radar/")).toContain(
-      "<loc>https://example.com/radar/models/acme-one</loc>",
+      "<loc>https://example.com/radar/en/models/acme-one</loc>",
     );
   });
 });

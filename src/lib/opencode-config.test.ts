@@ -110,13 +110,13 @@ describe("buildOpencodeConfig", () => {
     const result = buildOpencodeConfig({ ...baseProvider, base_url: null }, baseModel);
     expect(result.strategy).toBe("unsupported");
     expect(result.json).toBe("");
-    expect(result.blockers.join()).toContain("ベース URL");
+    expect(result.blockers.join()).toContain("base URL");
   });
 
   it("OpenAI 互換でない形式は接続できないと明示する", () => {
     const result = buildOpencodeConfig({ ...baseProvider, api_format: "mistral" }, baseModel);
     expect(result.strategy).toBe("unsupported");
-    expect(result.blockers.join()).toContain("OpenAI 互換ではありません");
+    expect(result.blockers.join()).toContain("not OpenAI-compatible");
   });
 
   it("baseURL のプレースホルダを黙って埋めない", () => {
@@ -156,13 +156,25 @@ describe("buildOpencodeConfig", () => {
       "CLOUDFLARE_API_KEY",
     ]);
     // アカウント固有の URL が必要なことは黙って埋めず、置換を促す
-    expect(result.blockers.join()).toContain("プレースホルダ");
+    expect(result.blockers.join()).toContain("placeholder");
   });
 
   it("セットアップ手順にキー取得 URL が含まれる", () => {
-    const steps = setupSteps(baseProvider).join("\n");
+    const steps = setupSteps(baseProvider, "ja").join("\n");
     expect(steps).toContain("https://acme.example/keys");
     expect(steps).toContain("ACME_API_KEY");
+  });
+
+  it("セットアップ手順は言語ごとに切り替わる", () => {
+    const en = setupSteps(baseProvider, "en").join(" ");
+    const ja = setupSteps(baseProvider, "ja").join(" ");
+    expect(en).toContain("Get an API key");
+    expect(ja).toContain("API キーを取得");
+    // 環境変数名と URL は言語に依存しない
+    for (const steps of [en, ja]) {
+      expect(steps).toContain("ACME_API_KEY");
+      expect(steps).toContain("https://acme.example/keys");
+    }
   });
 
   it("キー名と設定に並べる変数名が矛盾しない", () => {

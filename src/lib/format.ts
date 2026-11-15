@@ -88,18 +88,20 @@ export function daysSinceMs(isoDate: string, nowMs: number): number {
   return Math.floor((nowMs - then.getTime()) / 86_400_000);
 }
 
-export function formatDate(isoDate: string): string {
+export function formatDate(isoDate: string, locale: "en" | "ja" = "ja"): string {
   const [year, month, day] = isoDate.split("-");
   if (!year || !month || !day) return isoDate;
-  return `${year}年${Number(month)}月${Number(day)}日`;
+  return locale === "ja"
+    ? `${year}年${Number(month)}月${Number(day)}日`
+    : `${year}-${month}-${day}`;
 }
 
-export function formatDateTime(iso: string): string {
+export function formatDateTime(iso: string, locale: "en" | "ja" = "ja"): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat("ja-JP", {
+  return new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "en-GB", {
     year: "numeric",
-    month: "numeric",
+    month: locale === "ja" ? "numeric" : "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",

@@ -26,4 +26,10 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // i18n のコンテキストとフックは同じモジュールに置く必要があるため、
+    // このファイルだけ fast refresh の警告を外す。
+    files: ["src/lib/i18n.tsx"],
+    rules: { "react-refresh/only-export-components": "off" },
+  },
 );
